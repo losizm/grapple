@@ -89,11 +89,11 @@ package object json {
   /** Type class of {@code javax.json.JsonValue} */
   implicit class JsonValueType(val value: JsonValue) extends AnyVal {
     /** Gets value as specified type. */
-    def as[T](implicit getValue: JsonValue => T): T =
-      getValue(value)
+    def as[T](implicit convert: JsonValue => T): T =
+      convert(value)
 
     /** Optionally gets value as specified type. */
-    def asOpt[T](implicit getValue: JsonValue => T): Option[T] =
+    def asOpt[T](implicit convert: JsonValue => T): Option[T] =
       Try(as[T]).toOption
 
     /** Gets indexed value from JsonArray. */
