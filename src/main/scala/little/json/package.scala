@@ -87,50 +87,66 @@ package object json {
   }
 
   /** Type class of {@code javax.json.JsonValue} */
-  implicit class JsonValueType(val value: JsonValue) extends AnyVal {
-    /** Gets value as specified type. */
+  implicit class JsonValueType(val json: JsonValue) extends AnyVal {
+    /** Converts json to specified type. */
     def as[T](implicit convert: JsonValue => T): T =
-      convert(value)
+      convert(json)
 
-    /** Optionally gets value as specified type. */
+    /** Tries to converts json to specified type. */
+    def asTry[T](implicit convert: JsonValue => T): Try[T] =
+      Try(as[T])
+
+     /** Optionally converts json to specified type. */
     def asOpt[T](implicit convert: JsonValue => T): Option[T] =
-      Try(as[T]).toOption
+      asTry[T].toOption
 
     /** Gets indexed value from JsonArray. */
     def getString(index: Int): String =
-      value.asInstanceOf[JsonArray].getString(index)
+      json.asInstanceOf[JsonArray].getString(index)
+
+    /** Gets indexed value from JsonArray or returns default if value not present. */
+    def getString(index: Int, default: String): String =
+      json.asInstanceOf[JsonArray].getString(index, default)
 
     /** Gets indexed value from JsonArray. */
     def getInt(index: Int): Int =
-      value.asInstanceOf[JsonArray].getInt(index)
+      json.asInstanceOf[JsonArray].getInt(index)
+
+    /** Gets indexed value from JsonArray or returns default if value not present. */
+    def getInt(index: Int, default: Int): Int =
+      json.asInstanceOf[JsonArray].getInt(index, default)
 
     /** Gets indexed value from JsonArray. */
     def getBoolean(index: Int): Boolean =
-      value.asInstanceOf[JsonArray].getBoolean(index)
+      json.asInstanceOf[JsonArray].getBoolean(index)
+
+    /** Gets indexed value from JsonArray or returns default if value not present. */
+    def getBoolean(index: Int, default: Boolean): Boolean =
+      json.asInstanceOf[JsonArray].getBoolean(index, default)
 
     /** Gets named value from JsonObject. */
     def getString(name: String): String =
-      value.asInstanceOf[JsonObject].getString(name)
+      json.asInstanceOf[JsonObject].getString(name)
 
     /** Gets named value from JsonObject or returns default if value not present. */
     def getString(name: String, default: String): String =
-      value.asInstanceOf[JsonObject].getString(name, default)
+      json.asInstanceOf[JsonObject].getString(name, default)
 
     /** Gets named value from JsonObject. */
     def getInt(name: String): Int =
-      value.asInstanceOf[JsonObject].getInt(name)
+      json.asInstanceOf[JsonObject].getInt(name)
 
     /** Gets named value from JsonObject or returns default if value not present. */
     def getInt(name: String, default: Int): Int =
-      value.asInstanceOf[JsonObject].getInt(name, default)
+      json.asInstanceOf[JsonObject].getInt(name, default)
 
     /** Gets named value from JsonObject. */
     def getBoolean(name: String): Boolean =
-      value.asInstanceOf[JsonObject].getBoolean(name)
+      json.asInstanceOf[JsonObject].getBoolean(name)
 
     /** Gets named value from JsonObject or returns default if value not present. */
     def getBoolean(name: String, default: Boolean): Boolean =
-      value.asInstanceOf[JsonObject].getBoolean(name)
+      json.asInstanceOf[JsonObject].getBoolean(name)
   }
 
   /** Type class of {@code javax.json.stream.JsonParser} */
