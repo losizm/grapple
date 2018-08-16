@@ -17,14 +17,6 @@ package object json {
     def toJson[T](value: T)(implicit convert: T => JsonValue): JsonValue =
       convert(value)
 
-    /** Creates JsonArrayBuilder. */
-    def createArrayBuilder(): JsonArrayBuilder =
-      JavaxJson.createArrayBuilder()
-
-    /** Creates JsonObjectBuilder. */
-    def createObjectBuilder(): JsonObjectBuilder =
-      JavaxJson.createObjectBuilder()
-
     /** Parses given text to JsonStructure. */
     def parse[T <: JsonStructure](text: String): T = {
       val in = new StringReader(text)
@@ -34,14 +26,14 @@ package object json {
 
     /** Parses text from given input stream to JsonStructure. */
     def parse[T <: JsonStructure](in: InputStream): T = {
-      val json = JavaxJson.createReader(in)
+      val json = createReader(in)
       try json.read().asInstanceOf[T]
       finally Try(json.close())
     }
 
     /** Parses text from given reader to JsonStructure. */
     def parse[T <: JsonStructure](reader: Reader): T = {
-      val json = JavaxJson.createReader(reader)
+      val json = createReader(reader)
       try json.read().asInstanceOf[T]
       finally Try(json.close())
     }
@@ -52,6 +44,30 @@ package object json {
       try parse(in)
       finally Try(in.close())
     }
+
+    /** Creates JsonArrayBuilder. */
+    def createArrayBuilder(): JsonArrayBuilder =
+      JavaxJson.createArrayBuilder()
+
+    /** Creates JsonObjectBuilder. */
+    def createObjectBuilder(): JsonObjectBuilder =
+      JavaxJson.createObjectBuilder()
+
+    /** Creates JsonReader with given input stream. */
+    def createReader(in: InputStream): JsonReader =
+      JavaxJson.createReader(in)
+
+    /** Creates JsonReader with given reader. */
+    def createReader(reader: Reader): JsonReader =
+      JavaxJson.createReader(reader)
+
+    /** Creates JsonWriter with given output stream. */
+    def createWriter(out: OutputStream): JsonWriter =
+      JavaxJson.createWriter(out)
+
+    /** Creates JsonWriter with given writer. */
+    def createWriter(writer: Writer): JsonWriter =
+      JavaxJson.createWriter(writer)
 
     /** Creates JsonParser with given input stream. */
     def createParser(in: InputStream): JsonParser =
@@ -148,8 +164,7 @@ package object json {
     /**
      * Parses remainder of array.
      *
-     * Throws {@code JsonException} if unexpected parser event is encountered; e.g., if parser is
-     * not positioned inside array
+     * Throws {@code JsonException} if unexpected parser event is encountered.
      */
     def finishArray(): JsonArray = {
       val builder = JavaxJson.createArrayBuilder()
@@ -176,8 +191,7 @@ package object json {
     /**
      * Parses remainder of object.
      *
-     * Throws {@code JsonException} if unexpected parser event is encountered; e.g., if parser is
-     * not positioned inside object
+     * Throws {@code JsonException} if unexpected parser event is encountered.
      */
     def finishObject(): JsonObject = {
       val builder = JavaxJson.createObjectBuilder()
