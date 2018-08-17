@@ -97,7 +97,7 @@ package object json {
       Try(as[T])
 
      /** Optionally converts json to specified type. */
-    def asOpt[T](implicit convert: JsonValue => T): Option[T] =
+    def asOption[T](implicit convert: JsonValue => T): Option[T] =
       asTry[T].toOption
 
     /** Gets String from JsonArray. */

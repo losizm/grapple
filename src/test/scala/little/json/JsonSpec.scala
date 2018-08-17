@@ -111,7 +111,7 @@ class JsonSpec extends FlatSpec {
     assert(json.getString("name") == "root")
     assert(json.getBoolean("isRoot"))
     assert(json.as[User] == user)
-    assert(json.asOpt[User] == Some(user))
+    assert(json.asOption[User] == Some(user))
     assert(json.asTry[User] == Success(user))
   }
 }
