@@ -31,11 +31,15 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to number value with default" in {
-    val arr = Json.parse[JsonArray]("[]")
+    val arr = Json.parse[JsonArray]("""["Not a number"]""")
     assert(arr.getLong(0, 1) == 1L)
     assert(arr.getDouble(0, 1.1) == 1.1)
     assert(arr.getBigInt(0, BigInt(1)) == BigInt(1))
     assert(arr.getBigDecimal(0, BigDecimal(1.0)) == BigDecimal(1.0))
+    assert(arr.getLong(1, 1) == 1L)
+    assert(arr.getDouble(1, 1.1) == 1.1)
+    assert(arr.getBigInt(1, BigInt(1)) == BigInt(1))
+    assert(arr.getBigDecimal(1, BigDecimal(1.0)) == BigDecimal(1.0))
   }
 
   it should "provide access to exact number value" in {
@@ -46,10 +50,13 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to exact number value with default" in {
-    val arr = Json.parse[JsonArray]("[]")
+    val arr = Json.parse[JsonArray]("""["Not a number"]""")
     assert(arr.getIntExact(0, 1) == 1)
     assert(arr.getLongExact(0, 1L) == 1L)
     assert(arr.getBigIntExact(0, BigInt(1)) == BigInt(1))
+    assert(arr.getIntExact(1, 1) == 1)
+    assert(arr.getLongExact(1, 1L) == 1L)
+    assert(arr.getBigIntExact(1, BigInt(1)) == BigInt(1))
   }
 
   "JSON object" should "be parsed" in {
@@ -76,11 +83,15 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to number value with default" in {
-    val obj = Json.parse[JsonObject]("{}")
+    val obj = Json.parse[JsonObject]("""{ "a": "Not a number" }""")
     assert(obj.getLong("a", 1) == 1L)
     assert(obj.getDouble("a", 1.1) == 1.1)
     assert(obj.getBigInt("a", BigInt(1)) == BigInt(1))
     assert(obj.getBigDecimal("a", BigDecimal(1.0)) == BigDecimal(1.0))
+    assert(obj.getLong("b", 1) == 1L)
+    assert(obj.getDouble("b", 1.1) == 1.1)
+    assert(obj.getBigInt("b", BigInt(1)) == BigInt(1))
+    assert(obj.getBigDecimal("b", BigDecimal(1.0)) == BigDecimal(1.0))
   }
 
   it should "provide access to exact number value" in {
@@ -91,10 +102,13 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to exact number value with default" in {
-    val obj = Json.parse[JsonObject]("{}")
+    val obj = Json.parse[JsonObject]("""{ "a": "Not a number" }""")
     assert(obj.getIntExact("a", 1) == 1)
     assert(obj.getLongExact("a", 1L) == 1L)
     assert(obj.getBigIntExact("a", BigInt(1)) == BigInt(1))
+    assert(obj.getIntExact("b", 1) == 1)
+    assert(obj.getLongExact("b", 1L) == 1L)
+    assert(obj.getBigIntExact("b", BigInt(1)) == BigInt(1))
   }
 
   "JSON value" should "be converted to and from case class" in {
