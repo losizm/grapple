@@ -92,7 +92,7 @@ package object json {
     def as[T](implicit convert: JsonValue => T): T =
       convert(json)
 
-    /** Tries to converts json to specified type. */
+    /** Tries to convert json to specified type. */
     def asTry[T](implicit convert: JsonValue => T): Try[T] =
       Try(as[T])
 
@@ -200,6 +200,14 @@ package object json {
     /** Gets Boolean from JsonArray or default if value not present. */
     def getBoolean(index: Int, default: Boolean): Boolean =
       json.asInstanceOf[JsonArray].getBoolean(index, default)
+
+    /** Tests whether value in JsonArray is null. */
+    def isNull(index: Int): Boolean =
+      json.asInstanceOf[JsonArray].isNull(index)
+
+    /** Tests whether JsonNumber in JsonArray is integral. */
+    def isIntegral(index: Int): Boolean =
+      json.asInstanceOf[JsonArray].getJsonNumber(index).isIntegral
 
     /** Gets JsonArray from JsonArray. */
     def getJsonArray(index: Int): JsonArray =
@@ -309,6 +317,14 @@ package object json {
     /** Gets Boolean from JsonObject or default if value not present. */
     def getBoolean(name: String, default: Boolean): Boolean =
       json.asInstanceOf[JsonObject].getBoolean(name)
+
+    /** Tests whether value in JsonObject is null. */
+    def isNull(name: String): Boolean =
+      json.asInstanceOf[JsonObject].isNull(name)
+
+    /** Tests whether JsonNumber in JsonObject is integral. */
+    def isIntegral(name: String): Boolean =
+      json.asInstanceOf[JsonObject].getJsonNumber(name).isIntegral
 
     /** Gets JsonArray from JsonObject. */
     def getJsonArray(name: String): JsonArray =

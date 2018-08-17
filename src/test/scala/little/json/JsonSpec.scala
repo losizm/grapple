@@ -24,6 +24,10 @@ class JsonSpec extends FlatSpec {
     assert(arr.getBigInt(1) == BigInt(Long.MaxValue))
     assert(arr.getBigDecimal(2) == BigDecimal(-123.456))
     assert(arr.getBigDecimal(3) == BigDecimal(123.456))
+    assert(arr.isIntegral(0))
+    assert(arr.isIntegral(1))
+    assert(!arr.isIntegral(2))
+    assert(!arr.isIntegral(3))
   }
 
   it should "provide access to number value with default" in {
@@ -49,10 +53,10 @@ class JsonSpec extends FlatSpec {
   }
 
   "JSON object" should "be parsed" in {
-    val obj = Json.parse[JsonObject]("""{ "id": 0, "name": "root", "isRoot": true }""")
+    val obj = Json.parse[JsonObject]("""{ "id": 0, "name": "root", "enabled": true }""")
     assert(obj.getInt("id") == 0)
     assert(obj.getString("name") == "root")
-    assert(obj.getBoolean("isRoot"))
+    assert(obj.getBoolean("enabled"))
   }
 
   it should "provide access to number value" in {
@@ -65,6 +69,10 @@ class JsonSpec extends FlatSpec {
     assert(obj.getBigInt("b") == BigInt(Long.MaxValue))
     assert(obj.getBigDecimal("c") == BigDecimal(-123.456))
     assert(obj.getBigDecimal("d") == BigDecimal(123.456))
+    assert(obj.isIntegral("a"))
+    assert(obj.isIntegral("b"))
+    assert(!obj.isIntegral("c"))
+    assert(!obj.isIntegral("d"))
   }
 
   it should "provide access to number value with default" in {
@@ -90,18 +98,18 @@ class JsonSpec extends FlatSpec {
   }
 
   "JSON value" should "be converted to and from case class" in {
-    case class User(id: Int, name: String, isRoot: Boolean)
+    case class User(id: Int, name: String, enabled: Boolean)
 
     implicit val UserToJson: (User => JsonValue) = { user =>
       val obj = Json.createObjectBuilder()
       obj.add("id", user.id)
       obj.add("name", user.name)
-      obj.add("isRoot", user.isRoot)
+      obj.add("enabled", user.enabled)
       obj.build()
     }
 
     implicit val JsonToUser: (JsonValue => User) = { json =>
-      User(json.getInt("id"), json.getString("name"), json.getBoolean("isRoot"))
+      User(json.getInt("id"), json.getString("name"), json.getBoolean("enabled"))
     }
 
     val user = User(0, "root", true)
@@ -109,7 +117,7 @@ class JsonSpec extends FlatSpec {
 
     assert(json.getInt("id") == 0)
     assert(json.getString("name") == "root")
-    assert(json.getBoolean("isRoot"))
+    assert(json.getBoolean("enabled"))
     assert(json.as[User] == user)
     assert(json.asOption[User] == Some(user))
     assert(json.asTry[User] == Success(user))
