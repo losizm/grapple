@@ -168,6 +168,14 @@ package object json {
     def getBoolean(index: Int, default: Boolean): Boolean =
       json.asInstanceOf[JsonArray].getBoolean(index, default)
 
+    /** Gets JsonArray from JsonArray. */
+    def getJsonArray(index: Int): JsonArray =
+      json.asInstanceOf[JsonArray].getJsonArray(index)
+
+    /** Gets JsonObject from JsonArray. */
+    def getJsonObject(index: Int): JsonObject =
+      json.asInstanceOf[JsonArray].getJsonObject(index)
+
     /** Gets named value from JsonObject. */
     def getString(name: String): String =
       json.asInstanceOf[JsonObject].getString(name)
@@ -235,6 +243,14 @@ package object json {
     /** Gets named value from JsonObject or returns default if value not present. */
     def getBoolean(name: String, default: Boolean): Boolean =
       json.asInstanceOf[JsonObject].getBoolean(name)
+
+    /** Gets JsonArray from JsonObject. */
+    def getJsonArray(name: String): JsonArray =
+      json.asInstanceOf[JsonObject].getJsonArray(name)
+
+    /** Gets JsonObject from JsonObject. */
+    def getJsonObject(name: String): JsonObject =
+      json.asInstanceOf[JsonObject].getJsonObject(name)
   }
 
   /** Type class of {@code javax.json.stream.JsonParser} */
