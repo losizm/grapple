@@ -408,4 +408,51 @@ package object json {
       builder.build()
     }
   }
+
+  /** Writes value of type T in array context. */
+  trait ArrayContextWriter[T] {
+    /** Writes value in array context. */
+    def write(value: T)(implicit generator: JsonGenerator): JsonGenerator
+  }
+
+  /** Writes value of type T in object context. */
+  trait ObjectContextWriter[T] {
+    /** Writes value in object context. */
+    def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator
+  }
+
+  /** Type class of {@code javax.json.stream.JsonGenerator} */
+  implicit class JsonGeneratorType(val generator: JsonGenerator) extends AnyVal {
+    /** Writes value in array context. */
+    def write[T](value: T)(implicit writer: ArrayContextWriter[T]): JsonGenerator =
+      writer.write(value)(generator)
+
+    /** Writes value in object context. */
+    def write[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
+      writer.write(name, value)(generator)
+
+    /** Writes value in array context or writes null if value is null. */
+    def writeNullable[T](value: T)(implicit writer: ArrayContextWriter[T]): JsonGenerator =
+      if (value == null) generator.writeNull()
+      else writer.write(value)(generator)
+
+    /** Writes value in object context or writes null if value is null. */
+    def writeNullable[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
+      if (value == null) generator.writeNull(name)
+      else writer.write(name, value)(generator)
+
+    /**
+     * Writes value in array context if {@code Some}; otherwise, writes null if
+     * {@code None}.
+     */
+    def writeOption[T](value: Option[T])(implicit writer: ArrayContextWriter[T]): JsonGenerator =
+      value.fold(generator.writeNull()) { x => writer.write(x)(generator) }
+
+    /**
+     * Writes value in object context if {@code Some}; otherwise, writes null if
+     * {@code None}.
+     */
+    def writeOption[T](name: String, value: Option[T])(implicit writer: ObjectContextWriter[T]): JsonGenerator =
+      value.fold(generator.writeNull(name)) { x => writer.write(name, x)(generator) }
+  }
 }
