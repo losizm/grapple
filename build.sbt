@@ -1,6 +1,6 @@
 name := "little-json"
-version := "0.1.0"
-organization := "losizm.little-json"
+version := "0.2.0"
+organization := "losizm"
 
 scalaVersion := "2.12.6"
 scalacOptions ++= Seq("-deprecation", "-feature", "-Xcheckinit")
