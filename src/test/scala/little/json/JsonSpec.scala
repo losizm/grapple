@@ -14,11 +14,51 @@ class JsonSpec extends FlatSpec {
     assert(arr.getBoolean(2))
   }
 
+  it should "provide access to number type" in {
+    val arr = Json.parse[JsonArray](s"""[${Long.MinValue}, ${Long.MaxValue}, -123.456, 123.456]""")
+    assert(arr.getLong(0) == Long.MinValue)
+    assert(arr.getLong(1) == Long.MaxValue)
+    assert(arr.getDouble(2) == -123.456)
+    assert(arr.getDouble(3) == 123.456)
+    assert(arr.getBigInt(0) == BigInt(Long.MinValue))
+    assert(arr.getBigInt(1) == BigInt(Long.MaxValue))
+    assert(arr.getBigDecimal(2) == BigDecimal(-123.456))
+    assert(arr.getBigDecimal(3) == BigDecimal(123.456))
+  }
+
+  it should "provide access to number type with default" in {
+    val arr = Json.parse[JsonArray]("[]")
+    assert(arr.getLong(0, 1) == 1L)
+    assert(arr.getDouble(0, 1.1) == 1.1)
+    assert(arr.getBigInt(0, BigInt(1)) == BigInt(1))
+    assert(arr.getBigDecimal(0, BigDecimal(1.0)) == BigDecimal(1.0))
+  }
+
   "JSON object" should "be parsed" in {
     val obj = Json.parse[JsonObject]("""{ "id": 0, "name": "root", "isRoot": true }""")
     assert(obj.getInt("id") == 0)
     assert(obj.getString("name") == "root")
     assert(obj.getBoolean("isRoot"))
+  }
+
+  it should "provide access to number type" in {
+    val obj = Json.parse[JsonObject](s"""{ "a": ${Long.MinValue}, "b": ${Long.MaxValue}, "c": -123.456, "d": 123.456 }""")
+    assert(obj.getLong("a") == Long.MinValue)
+    assert(obj.getLong("b") == Long.MaxValue)
+    assert(obj.getDouble("c") == -123.456)
+    assert(obj.getDouble("d") == 123.456)
+    assert(obj.getBigInt("a") == BigInt(Long.MinValue))
+    assert(obj.getBigInt("b") == BigInt(Long.MaxValue))
+    assert(obj.getBigDecimal("c") == BigDecimal(-123.456))
+    assert(obj.getBigDecimal("d") == BigDecimal(123.456))
+  }
+
+  it should "provide access to number type with default" in {
+    val arr = Json.parse[JsonObject]("{}")
+    assert(arr.getLong("a", 1) == 1L)
+    assert(arr.getDouble("a", 1.1) == 1.1)
+    assert(arr.getBigInt("a", BigInt(1)) == BigInt(1))
+    assert(arr.getBigDecimal("a", BigDecimal(1.0)) == BigDecimal(1.0))
   }
 
   "JSON value" should "be converted to and from case class" in {
