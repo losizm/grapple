@@ -117,6 +117,50 @@ package object json {
       json.asInstanceOf[JsonArray].getInt(index, default)
 
     /** Gets indexed value from JsonArray. */
+    def getLong(index: Int): Long =
+      json.asInstanceOf[JsonArray].getJsonNumber(index).longValue
+
+    /** Gets indexed value from JsonArray or returns default if value not present. */
+    def getLong(index: Int, default: Long): Long = {
+      val arr = json.asInstanceOf[JsonArray]
+      if (arr.size > index) arr.getJsonNumber(index).longValue
+      else default
+    }
+
+    /** Gets indexed value from JsonArray. */
+    def getDouble(index: Int): Double =
+      json.asInstanceOf[JsonArray].getJsonNumber(index).doubleValue
+
+    /** Gets indexed value from JsonArray or returns default if value not present. */
+    def getDouble(index: Int, default: Double): Double = {
+      val arr = json.asInstanceOf[JsonArray]
+      if (arr.size > index) arr.getJsonNumber(index).doubleValue
+      else default
+    }
+
+    /** Gets indexed value from JsonArray. */
+    def getBigInt(index: Int): BigInt =
+      json.asInstanceOf[JsonArray].getJsonNumber(index).bigIntegerValue
+
+    /** Gets indexed value from JsonArray or returns default if value not present. */
+    def getBigInt(index: Int, default: BigInt): BigInt = {
+      val arr = json.asInstanceOf[JsonArray]
+      if (arr.size > index) arr.getJsonNumber(index).bigIntegerValue
+      else default
+    }
+
+    /** Gets indexed value from JsonArray. */
+    def getBigDecimal(index: Int): BigDecimal =
+      json.asInstanceOf[JsonArray].getJsonNumber(index).bigDecimalValue
+
+    /** Gets indexed value from JsonArray or returns default if value not present. */
+    def getBigDecimal(index: Int, default: BigDecimal): BigDecimal = {
+      val arr = json.asInstanceOf[JsonArray]
+      if (arr.size > index) arr.getJsonNumber(index).bigDecimalValue
+      else default
+    }
+
+    /** Gets indexed value from JsonArray. */
     def getBoolean(index: Int): Boolean =
       json.asInstanceOf[JsonArray].getBoolean(index)
 
@@ -139,6 +183,50 @@ package object json {
     /** Gets named value from JsonObject or returns default if value not present. */
     def getInt(name: String, default: Int): Int =
       json.asInstanceOf[JsonObject].getInt(name, default)
+
+    /** Gets named value from JsonObject. */
+    def getLong(name: String): Long =
+      json.asInstanceOf[JsonObject].getJsonNumber(name).longValue
+
+    /** Gets named value from JsonObject or returns default if value not present. */
+    def getLong(name: String, default: Long): Long = {
+      val obj = json.asInstanceOf[JsonObject]
+      if (obj.containsKey(name)) obj.getJsonNumber(name).longValue
+      else default
+    }
+
+    /** Gets named value from JsonObject. */
+    def getDouble(name: String): Double =
+      json.asInstanceOf[JsonObject].getJsonNumber(name).doubleValue
+
+    /** Gets named value from JsonObject or returns default if value not present. */
+    def getDouble(name: String, default: Double): Double = {
+      val obj = json.asInstanceOf[JsonObject]
+      if (obj.containsKey(name)) obj.getJsonNumber(name).doubleValue
+      else default
+    }
+
+    /** Gets named value from JsonObject. */
+    def getBigInt(name: String): BigInt =
+      json.asInstanceOf[JsonObject].getJsonNumber(name).bigIntegerValue
+
+    /** Gets named value from JsonObject or returns default if value not present. */
+    def getBigInt(name: String, default: BigInt): BigInt = {
+      val obj = json.asInstanceOf[JsonObject]
+      if (obj.containsKey(name)) obj.getJsonNumber(name).bigIntegerValue
+      else default
+    }
+
+    /** Gets named value from JsonObject. */
+    def getBigDecimal(name: String): BigDecimal =
+      json.asInstanceOf[JsonObject].getJsonNumber(name).bigDecimalValue
+
+    /** Gets named value from JsonObject or returns default if value not present. */
+    def getBigDecimal(name: String, default: BigDecimal): BigDecimal = {
+      val obj = json.asInstanceOf[JsonObject]
+      if (obj.containsKey(name)) obj.getJsonNumber(name).bigDecimalValue
+      else default
+    }
 
     /** Gets named value from JsonObject. */
     def getBoolean(name: String): Boolean =

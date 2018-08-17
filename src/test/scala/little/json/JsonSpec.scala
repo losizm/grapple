@@ -2,6 +2,8 @@ package little.json
 
 import javax.json.{ JsonArray, JsonObject, JsonValue }
 
+import scala.util.Success
+
 import org.scalatest.FlatSpec
 
 class JsonSpec extends FlatSpec {
@@ -23,11 +25,11 @@ class JsonSpec extends FlatSpec {
     case class User(id: Int, name: String, isRoot: Boolean)
 
     implicit val UserToJson: (User => JsonValue) = { user =>
-      val builder = Json.createObjectBuilder()
-      builder.add("id", user.id)
-      builder.add("name", user.name)
-      builder.add("isRoot", user.isRoot)
-      builder.build()
+      val obj = Json.createObjectBuilder()
+      obj.add("id", user.id)
+      obj.add("name", user.name)
+      obj.add("isRoot", user.isRoot)
+      obj.build()
     }
 
     implicit val JsonToUser: (JsonValue => User) = { json =>
@@ -41,5 +43,7 @@ class JsonSpec extends FlatSpec {
     assert(json.getString("name") == "root")
     assert(json.getBoolean("isRoot"))
     assert(json.as[User] == user)
+    assert(json.asOpt[User] == Some(user))
+    assert(json.asTry[User] == Success(user))
   }
 }
