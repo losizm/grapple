@@ -410,15 +410,28 @@ package object json {
   }
 
   /** Writes value of type T in array context. */
-  trait ArrayContextWriter[T] {
+  trait ArrayContextWriter[T] extends Any {
     /** Writes value in array context. */
     def write(value: T)(implicit generator: JsonGenerator): JsonGenerator
   }
 
   /** Writes value of type T in object context. */
-  trait ObjectContextWriter[T] {
+  trait ObjectContextWriter[T] extends Any {
     /** Writes value in object context. */
     def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator
+  }
+
+  /**
+   * Converts value of type T to JsonValue and writes it in requested context.
+   */
+  implicit class ConverterContextWriter[T](val converter: T => JsonValue) extends ArrayContextWriter[T] with ObjectContextWriter[T] {
+    /** Converts value to JsonValue and writes it in array context. */
+    def write(value: T)(implicit generator: JsonGenerator): JsonGenerator =
+      generator.write(converter(value))
+
+    /** Converts value to JsonValue and writes it in object context. */
+    def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator =
+      generator.write(converter(value))
   }
 
   /** Type class of {@code javax.json.stream.JsonGenerator} */
