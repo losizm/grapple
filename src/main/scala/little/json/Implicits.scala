@@ -5,7 +5,7 @@ import javax.json.stream.{ JsonGenerator, JsonParser }
 
 import scala.util.Try
 
-/** Provides JSON related type classes and utilities. */
+/** Provides implicit values and types. */
 object Implicits {
   /** Type class of {@code javax.json.JsonValue} */
   implicit class JsonValueType(val json: JsonValue) extends AnyVal {

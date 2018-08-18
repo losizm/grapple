@@ -10,7 +10,7 @@ import scala.util.Try
 
 /** Provides factory methods and other utilities. */
 object Json {
-  /** Converts value to JSON value. */
+  /** Converts value to JsonValue. */
   def toJson[T](value: T)(implicit convert: ToJson[T]): JsonValue =
     convert(value)
 
