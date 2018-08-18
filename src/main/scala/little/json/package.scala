@@ -88,237 +88,187 @@ package object json {
 
   /** Type class of {@code javax.json.JsonValue} */
   implicit class JsonValueType(val json: JsonValue) extends AnyVal {
-    /** Converts json to specified type. */
+    /** Converts json to requested type. */
     def as[T](implicit convert: JsonValue => T): T =
       convert(json)
 
-    /** Tries to convert json to specified type. */
-    def asTry[T](implicit convert: JsonValue => T): Try[T] =
-      Try(as[T])
-
-     /** Optionally converts json to specified type. */
+     /** Optionally converts json to requested type. */
     def asOption[T](implicit convert: JsonValue => T): Option[T] =
       asTry[T].toOption
 
-    /** Gets String from JsonArray. */
-    def getString(index: Int): String =
-      json.asInstanceOf[JsonArray].getString(index)
+    /** Tries to convert json to requested type. */
+    def asTry[T](implicit convert: JsonValue => T): Try[T] =
+      Try(as[T])
 
-    /** Gets String from JsonArray or returns default. */
-    def getString(index: Int, default: String): String =
-      json.asInstanceOf[JsonArray].getString(index, default)
+    /** Casts json to JsonString. */
+    def asString: JsonString =
+      json.asInstanceOf[JsonString]
 
-    /** Gets Int from JsonArray. */
-    def getInt(index: Int): Int =
-      json.asInstanceOf[JsonArray].getInt(index)
+    /** Casts json to JsonNumber. */
+    def asNumber: JsonNumber =
+      json.asInstanceOf[JsonNumber]
 
-    /** Gets Int from JsonArray or returns default. */
-    def getInt(index: Int, default: Int): Int =
-      json.asInstanceOf[JsonArray].getInt(index, default)
+    /** Casts json to JsonStructure. */
+    def asStructure: JsonStructure =
+      json.asInstanceOf[JsonStructure]
 
-    /** Gets exact Int from JsonArray. */
+    /** Casts json to JsonArray. */
+    def asArray: JsonArray =
+      json.asInstanceOf[JsonArray]
+
+    /** Casts json to JsonObject. */
+    def asObject: JsonObject =
+      json.asInstanceOf[JsonObject]
+  }
+
+  /** Type class of {@code javax.json.JsonArray} */
+  implicit class JsonArrayType(val json: JsonArray) extends AnyVal {
+    /** Gets value from array and converts it to requested type. */
+    def get[T](index: Int)(implicit convert: JsonValue => T): T =
+      convert(json.get(index))
+
+    /** Optionally gets value from array and converts it to requested type. */
+    def getOption[T](index: Int)(implicit convert: JsonValue => T): Option[T] =
+      getTry[T](index).toOption
+
+    /** Tries to get value from array and convert it to requested type. */
+    def getTry[T](index: Int)(implicit convert: JsonValue => T): Try[T] =
+      Try(get[T](index))
+
+    /** Gets exact Int from array. */
     def getIntExact(index: Int): Int =
-      json.asInstanceOf[JsonArray].getJsonNumber(index).intValueExact
+      json.getJsonNumber(index).intValueExact
 
-    /** Gets exact Int from JsonArray or returns default. */
-    def getIntExact(index: Int, default: Int): Int = {
-      val arr = json.asInstanceOf[JsonArray]
-      Try(arr.getJsonNumber(index).intValueExact).getOrElse(default)
-    }
+    /** Gets exact Int from array or returns default. */
+    def getIntExact(index: Int, default: Int): Int =
+      Try(getIntExact(index)).getOrElse(default)
 
-    /** Gets Long from JsonArray. */
+    /** Gets Long from array. */
     def getLong(index: Int): Long =
-      json.asInstanceOf[JsonArray].getJsonNumber(index).longValue
+      json.getJsonNumber(index).longValue
 
-    /** Gets Long from JsonArray or returns default. */
-    def getLong(index: Int, default: Long): Long = {
-      val arr = json.asInstanceOf[JsonArray]
-      Try(arr.getJsonNumber(index).longValue).getOrElse(default)
-    }
+    /** Gets Long from array or returns default. */
+    def getLong(index: Int, default: Long): Long =
+      Try(getLong(index)).getOrElse(default)
 
-    /** Gets exact Long from JsonArray. */
+    /** Gets exact Long from array. */
     def getLongExact(index: Int): Long =
-      json.asInstanceOf[JsonArray].getJsonNumber(index).longValueExact
+      json.getJsonNumber(index).longValueExact
 
-    /** Gets exact Long from JsonArray or returns default. */
-    def getLongExact(index: Int, default: Long): Long = {
-      val arr = json.asInstanceOf[JsonArray]
-      Try(arr.getJsonNumber(index).longValueExact).getOrElse(default)
-    }
+    /** Gets exact Long from array or returns default. */
+    def getLongExact(index: Int, default: Long): Long =
+      Try(getLongExact(index)).getOrElse(default)
 
-    /** Gets Double from JsonArray. */
+    /** Gets Double from array. */
     def getDouble(index: Int): Double =
-      json.asInstanceOf[JsonArray].getJsonNumber(index).doubleValue
+      json.getJsonNumber(index).doubleValue
 
-    /** Gets Double from JsonArray or returns default. */
-    def getDouble(index: Int, default: Double): Double = {
-      val arr = json.asInstanceOf[JsonArray]
-      Try(arr.getJsonNumber(index).doubleValue).getOrElse(default)
-    }
+    /** Gets Double from array or returns default. */
+    def getDouble(index: Int, default: Double): Double =
+      Try(getDouble(index)).getOrElse(default)
 
-    /** Gets BigInt from JsonArray. */
+    /** Gets BigInt from array. */
     def getBigInt(index: Int): BigInt =
-      json.asInstanceOf[JsonArray].getJsonNumber(index).bigIntegerValue
+      json.getJsonNumber(index).bigIntegerValue
 
-    /** Gets BigInt from JsonArray or returns default. */
-    def getBigInt(index: Int, default: BigInt): BigInt = {
-      val arr = json.asInstanceOf[JsonArray]
-      Try[BigInt](arr.getJsonNumber(index).bigIntegerValue).getOrElse(default)
-    }
+    /** Gets BigInt from array or returns default. */
+    def getBigInt(index: Int, default: BigInt): BigInt =
+      Try(getBigInt(index)).getOrElse(default)
 
-    /** Gets exact BigInt from JsonArray. */
+    /** Gets exact BigInt from array. */
     def getBigIntExact(index: Int): BigInt =
-      json.asInstanceOf[JsonArray].getJsonNumber(index).bigIntegerValueExact
+      json.getJsonNumber(index).bigIntegerValueExact
 
-    /** Gets exact BigInt from JsonArray or returns default. */
-    def getBigIntExact(index: Int, default: BigInt): BigInt = {
-      val arr = json.asInstanceOf[JsonArray]
-      Try[BigInt](arr.getJsonNumber(index).bigIntegerValueExact).getOrElse(default)
-    }
+    /** Gets exact BigInt from array or returns default. */
+    def getBigIntExact(index: Int, default: BigInt): BigInt =
+      Try(getBigIntExact(index)).getOrElse(default)
 
-    /** Gets BigDecimal from JsonArray. */
+    /** Gets BigDecimal from array. */
     def getBigDecimal(index: Int): BigDecimal =
-      json.asInstanceOf[JsonArray].getJsonNumber(index).bigDecimalValue
+      json.getJsonNumber(index).bigDecimalValue
 
-    /** Gets BigDecimal from JsonArray or returns default. */
-    def getBigDecimal(index: Int, default: BigDecimal): BigDecimal = {
-      val arr = json.asInstanceOf[JsonArray]
-      Try[BigDecimal](arr.getJsonNumber(index).bigDecimalValue).getOrElse(default)
-    }
+    /** Gets BigDecimal from array or returns default. */
+    def getBigDecimal(index: Int, default: BigDecimal): BigDecimal =
+      Try(getBigDecimal(index)).getOrElse(default)
 
-    /** Gets Boolean from JsonArray. */
-    def getBoolean(index: Int): Boolean =
-      json.asInstanceOf[JsonArray].getBoolean(index)
-
-    /** Gets Boolean from JsonArray or returns default. */
-    def getBoolean(index: Int, default: Boolean): Boolean =
-      json.asInstanceOf[JsonArray].getBoolean(index, default)
-
-    /** Tests whether value in JsonArray is null. */
-    def isNull(index: Int): Boolean =
-      json.asInstanceOf[JsonArray].isNull(index)
-
-    /** Tests whether JsonNumber in JsonArray is integral. */
+    /** Tests whether JsonNumber in array is integral. */
     def isIntegral(index: Int): Boolean =
-      json.asInstanceOf[JsonArray].getJsonNumber(index).isIntegral
+      json.getJsonNumber(index).isIntegral
+  }
 
-    /** Gets JsonArray from JsonArray. */
-    def getJsonArray(index: Int): JsonArray =
-      json.asInstanceOf[JsonArray].getJsonArray(index)
+  /** Type class of {@code javax.json.JsonObject} */
+  implicit class JsonObjectType(val json: JsonObject) extends AnyVal {
+    /** Gets value from object and converts it to requested type. */
+    def get[T](name: String)(implicit convert: JsonValue => T): T =
+      convert(json.get(name))
 
-    /** Gets JsonObject from JsonArray. */
-    def getJsonObject(index: Int): JsonObject =
-      json.asInstanceOf[JsonArray].getJsonObject(index)
+    /** Optionally gets value from object and converts it to requested type. */
+    def getOption[T](name: String)(implicit convert: JsonValue => T): Option[T] =
+      getTry[T](name).toOption
 
-    /** Gets String from JsonObject. */
-    def getString(name: String): String =
-      json.asInstanceOf[JsonObject].getString(name)
+    /** Tries to get value from object and convert it to requested type. */
+    def getTry[T](name: String)(implicit convert: JsonValue => T): Try[T] =
+      Try(get[T](name))
 
-    /** Gets String from JsonObject or returns default. */
-    def getString(name: String, default: String): String =
-      json.asInstanceOf[JsonObject].getString(name, default)
-
-    /** Gets Int from JsonObject. */
-    def getInt(name: String): Int =
-      json.asInstanceOf[JsonObject].getInt(name)
-
-    /** Gets Int from JsonObject or returns default. */
-    def getInt(name: String, default: Int): Int =
-      json.asInstanceOf[JsonObject].getInt(name, default)
-
-    /** Gets exact Int from JsonObject. */
+    /** Gets exact Int from object. */
     def getIntExact(name: String): Int =
-      json.asInstanceOf[JsonObject].getJsonNumber(name).intValueExact
+      json.getJsonNumber(name).intValueExact
 
-    /** Gets exact Int from JsonObject or returns default. */
-    def getIntExact(name: String, default: Int): Int = {
-      val obj = json.asInstanceOf[JsonObject]
-      Try(obj.getJsonNumber(name).intValueExact).getOrElse(default)
-    }
+    /** Gets exact Int from object or returns default. */
+    def getIntExact(name: String, default: Int): Int =
+      Try(getIntExact(name)).getOrElse(default)
 
-    /** Gets Long from JsonObject. */
+    /** Gets Long from object. */
     def getLong(name: String): Long =
-      json.asInstanceOf[JsonObject].getJsonNumber(name).longValue
+      json.getJsonNumber(name).longValue
 
-    /** Gets Long from JsonObject or returns default. */
-    def getLong(name: String, default: Long): Long = {
-      val obj = json.asInstanceOf[JsonObject]
-      Try(obj.getJsonNumber(name).longValue).getOrElse(default)
-    }
+    /** Gets Long from object or returns default. */
+    def getLong(name: String, default: Long): Long =
+      Try(getLong(name)).getOrElse(default)
 
-    /** Gets exact Long from JsonObject. */
+    /** Gets exact Long from object. */
     def getLongExact(name: String): Long =
-      json.asInstanceOf[JsonObject].getJsonNumber(name).longValueExact
+      json.getJsonNumber(name).longValueExact
 
-    /** Gets exact Long from JsonObject or returns default. */
-    def getLongExact(name: String, default: Long): Long = {
-      val obj = json.asInstanceOf[JsonObject]
-      Try(obj.getJsonNumber(name).longValueExact).getOrElse(default)
-    }
+    /** Gets exact Long from object or returns default. */
+    def getLongExact(name: String, default: Long): Long =
+      Try(getLongExact(name)).getOrElse(default)
 
-    /** Gets Double from JsonObject. */
+    /** Gets Double from object. */
     def getDouble(name: String): Double =
-      json.asInstanceOf[JsonObject].getJsonNumber(name).doubleValue
+      json.getJsonNumber(name).doubleValue
 
-    /** Gets Double from JsonObject or returns default. */
-    def getDouble(name: String, default: Double): Double = {
-      val obj = json.asInstanceOf[JsonObject]
-      Try(obj.getJsonNumber(name).doubleValue).getOrElse(default)
-    }
+    /** Gets Double from object or returns default. */
+    def getDouble(name: String, default: Double): Double =
+      Try(getDouble(name)).getOrElse(default)
 
-    /** Gets BigInt from JsonObject. */
+    /** Gets BigInt from object. */
     def getBigInt(name: String): BigInt =
-      json.asInstanceOf[JsonObject].getJsonNumber(name).bigIntegerValue
+      json.getJsonNumber(name).bigIntegerValue
 
-    /** Gets BigInt from JsonObject or returns default. */
-    def getBigInt(name: String, default: BigInt): BigInt = {
-      val obj = json.asInstanceOf[JsonObject]
-      Try[BigInt](obj.getJsonNumber(name).bigIntegerValue).getOrElse(default)
-    }
+    /** Gets BigInt from object or returns default. */
+    def getBigInt(name: String, default: BigInt): BigInt =
+      Try(getBigInt(name)).getOrElse(default)
 
-    /** Gets exact BigInt from JsonObject. */
+    /** Gets exact BigInt from object. */
     def getBigIntExact(name: String): BigInt =
-      json.asInstanceOf[JsonObject].getJsonNumber(name).bigIntegerValueExact
+      json.getJsonNumber(name).bigIntegerValueExact
 
-    /** Gets exact BigInt from JsonObject or returns default. */
-    def getBigIntExact(name: String, default: BigInt): BigInt = {
-      val obj = json.asInstanceOf[JsonObject]
-      Try[BigInt](obj.getJsonNumber(name).bigIntegerValueExact).getOrElse(default)
-    }
+    /** Gets exact BigInt from object or returns default. */
+    def getBigIntExact(name: String, default: BigInt): BigInt =
+      Try(getBigIntExact(name)).getOrElse(default)
 
-    /** Gets BigDecimal from JsonObject. */
+    /** Gets BigDecimal from object. */
     def getBigDecimal(name: String): BigDecimal =
-      json.asInstanceOf[JsonObject].getJsonNumber(name).bigDecimalValue
+      json.getJsonNumber(name).bigDecimalValue
 
-    /** Gets BigDecimal from JsonObject or returns default. */
-    def getBigDecimal(name: String, default: BigDecimal): BigDecimal = {
-      val obj = json.asInstanceOf[JsonObject]
-      Try[BigDecimal](obj.getJsonNumber(name).bigDecimalValue).getOrElse(default)
-    }
+    /** Gets BigDecimal from object or returns default. */
+    def getBigDecimal(name: String, default: BigDecimal): BigDecimal =
+      Try(getBigDecimal(name)).getOrElse(default)
 
-    /** Gets Boolean from JsonObject. */
-    def getBoolean(name: String): Boolean =
-      json.asInstanceOf[JsonObject].getBoolean(name)
-
-    /** Gets Boolean from JsonObject or returns default. */
-    def getBoolean(name: String, default: Boolean): Boolean =
-      json.asInstanceOf[JsonObject].getBoolean(name)
-
-    /** Tests whether value in JsonObject is null. */
-    def isNull(name: String): Boolean =
-      json.asInstanceOf[JsonObject].isNull(name)
-
-    /** Tests whether JsonNumber in JsonObject is integral. */
+    /** Tests whether JsonNumber in object is integral. */
     def isIntegral(name: String): Boolean =
-      json.asInstanceOf[JsonObject].getJsonNumber(name).isIntegral
-
-    /** Gets JsonArray from JsonObject. */
-    def getJsonArray(name: String): JsonArray =
-      json.asInstanceOf[JsonObject].getJsonArray(name)
-
-    /** Gets JsonObject from JsonObject. */
-    def getJsonObject(name: String): JsonObject =
-      json.asInstanceOf[JsonObject].getJsonObject(name)
+      json.getJsonNumber(name).isIntegral
   }
 
   /** Type class of {@code javax.json.stream.JsonParser} */

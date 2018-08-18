@@ -1,6 +1,6 @@
 package little.json
 
-import javax.json.{ JsonArray, JsonObject, JsonValue }
+import javax.json.{ JsonArray, JsonException, JsonObject, JsonValue }
 
 import scala.util.Success
 
@@ -122,12 +122,13 @@ class JsonSpec extends FlatSpec {
       obj.build()
     }
 
-    implicit val JsonToUser: (JsonValue => User) = { json =>
-      User(json.getInt("id"), json.getString("name"), json.getBoolean("enabled"))
+    implicit val JsonToUser: (JsonValue => User) = {
+      case obj: JsonObject => User(obj.getInt("id"), obj.getString("name"), obj.getBoolean("enabled"))
+      case other => throw new JsonException(s"""required JsonObject / found ${other.getValueType}""")
     }
 
     val user = User(0, "root", true)
-    val json = Json.toJson(user)
+    val json = Json.toJson(user).asObject
 
     assert(json.getInt("id") == 0)
     assert(json.getString("name") == "root")
