@@ -87,7 +87,7 @@ package object json {
   }
 
   /** Type class of {@code javax.json.JsonValue} */
-  implicit class JsonValueType(val json: JsonValue) extends AnyVal {
+  implicit class LittleJsonValue(val json: JsonValue) extends AnyVal {
     /** Converts json to requested type. */
     def as[T](implicit convert: JsonValue => T): T =
       convert(json)
@@ -122,7 +122,7 @@ package object json {
   }
 
   /** Type class of {@code javax.json.JsonArray} */
-  implicit class JsonArrayType(val json: JsonArray) extends AnyVal {
+  implicit class LittleJsonArray(val json: JsonArray) extends AnyVal {
     /** Gets value from array and converts it to requested type. */
     def get[T](index: Int)(implicit convert: JsonValue => T): T =
       convert(json.get(index))
@@ -197,7 +197,7 @@ package object json {
   }
 
   /** Type class of {@code javax.json.JsonObject} */
-  implicit class JsonObjectType(val json: JsonObject) extends AnyVal {
+  implicit class LittleJsonObject(val json: JsonObject) extends AnyVal {
     /** Gets value from object and converts it to requested type. */
     def get[T](name: String)(implicit convert: JsonValue => T): T =
       convert(json.get(name))
@@ -272,7 +272,7 @@ package object json {
   }
 
   /** Type class of {@code javax.json.stream.JsonParser} */
-  implicit class JsonParserType(val parser: JsonParser) extends AnyVal {
+  implicit class LittleJsonParser(val parser: JsonParser) extends AnyVal {
     import JsonParser.Event._
 
     /**
@@ -385,7 +385,7 @@ package object json {
   }
 
   /** Type class of {@code javax.json.stream.JsonGenerator} */
-  implicit class JsonGeneratorType(val generator: JsonGenerator) extends AnyVal {
+  implicit class LittleJsonGenerator(val generator: JsonGenerator) extends AnyVal {
     /** Writes value in array context. */
     def write[T](value: T)(implicit writer: ArrayContextWriter[T]): JsonGenerator =
       writer.write(value)(generator)
