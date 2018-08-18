@@ -371,17 +371,100 @@ package object json {
     def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator
   }
 
-  /**
-   * Converts value of type T to JsonValue and writes it in requested context.
-   */
-  implicit class ConverterContextWriter[T](val converter: T => JsonValue) extends ArrayContextWriter[T] with ObjectContextWriter[T] {
-    /** Converts value to JsonValue and writes it in array context. */
-    def write(value: T)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(converter(value))
+  /** Writes value of type T in requested context. */
+  trait ContextWriter[T] extends ArrayContextWriter[T] with ObjectContextWriter[T]
 
-    /** Converts value to JsonValue and writes it in object context. */
-    def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(converter(value))
+  /** Provides standard set of ContextWriters. */
+  object ContextWriter {
+    /**
+     * Converts value of type T to JsonValue and writes it in requested context.
+     */
+    implicit class ConverterContextWriter[T](val converter: T => JsonValue) extends ContextWriter[T] {
+      /** Converts value to JsonValue and writes it in array context. */
+      def write(value: T)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(converter(value))
+
+      /** Converts value to JsonValue and writes it in object context. */
+      def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(name, converter(value))
+    }
+
+    /** Writes String in requested context. */
+    implicit object StringContextWriter extends ContextWriter[String] {
+      /** Writes String in array context. */
+      def write(value: String)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(value)
+
+      /** Writes String in object context. */
+      def write(name: String, value: String)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(name, value)
+    }
+
+    /** Writes Int in requested context. */
+    implicit object IntContextWriter extends ContextWriter[Int] {
+      /** Writes Int in array context. */
+      def write(value: Int)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(value)
+
+      /** Writes Int in object context. */
+      def write(name: String, value: Int)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(name, value)
+    }
+
+    /** Writes Long in requested context. */
+    implicit object LongContextWriter extends ContextWriter[Long] {
+      /** Writes Long in array context. */
+      def write(value: Long)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(value)
+
+      /** Writes Long in object context. */
+      def write(name: String, value: Long)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(name, value)
+    }
+
+    /** Writes Double in requested context. */
+    implicit object DoubleContextWriter extends ContextWriter[Double] {
+      /** Writes Double in array context. */
+      def write(value: Double)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(value)
+
+      /** Writes Double in object context. */
+      def write(name: String, value: Double)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(name, value)
+    }
+
+    /** Writes BigInt in requested context. */
+    implicit object BigIntContextWriter extends ContextWriter[BigInt] {
+      /** Writes BigInt in array context. */
+      def write(value: BigInt)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(value.bigInteger)
+
+      /** Writes BigInt in object context. */
+      def write(name: String, value: BigInt)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(name, value.bigInteger)
+    }
+
+    /** Writes BigDecimal in requested context. */
+    implicit object BigDecimalContextWriter extends ContextWriter[BigDecimal] {
+      /** Writes BigDecimal in array context. */
+      def write(value: BigDecimal)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(value.bigDecimal)
+
+      /** Writes BigDecimal in object context. */
+      def write(name: String, value: BigDecimal)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(name, value.bigDecimal)
+    }
+
+    /** Writes Boolean in requested context. */
+    implicit object BooleanContextWriter extends ContextWriter[Boolean] {
+      /** Writes Boolean in array context. */
+      def write(value: Boolean)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(value)
+
+      /** Writes Boolean in object context. */
+      def write(name: String, value: Boolean)(implicit generator: JsonGenerator): JsonGenerator =
+        generator.write(name, value)
+    }
   }
 
   /** Type class of {@code javax.json.stream.JsonGenerator} */
@@ -390,19 +473,10 @@ package object json {
     def write[T](value: T)(implicit writer: ArrayContextWriter[T]): JsonGenerator =
       writer.write(value)(generator)
 
-    /** Writes value in object context. */
-    def write[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
-      writer.write(name, value)(generator)
-
     /** Writes value in array context or writes null if value is null. */
     def writeNullable[T](value: T)(implicit writer: ArrayContextWriter[T]): JsonGenerator =
       if (value == null) generator.writeNull()
       else writer.write(value)(generator)
-
-    /** Writes value in object context or writes null if value is null. */
-    def writeNullable[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
-      if (value == null) generator.writeNull(name)
-      else writer.write(name, value)(generator)
 
     /**
      * Writes value in array context if {@code Some}; otherwise, writes null if
@@ -410,6 +484,15 @@ package object json {
      */
     def writeOption[T](value: Option[T])(implicit writer: ArrayContextWriter[T]): JsonGenerator =
       value.fold(generator.writeNull()) { x => writer.write(x)(generator) }
+
+    /** Writes value in object context. */
+    def write[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
+      writer.write(name, value)(generator)
+
+    /** Writes value in object context or writes null if value is null. */
+    def writeNullable[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
+      if (value == null) generator.writeNull(name)
+      else writer.write(name, value)(generator)
 
     /**
      * Writes value in object context if {@code Some}; otherwise, writes null if
