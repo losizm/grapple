@@ -8,7 +8,7 @@ import javax.json.stream.JsonGenerator
  *
  * @see [[FromJson]]
  */
-trait ToJson[T] extends ContextWriter[T] {
+trait ToJson[T] extends (T => JsonValue) with ContextWriter[T] {
   /** Converts value to JsonValue. */
   def apply(value: T): JsonValue
 

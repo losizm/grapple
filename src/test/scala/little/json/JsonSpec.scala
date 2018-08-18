@@ -47,19 +47,19 @@ class JsonSpec extends FlatSpec {
 
   it should "provide access to exact number value" in {
     val arr = Json.parse[JsonArray]("[123]")
-    assert(arr.getIntExact(0) == 123)
-    assert(arr.getLongExact(0) == 123L)
-    assert(arr.getBigIntExact(0) == BigInt(123))
+    assert(arr.get(0).as[Int] == 123)
+    assert(arr.get(0).as[Long] == 123L)
+    assert(arr.get(0).as[BigInt] == BigInt(123))
   }
 
   it should "provide access to exact number value with default" in {
     val arr = Json.parse[JsonArray]("""["Not a number"]""")
-    assert(arr.getIntExact(0, 1) == 1)
-    assert(arr.getLongExact(0, 1L) == 1L)
-    assert(arr.getBigIntExact(0, BigInt(1)) == BigInt(1))
-    assert(arr.getIntExact(1, 1) == 1)
-    assert(arr.getLongExact(1, 1L) == 1L)
-    assert(arr.getBigIntExact(1, BigInt(1)) == BigInt(1))
+    assert(arr.getOrElse(0, 1) == 1)
+    assert(arr.getOrElse(0, 1L) == 1L)
+    assert(arr.getOrElse(0, BigInt(1)) == BigInt(1))
+    assert(arr.getOrElse(1, 1) == 1)
+    assert(arr.getOrElse(1, 1L) == 1L)
+    assert(arr.getOrElse(1, BigInt(1)) == BigInt(1))
   }
 
   "JSON object" should "be parsed" in {
@@ -99,19 +99,20 @@ class JsonSpec extends FlatSpec {
 
   it should "provide access to exact number value" in {
     val obj = Json.parse[JsonObject]("""{ "a": 123 }""")
-    assert(obj.getIntExact("a") == 123)
-    assert(obj.getLongExact("a") == 123L)
-    assert(obj.getBigIntExact("a") == BigInt(123))
+    assert(obj.get("a").as[Int] == 123)
+    assert(obj.get("a").as[Long] == 123L)
+    assert(obj.get("a").as[BigInt] == BigInt(123))
   }
 
   it should "provide access to exact number value with default" in {
     val obj = Json.parse[JsonObject]("""{ "a": "Not a number" }""")
-    assert(obj.getIntExact("a", 1) == 1)
-    assert(obj.getLongExact("a", 1L) == 1L)
-    assert(obj.getBigIntExact("a", BigInt(1)) == BigInt(1))
-    assert(obj.getIntExact("b", 1) == 1)
-    assert(obj.getLongExact("b", 1L) == 1L)
-    assert(obj.getBigIntExact("b", BigInt(1)) == BigInt(1))
+    assert(obj.getOrElse("a", 1) == 1)
+    assert(obj.getOrElse("a", 1L) == 1L)
+    assert(obj.getOrElse("a", BigInt(1)) == BigInt(1))
+    assert(obj.getOrElse("b", 1) == 1)
+    assert(obj.getOrElse("b", 1L) == 1L)
+    assert(obj.getOrElse("b", BigInt(1)) == BigInt(1))
+    assert(obj.getOrElse("b", BigInt(1)) == BigInt(1))
   }
 
   "JSON value" should "be converted to and from case class" in {

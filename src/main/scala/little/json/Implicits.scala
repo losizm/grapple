@@ -7,7 +7,54 @@ import scala.util.Try
 
 /** Provides implicit values and types. */
 object Implicits {
-  /** Type class of {@code javax.json.JsonValue} */
+  /** Converts json to String. */
+  implicit val jsonToString: FromJson[String] = {
+    case json: JsonString => json.getString
+    case json => throw new JsonException(s"required STRING but found ${json.getValueType}")
+  }
+
+  /** Converts json to Int (exact). */
+  implicit val jsonToInt: FromJson[Int] = {
+    case json: JsonNumber => json.intValueExact
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+  }
+
+  /** Converts json to Long (exact). */
+  implicit val jsonToLong: FromJson[Long] = {
+    case json: JsonNumber => json.longValueExact
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+  }
+
+  /** Converts json to Double. */
+  implicit val jsonToDouble: FromJson[Double] = {
+    case json: JsonNumber => json.doubleValue
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+  }
+
+  /** Converts json to BigInt (exact). */
+  implicit val jsonToBigInt: FromJson[BigInt] = {
+    case json: JsonNumber => json.bigIntegerValueExact
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+  }
+
+  /** Converts json to BigDecimal. */
+  implicit val jsonToBigDecimal: FromJson[BigDecimal] = {
+    case json: JsonNumber => json.bigDecimalValue
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+  }
+
+  /** Converts json to Boolean. */
+  implicit val jsonToBoolean: FromJson[Boolean] = {
+    case JsonValue.TRUE => true
+    case JsonValue.FALSE => false
+    case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
+  }
+
+  /**
+   * Type class of {@code javax.json.JsonValue}
+   *
+   * @see [[JsonArrayType]], [[JsonObjectType]]
+   */
   implicit class JsonValueType(val json: JsonValue) extends AnyVal {
     /** Converts json to requested type. */
     def as[T](implicit convert: FromJson[T]): T =
@@ -42,11 +89,18 @@ object Implicits {
       json.asInstanceOf[JsonObject]
   }
 
-  /** Type class of {@code javax.json.JsonArray} */
+  /**
+   * Type class of {@code javax.json.JsonArray}
+   *
+   * @see [[JsonValueType]], [[JsonObjectType]]
+   */
   implicit class JsonArrayType(val json: JsonArray) extends AnyVal {
-    /** Gets value from array and converts it to requested type. */
-    def get[T](index: Int)(implicit convert: FromJson[T]): T =
-      convert(json.get(index))
+    /**
+     * Gets value from array and converts it to requested type or returns
+     * evaluated default.
+     */
+    def getOrElse[T](index: Int, default: => T)(implicit convert: FromJson[T]): T =
+      getTry[T](index).getOrElse(default)
 
     /** Optionally gets value from array and converts it to requested type. */
     def getOption[T](index: Int)(implicit convert: FromJson[T]): Option[T] =
@@ -54,15 +108,7 @@ object Implicits {
 
     /** Tries to get value from array and convert it to requested type. */
     def getTry[T](index: Int)(implicit convert: FromJson[T]): Try[T] =
-      Try(get[T](index))
-
-    /** Gets exact Int from array. */
-    def getIntExact(index: Int): Int =
-      json.getJsonNumber(index).intValueExact
-
-    /** Gets exact Int from array or returns default. */
-    def getIntExact(index: Int, default: Int): Int =
-      Try(getIntExact(index)).getOrElse(default)
+      Try(json.get(index).as[T])
 
     /** Gets Long from array. */
     def getLong(index: Int): Long =
@@ -71,14 +117,6 @@ object Implicits {
     /** Gets Long from array or returns default. */
     def getLong(index: Int, default: Long): Long =
       Try(getLong(index)).getOrElse(default)
-
-    /** Gets exact Long from array. */
-    def getLongExact(index: Int): Long =
-      json.getJsonNumber(index).longValueExact
-
-    /** Gets exact Long from array or returns default. */
-    def getLongExact(index: Int, default: Long): Long =
-      Try(getLongExact(index)).getOrElse(default)
 
     /** Gets Double from array. */
     def getDouble(index: Int): Double =
@@ -96,14 +134,6 @@ object Implicits {
     def getBigInt(index: Int, default: BigInt): BigInt =
       Try(getBigInt(index)).getOrElse(default)
 
-    /** Gets exact BigInt from array. */
-    def getBigIntExact(index: Int): BigInt =
-      json.getJsonNumber(index).bigIntegerValueExact
-
-    /** Gets exact BigInt from array or returns default. */
-    def getBigIntExact(index: Int, default: BigInt): BigInt =
-      Try(getBigIntExact(index)).getOrElse(default)
-
     /** Gets BigDecimal from array. */
     def getBigDecimal(index: Int): BigDecimal =
       json.getJsonNumber(index).bigDecimalValue
@@ -112,32 +142,27 @@ object Implicits {
     def getBigDecimal(index: Int, default: BigDecimal): BigDecimal =
       Try(getBigDecimal(index)).getOrElse(default)
 
-    /** Tests whether JsonNumber in array is integral. */
+    /** Tests whether value in array is integral. */
     def isIntegral(index: Int): Boolean =
-      json.getJsonNumber(index).isIntegral
+      Try(json.getJsonNumber(index).isIntegral).getOrElse(false)
   }
 
-  /** Type class of {@code javax.json.JsonObject} */
+  /**
+   * Type class of {@code javax.json.JsonObject}
+   *
+   * @see [[JsonValueType]], [[JsonArrayType]]
+   */
   implicit class JsonObjectType(val json: JsonObject) extends AnyVal {
-    /** Gets value from object and converts it to requested type. */
-    def get[T](name: String)(implicit convert: FromJson[T]): T =
-      convert(json.get(name))
-
-    /** Optionally gets value from object and converts it to requested type. */
-    def getOption[T](name: String)(implicit convert: FromJson[T]): Option[T] =
-      getTry[T](name).toOption
+    /**
+     * Gets value from object and converts it to requested type or returns
+     * evaluated default.
+     */
+    def getOrElse[T](name: String, default: => T)(implicit convert: FromJson[T]): T =
+      getTry[T](name).getOrElse(default)
 
     /** Tries to get value from object and convert it to requested type. */
     def getTry[T](name: String)(implicit convert: FromJson[T]): Try[T] =
-      Try(get[T](name))
-
-    /** Gets exact Int from object. */
-    def getIntExact(name: String): Int =
-      json.getJsonNumber(name).intValueExact
-
-    /** Gets exact Int from object or returns default. */
-    def getIntExact(name: String, default: Int): Int =
-      Try(getIntExact(name)).getOrElse(default)
+      Try(json.get(name).as[T])
 
     /** Gets Long from object. */
     def getLong(name: String): Long =
@@ -146,14 +171,6 @@ object Implicits {
     /** Gets Long from object or returns default. */
     def getLong(name: String, default: Long): Long =
       Try(getLong(name)).getOrElse(default)
-
-    /** Gets exact Long from object. */
-    def getLongExact(name: String): Long =
-      json.getJsonNumber(name).longValueExact
-
-    /** Gets exact Long from object or returns default. */
-    def getLongExact(name: String, default: Long): Long =
-      Try(getLongExact(name)).getOrElse(default)
 
     /** Gets Double from object. */
     def getDouble(name: String): Double =
@@ -171,14 +188,6 @@ object Implicits {
     def getBigInt(name: String, default: BigInt): BigInt =
       Try(getBigInt(name)).getOrElse(default)
 
-    /** Gets exact BigInt from object. */
-    def getBigIntExact(name: String): BigInt =
-      json.getJsonNumber(name).bigIntegerValueExact
-
-    /** Gets exact BigInt from object or returns default. */
-    def getBigIntExact(name: String, default: BigInt): BigInt =
-      Try(getBigIntExact(name)).getOrElse(default)
-
     /** Gets BigDecimal from object. */
     def getBigDecimal(name: String): BigDecimal =
       json.getJsonNumber(name).bigDecimalValue
@@ -187,9 +196,9 @@ object Implicits {
     def getBigDecimal(name: String, default: BigDecimal): BigDecimal =
       Try(getBigDecimal(name)).getOrElse(default)
 
-    /** Tests whether JsonNumber in object is integral. */
+    /** Tests whether value in object is integral. */
     def isIntegral(name: String): Boolean =
-      json.getJsonNumber(name).isIntegral
+      Try(json.getJsonNumber(name).isIntegral).getOrElse(false)
   }
 
   /** Type class of {@code javax.json.stream.JsonGenerator} */

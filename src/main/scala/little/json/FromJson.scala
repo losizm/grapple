@@ -7,7 +7,7 @@ import javax.json.JsonValue
  *
  * @see [[ToJson]]
  */
-trait FromJson[T] {
+trait FromJson[T] extends (JsonValue => T) {
   /** Converts json to T. */
   def apply(json: JsonValue): T
 }
