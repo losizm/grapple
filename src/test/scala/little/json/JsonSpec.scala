@@ -6,6 +6,8 @@ import scala.util.Success
 
 import org.scalatest.FlatSpec
 
+import Test._
+
 class JsonSpec extends FlatSpec {
   "JSON array" should "be parsed" in {
     val arr = Json.parse[JsonArray]("""[0, "root", true]""")
@@ -112,21 +114,6 @@ class JsonSpec extends FlatSpec {
   }
 
   "JSON value" should "be converted to and from case class" in {
-    case class User(id: Int, name: String, enabled: Boolean)
-
-    implicit val UserToJson: (User => JsonValue) = { user =>
-      val obj = Json.createObjectBuilder()
-      obj.add("id", user.id)
-      obj.add("name", user.name)
-      obj.add("enabled", user.enabled)
-      obj.build()
-    }
-
-    implicit val JsonToUser: (JsonValue => User) = {
-      case obj: JsonObject => User(obj.getInt("id"), obj.getString("name"), obj.getBoolean("enabled"))
-      case other => throw new JsonException(s"""required JsonObject / found ${other.getValueType}""")
-    }
-
     val user = User(0, "root", true)
     val json = Json.toJson(user).asObject
 

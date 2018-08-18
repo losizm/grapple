@@ -11,10 +11,45 @@ import scala.util.Try
 
 /** Provides JSON related type classes and utilities. */
 package object json {
+  /** Writes value of type T in array context. */
+  trait ArrayContextWriter[T] extends Any {
+    /** Writes value in array context. */
+    def write(value: T)(implicit generator: JsonGenerator): JsonGenerator
+  }
+
+  /** Writes value of type T in object context. */
+  trait ObjectContextWriter[T] extends Any {
+    /** Writes value in object context. */
+    def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator
+  }
+
+  /** Writes value of type T in requested context. */
+  trait ContextWriter[T] extends ArrayContextWriter[T] with ObjectContextWriter[T]
+
+  /** Converts value of type T to JsonValue. */
+  trait ToJson[T] extends ContextWriter[T] {
+    /** Converts value to JsonValue. */
+    def apply(value: T): JsonValue
+
+    /** Converts value to JsonValue and writes it in array context. */
+    def write(value: T)(implicit generator: JsonGenerator): JsonGenerator =
+      generator.write(this(value))
+
+    /** Converts value to JsonValue and writes it in object context. */
+    def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator =
+      generator.write(name, this(value))
+  }
+
+  /** Converts JsonValue to value of type T. */
+  trait FromJson[T] {
+    /** Converts json to T. */
+    def apply(json: JsonValue): T
+  }
+
   /** Provides JSON utilities. */
   object Json {
     /** Converts value to JSON value. */
-    def toJson[T](value: T)(implicit convert: T => JsonValue): JsonValue =
+    def toJson[T](value: T)(implicit convert: ToJson[T]): JsonValue =
       convert(value)
 
     /** Parses given text to JsonStructure. */
@@ -89,15 +124,15 @@ package object json {
   /** Type class of {@code javax.json.JsonValue} */
   implicit class LittleJsonValue(val json: JsonValue) extends AnyVal {
     /** Converts json to requested type. */
-    def as[T](implicit convert: JsonValue => T): T =
+    def as[T](implicit convert: FromJson[T]): T =
       convert(json)
 
      /** Optionally converts json to requested type. */
-    def asOption[T](implicit convert: JsonValue => T): Option[T] =
+    def asOption[T](implicit convert: FromJson[T]): Option[T] =
       asTry[T].toOption
 
     /** Tries to convert json to requested type. */
-    def asTry[T](implicit convert: JsonValue => T): Try[T] =
+    def asTry[T](implicit convert: FromJson[T]): Try[T] =
       Try(as[T])
 
     /** Casts json to JsonString. */
@@ -124,15 +159,15 @@ package object json {
   /** Type class of {@code javax.json.JsonArray} */
   implicit class LittleJsonArray(val json: JsonArray) extends AnyVal {
     /** Gets value from array and converts it to requested type. */
-    def get[T](index: Int)(implicit convert: JsonValue => T): T =
+    def get[T](index: Int)(implicit convert: FromJson[T]): T =
       convert(json.get(index))
 
     /** Optionally gets value from array and converts it to requested type. */
-    def getOption[T](index: Int)(implicit convert: JsonValue => T): Option[T] =
+    def getOption[T](index: Int)(implicit convert: FromJson[T]): Option[T] =
       getTry[T](index).toOption
 
     /** Tries to get value from array and convert it to requested type. */
-    def getTry[T](index: Int)(implicit convert: JsonValue => T): Try[T] =
+    def getTry[T](index: Int)(implicit convert: FromJson[T]): Try[T] =
       Try(get[T](index))
 
     /** Gets exact Int from array. */
@@ -199,15 +234,15 @@ package object json {
   /** Type class of {@code javax.json.JsonObject} */
   implicit class LittleJsonObject(val json: JsonObject) extends AnyVal {
     /** Gets value from object and converts it to requested type. */
-    def get[T](name: String)(implicit convert: JsonValue => T): T =
+    def get[T](name: String)(implicit convert: FromJson[T]): T =
       convert(json.get(name))
 
     /** Optionally gets value from object and converts it to requested type. */
-    def getOption[T](name: String)(implicit convert: JsonValue => T): Option[T] =
+    def getOption[T](name: String)(implicit convert: FromJson[T]): Option[T] =
       getTry[T](name).toOption
 
     /** Tries to get value from object and convert it to requested type. */
-    def getTry[T](name: String)(implicit convert: JsonValue => T): Try[T] =
+    def getTry[T](name: String)(implicit convert: FromJson[T]): Try[T] =
       Try(get[T](name))
 
     /** Gets exact Int from object. */
@@ -359,36 +394,8 @@ package object json {
     }
   }
 
-  /** Writes value of type T in array context. */
-  trait ArrayContextWriter[T] extends Any {
-    /** Writes value in array context. */
-    def write(value: T)(implicit generator: JsonGenerator): JsonGenerator
-  }
-
-  /** Writes value of type T in object context. */
-  trait ObjectContextWriter[T] extends Any {
-    /** Writes value in object context. */
-    def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator
-  }
-
-  /** Writes value of type T in requested context. */
-  trait ContextWriter[T] extends ArrayContextWriter[T] with ObjectContextWriter[T]
-
   /** Provides standard set of ContextWriters. */
   object ContextWriter {
-    /**
-     * Converts value of type T to JsonValue and writes it in requested context.
-     */
-    implicit class ConverterContextWriter[T](val converter: T => JsonValue) extends ContextWriter[T] {
-      /** Converts value to JsonValue and writes it in array context. */
-      def write(value: T)(implicit generator: JsonGenerator): JsonGenerator =
-        generator.write(converter(value))
-
-      /** Converts value to JsonValue and writes it in object context. */
-      def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator =
-        generator.write(name, converter(value))
-    }
-
     /** Writes String in requested context. */
     implicit object StringContextWriter extends ContextWriter[String] {
       /** Writes String in array context. */
