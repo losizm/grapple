@@ -1,15 +1,11 @@
 package little.json
 
 import java.io.StringWriter
-import javax.json.{ JsonArray, JsonException, JsonObject, JsonValue }
-
-import scala.util.Success
 
 import org.scalatest.FlatSpec
 
-import ContextWriter._
+import Implicits._
 import Test._
-import scala.language.implicitConversions
 
 class JsonGeneratorSpec extends FlatSpec {
   val user = User(0, "root", true)

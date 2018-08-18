@@ -1,11 +1,12 @@
 package little.json
 
-import javax.json.{ JsonArray, JsonException, JsonObject, JsonValue }
+import javax.json.{ JsonArray, JsonObject }
 
 import scala.util.Success
 
 import org.scalatest.FlatSpec
 
+import Implicits._
 import Test._
 
 class JsonSpec extends FlatSpec {
