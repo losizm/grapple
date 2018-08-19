@@ -10,7 +10,7 @@ import Test._
 class JsonGeneratorSpec extends FlatSpec {
   val user = User(0, "root", true)
 
-  "JSON generator" should "write array" in {
+  "JSON generator" should "generate array" in {
     val out = new StringWriter()
     val generator = Json.createGenerator(out)
 
@@ -27,12 +27,11 @@ class JsonGeneratorSpec extends FlatSpec {
     generator.write(BigDecimal(1.0))
     generator.writeNullable(BigDecimal(1.0))
     generator.writeOption(Some(BigDecimal(1.0)))
-    generator.writeNullable(User(0, "root", true))
     generator.writeEnd()
     generator.close()
   }
 
-  "JSON generator" should "write object" in {
+  it should "generate object" in {
     val out = new StringWriter()
     val generator = Json.createGenerator(out)
 
