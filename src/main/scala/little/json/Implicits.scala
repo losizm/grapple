@@ -160,6 +160,10 @@ object Implicits {
     def getOrElse[T](name: String, default: => T)(implicit convert: FromJson[T]): T =
       getTry[T](name).getOrElse(default)
 
+    /** Optionally gets value from object and converts it to requested type. */
+    def getOption[T](name: String)(implicit convert: FromJson[T]): Option[T] =
+      getTry[T](name).toOption
+
     /** Tries to get value from object and convert it to requested type. */
     def getTry[T](name: String)(implicit convert: FromJson[T]): Try[T] =
       Try(json.get(name).as[T])
