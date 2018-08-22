@@ -3,6 +3,8 @@ package little.json
 import javax.json._
 import javax.json.stream.{ JsonGenerator, JsonParser }
 
+import scala.collection.convert.ImplicitConversionsToScala.`iterable AsScalaIterable`
+import scala.language.higherKinds
 import scala.util.Try
 
 /** Provides implicit values and types. */
@@ -48,6 +50,25 @@ object Implicits {
     case JsonValue.TRUE => true
     case JsonValue.FALSE => false
     case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
+  }
+
+  private def jsonToIterable[T : FromJson](json: JsonValue): Iterable[T] =
+    if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T])
+    else throw new JsonException(s"required ARRAY found ${json.getValueType}")
+
+  /** Converts json to List[T]. */
+  implicit def jsonToList[T : FromJson] = new FromJson[List[T]] {
+    def apply(json: JsonValue): List[T] = jsonToIterable[T](json).toList
+  }
+
+  /** Converts json to Seq[T]. */
+  implicit def jsonToSeq[T : FromJson] = new FromJson[Seq[T]] {
+    def apply(json: JsonValue): Seq[T] = jsonToIterable[T](json).toSeq
+  }
+
+  /** Converts json to Set[T]. */
+  implicit def jsonToSet[T : FromJson] = new FromJson[Set[T]] {
+    def apply(json: JsonValue): Set[T] = jsonToIterable[T](json).toSet
   }
 
   /**
