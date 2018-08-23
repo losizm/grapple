@@ -4,7 +4,9 @@ import javax.json._
 import javax.json.stream.{ JsonGenerator, JsonParser }
 
 import scala.collection.convert.ImplicitConversionsToScala.`iterable AsScalaIterable`
+import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
+import scala.reflect.ClassTag
 import scala.util.Try
 
 /** Provides implicit values and types. */
@@ -52,8 +54,8 @@ object Implicits {
     case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
   }
 
-  /** Converts Iterable[T] to json. */
-  implicit def iterableToJson[T, M[T] <: Iterable[T]](implicit convert: ToJson[T]) = new ToJson[M[T]] {
+  /** Converts TraversableOnce[T] to json. */
+  implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) = new ToJson[M[T]] {
     def apply(values: M[T]): JsonValue =
       values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
   }
@@ -64,56 +66,18 @@ object Implicits {
       values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
   }
 
-  /** Converts json to Iterable[T]. */
-  implicit def jsonToIterable[T](implicit convert: FromJson[T]) = new FromJson[Iterable[T]] {
-    def apply(json: JsonValue): Iterable[T] =
-      if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T])
+  /** Converts json to TraversableOnce[T]. */
+  implicit def jsonToTraversableOnce[T, M[T] <: TraversableOnce[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) = new FromJson[M[T]] {
+    def apply(json: JsonValue): M[T] =
+      if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).to[M]
       else throw new JsonException(s"required ARRAY found ${json.getValueType}")
   }
 
   /** Converts json to Array[T]. */
-  implicit def jsonToArray[T](implicit convert: FromJson[T], tag: scala.reflect.ClassTag[T]) = new FromJson[Array[T]] {
-    def apply(json: JsonValue): Array[T] = json.as[Iterable[T]].toArray
-  }
-
-  /** Converts json to IndexedSeq[T]. */
-  implicit def jsonToIndexedSeq[T](implicit convert: FromJson[T]) = new FromJson[IndexedSeq[T]] {
-    def apply(json: JsonValue): IndexedSeq[T] = json.as[Iterable[T]].toIndexedSeq
-  }
-
-  /** Converts json to Iterator[T]. */
-  implicit def jsonToIterator[T](implicit convert: FromJson[T]) = new FromJson[Iterator[T]] {
-    def apply(json: JsonValue): Iterator[T] = json.as[Iterable[T]].toIterator
-  }
-
-  /** Converts json to List[T]. */
-  implicit def jsonToList[T](implicit convert: FromJson[T]) = new FromJson[List[T]] {
-    def apply(json: JsonValue): List[T] = json.as[Iterable[T]].toList
-  }
-
-  /** Converts json to Seq[T]. */
-  implicit def jsonToSeq[T](implicit convert: FromJson[T]) = new FromJson[Seq[T]] {
-    def apply(json: JsonValue): Seq[T] = json.as[Iterable[T]].toSeq
-  }
-
-  /** Converts json to Set[T]. */
-  implicit def jsonToSet[T](implicit convert: FromJson[T]) = new FromJson[Set[T]] {
-    def apply(json: JsonValue): Set[T] = json.as[Iterable[T]].toSet
-  }
-
-  /** Converts json to Stream[T]. */
-  implicit def jsonToStream[T](implicit convert: FromJson[T]) = new FromJson[Stream[T]] {
-    def apply(json: JsonValue): Stream[T] = json.as[Iterable[T]].toStream
-  }
-
-  /** Converts json to Traversable[T]. */
-  implicit def jsonToTraversable[T](implicit convert: FromJson[T]) = new FromJson[Traversable[T]] {
-    def apply(json: JsonValue): Traversable[T] = json.as[Iterable[T]]
-  }
-
-  /** Converts json to Vector[T]. */
-  implicit def jsonToVector[T](implicit convert: FromJson[T]) = new FromJson[Vector[T]] {
-    def apply(json: JsonValue): Vector[T] = json.as[Iterable[T]].toVector
+  implicit def jsonToArray[T](implicit convert: FromJson[T], tag: ClassTag[T]) = new FromJson[Array[T]] {
+    def apply(json: JsonValue): Array[T] =
+      if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).toArray
+      else throw new JsonException(s"required ARRAY found ${json.getValueType}")
   }
 
   /**
