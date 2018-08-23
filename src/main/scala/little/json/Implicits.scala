@@ -52,6 +52,18 @@ object Implicits {
     case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
   }
 
+  /** Converts Iterable[T] to json. */
+  implicit def iterableToJson[T, M[T] <: Iterable[T]](implicit convert: ToJson[T]) = new ToJson[M[T]] {
+    def apply(values: M[T]): JsonValue =
+      values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
+  }
+
+  /** Converts Array[T] to json. */
+  implicit def arrayToJson[T](implicit convert: ToJson[T]) = new ToJson[Array[T]] {
+    def apply(values: Array[T]): JsonValue =
+      values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
+  }
+
   /** Converts json to Iterable[T]. */
   implicit def jsonToIterable[T](implicit convert: FromJson[T]) = new FromJson[Iterable[T]] {
     def apply(json: JsonValue): Iterable[T] =
