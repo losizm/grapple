@@ -5,7 +5,7 @@ import javax.json.{ JsonException, JsonObject, JsonValue }
 import scala.util.Success
 
 object Test {
-  case class User(id: Int, name: String, enabled: Boolean)
+  case class User(id: Int, name: String, enabled: Boolean = true)
 
   implicit val userToJson: ToJson[User] = { user =>
     val json = Json.createObjectBuilder()
@@ -16,7 +16,7 @@ object Test {
   }
 
   implicit val jsonToUser: FromJson[User] = {
-    case json: JsonObject => User(json.getInt("id"), json.getString("name"), json.getBoolean("enabled"))
+    case json: JsonObject => User(json.getInt("id"), json.getString("name"), json.getBoolean("enabled", true))
     case json => throw new JsonException(s"""required OBJECT but found ${json.getValueType}""")
   }
 }

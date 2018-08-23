@@ -59,9 +59,19 @@ object Implicits {
       else throw new JsonException(s"required ARRAY found ${json.getValueType}")
   }
 
-  /** Converts json to Seq[T]. */
-  implicit def jsonToSeq[T](implicit convert: FromJson[T]) = new FromJson[Seq[T]] {
-    def apply(json: JsonValue): Seq[T] = json.as[Iterable[T]].toSeq
+  /** Converts json to Array[T]. */
+  implicit def jsonToArray[T](implicit convert: FromJson[T], tag: scala.reflect.ClassTag[T]) = new FromJson[Array[T]] {
+    def apply(json: JsonValue): Array[T] = json.as[Iterable[T]].toArray
+  }
+
+  /** Converts json to IndexedSeq[T]. */
+  implicit def jsonToIndexedSeq[T](implicit convert: FromJson[T]) = new FromJson[IndexedSeq[T]] {
+    def apply(json: JsonValue): IndexedSeq[T] = json.as[Iterable[T]].toIndexedSeq
+  }
+
+  /** Converts json to Iterator[T]. */
+  implicit def jsonToIterator[T](implicit convert: FromJson[T]) = new FromJson[Iterator[T]] {
+    def apply(json: JsonValue): Iterator[T] = json.as[Iterable[T]].toIterator
   }
 
   /** Converts json to List[T]. */
@@ -69,9 +79,29 @@ object Implicits {
     def apply(json: JsonValue): List[T] = json.as[Iterable[T]].toList
   }
 
+  /** Converts json to Seq[T]. */
+  implicit def jsonToSeq[T](implicit convert: FromJson[T]) = new FromJson[Seq[T]] {
+    def apply(json: JsonValue): Seq[T] = json.as[Iterable[T]].toSeq
+  }
+
   /** Converts json to Set[T]. */
   implicit def jsonToSet[T](implicit convert: FromJson[T]) = new FromJson[Set[T]] {
     def apply(json: JsonValue): Set[T] = json.as[Iterable[T]].toSet
+  }
+
+  /** Converts json to Stream[T]. */
+  implicit def jsonToStream[T](implicit convert: FromJson[T]) = new FromJson[Stream[T]] {
+    def apply(json: JsonValue): Stream[T] = json.as[Iterable[T]].toStream
+  }
+
+  /** Converts json to Traversable[T]. */
+  implicit def jsonToTraversable[T](implicit convert: FromJson[T]) = new FromJson[Traversable[T]] {
+    def apply(json: JsonValue): Traversable[T] = json.as[Iterable[T]]
+  }
+
+  /** Converts json to Vector[T]. */
+  implicit def jsonToVector[T](implicit convert: FromJson[T]) = new FromJson[Vector[T]] {
+    def apply(json: JsonValue): Vector[T] = json.as[Iterable[T]].toVector
   }
 
   /**

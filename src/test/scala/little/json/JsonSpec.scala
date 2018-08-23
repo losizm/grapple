@@ -126,4 +126,20 @@ class JsonSpec extends FlatSpec {
     assert(json.asOption[User] == Some(user))
     assert(json.asTry[User] == Success(user))
   }
+
+  "JSON array of objects" should "be converted to collection" in {
+    val json = Json.parse[JsonArray]("""[{ "id": 0, "name": "root" }, { "id": 500, "name": "guest", "enabled": false }]""")
+    val users = Seq(User(0, "root"), User(500, "guest", false))
+
+    assert(json.as[Array[User]].corresponds(users)(_ == _))
+    assert(json.as[IndexedSeq[User]].corresponds(users)(_ == _))
+    assert(json.as[Iterable[User]] == users)
+    assert(json.as[Iterator[User]].corresponds(users)(_ == _))
+    assert(json.as[List[User]].corresponds(users)(_ == _))
+    assert(json.as[Seq[User]] == users)
+    assert(json.as[Set[User]] == users.toSet)
+    assert(json.as[Stream[User]].corresponds(users)(_ == _))
+    assert(json.as[Vector[User]].corresponds(users)(_ == _))
+    assert(json.as[Traversable[User]] == users)
+  }
 }
