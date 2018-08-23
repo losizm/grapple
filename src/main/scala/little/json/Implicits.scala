@@ -52,23 +52,26 @@ object Implicits {
     case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
   }
 
-  private def jsonToIterable[T : FromJson](json: JsonValue): Iterable[T] =
-    if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T])
-    else throw new JsonException(s"required ARRAY found ${json.getValueType}")
-
-  /** Converts json to List[T]. */
-  implicit def jsonToList[T : FromJson] = new FromJson[List[T]] {
-    def apply(json: JsonValue): List[T] = jsonToIterable[T](json).toList
+  /** Converts json to Iterable[T]. */
+  implicit def jsonToIterable[T](implicit convert: FromJson[T]) = new FromJson[Iterable[T]] {
+    def apply(json: JsonValue): Iterable[T] =
+      if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T])
+      else throw new JsonException(s"required ARRAY found ${json.getValueType}")
   }
 
   /** Converts json to Seq[T]. */
-  implicit def jsonToSeq[T : FromJson] = new FromJson[Seq[T]] {
-    def apply(json: JsonValue): Seq[T] = jsonToIterable[T](json).toSeq
+  implicit def jsonToSeq[T](implicit convert: FromJson[T]) = new FromJson[Seq[T]] {
+    def apply(json: JsonValue): Seq[T] = json.as[Iterable[T]].toSeq
+  }
+
+  /** Converts json to List[T]. */
+  implicit def jsonToList[T](implicit convert: FromJson[T]) = new FromJson[List[T]] {
+    def apply(json: JsonValue): List[T] = json.as[Iterable[T]].toList
   }
 
   /** Converts json to Set[T]. */
-  implicit def jsonToSet[T : FromJson] = new FromJson[Set[T]] {
-    def apply(json: JsonValue): Set[T] = jsonToIterable[T](json).toSet
+  implicit def jsonToSet[T](implicit convert: FromJson[T]) = new FromJson[Set[T]] {
+    def apply(json: JsonValue): Set[T] = json.as[Iterable[T]].toSet
   }
 
   /**
