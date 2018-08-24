@@ -9,7 +9,7 @@ To use **little-json**, start by adding it to your project:
 
 * sbt
 ```scala
-libraryDependencies += "losizm" %% "little-json" %% "1.0.0"
+libraryDependencies += "losizm" %% "little-json" % "1.0.0"
 ```
 * Gradle
 ```groovy
@@ -32,7 +32,7 @@ So, for example, include the following to add the Glassfish reference
 implementation as a dependency to your sbt build:
 
 ```scala
-libraryDependencies += "org.glassfish" %% "javax.json" %% "1.1.2"
+libraryDependencies += "org.glassfish" % "javax.json" % "1.1.2"
 ```
 
 ## A Little Taste of little-json
