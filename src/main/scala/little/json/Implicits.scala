@@ -373,7 +373,7 @@ object Implicits {
 
       while (event != terminal) {
         f(event)
-        parser.next()
+        event = parser.next()
       }
     }
   }
