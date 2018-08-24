@@ -20,9 +20,9 @@ import javax.json.{ JsonArrayBuilder, JsonObjectBuilder }
 /**
  * Adds value of type T to array builder.
  *
- * @see [[ObjectContextAdder]]
+ * @see [[ObjectBuilderCompanion]]
  */
-trait ArrayContextAdder[T] extends Any {
+trait ArrayBuilderCompanion[T] extends Any {
   /** Adds value to array builder. */
   def add(value: T)(implicit builder: JsonArrayBuilder): JsonArrayBuilder
 }
@@ -30,12 +30,12 @@ trait ArrayContextAdder[T] extends Any {
 /**
  * Adds value of type T to object builder.
  *
- * @see [[ArrayContextAdder]]
+ * @see [[ArrayBuilderCompanion]]
  */
-trait ObjectContextAdder[T] extends Any {
+trait ObjectBuilderCompanion[T] extends Any {
   /** Adds value to object builder. */
   def add(name: String, value: T)(implicit builder: JsonObjectBuilder): JsonObjectBuilder
 }
 
 /** Adds value of type T to requested builder. */
-trait ContextAdder[T] extends ArrayContextAdder[T] with ObjectContextAdder[T]
+trait BuilderCompanion[T] extends ArrayBuilderCompanion[T] with ObjectBuilderCompanion[T]

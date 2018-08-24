@@ -400,20 +400,20 @@ object Implicits {
    */
   implicit class JsonArrayBuilderType(val builder: JsonArrayBuilder) extends AnyVal {
     /** Adds value to array builder. */
-    def add[T](value: T)(implicit adder: ArrayContextAdder[T]): JsonArrayBuilder =
-      adder.add(value)(builder)
+    def add[T](value: T)(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
+      companion.add(value)(builder)
 
     /** Adds value to array builder or adds null if value is null. */
-    def addNullable[T](value: T)(implicit adder: ArrayContextAdder[T]): JsonArrayBuilder =
+    def addNullable[T](value: T)(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
       if (value == null) builder.addNull()
-      else adder.add(value)(builder)
+      else companion.add(value)(builder)
 
     /**
      * Adds value to array builder if {@code Some}; otherwise, adds null if
      * {@code None}.
      */
-    def addOption[T](value: Option[T])(implicit adder: ArrayContextAdder[T]): JsonArrayBuilder =
-      value.fold(builder.addNull()) { x => adder.add(x)(builder) }
+    def addOption[T](value: Option[T])(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
+      value.fold(builder.addNull()) { x => companion.add(x)(builder) }
   }
 
   /**
@@ -423,20 +423,20 @@ object Implicits {
    */
   implicit class JsonObjectBuilderType(val builder: JsonObjectBuilder) extends AnyVal {
     /** Adds value to object builder. */
-    def add[T](name: String, value: T)(implicit adder: ObjectContextAdder[T]): JsonObjectBuilder =
-      adder.add(name, value)(builder)
+    def add[T](name: String, value: T)(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
+      companion.add(name, value)(builder)
 
     /** Adds value to object builder or adds null if value is null. */
-    def addNullable[T](name: String, value: T)(implicit adder: ObjectContextAdder[T]): JsonObjectBuilder =
+    def addNullable[T](name: String, value: T)(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
       if (value == null) builder.addNull(name)
-      else adder.add(name, value)(builder)
+      else companion.add(name, value)(builder)
 
     /**
      * Adds value to object builder if {@code Some}; otherwise, adds null if
      * {@code None}.
      */
-    def addOption[T](name: String, value: Option[T])(implicit adder: ObjectContextAdder[T]): JsonObjectBuilder =
-      value.fold(builder.addNull(name)) { x => adder.add(name, x)(builder) }
+    def addOption[T](name: String, value: Option[T])(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
+      value.fold(builder.addNull(name)) { x => companion.add(name, x)(builder) }
   }
 
   /** Writes String in requested context. */
@@ -517,7 +517,7 @@ object Implicits {
   }
 
   /** Adds String to requested builder. */
-  implicit object StringContextAdder extends ContextAdder[String] {
+  implicit object StringBuilderCompanion extends BuilderCompanion[String] {
     /** Adds String to array builder. */
     def add(value: String)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
@@ -528,7 +528,7 @@ object Implicits {
   }
 
   /** Adds Int to requested builder. */
-  implicit object IntContextAdder extends ContextAdder[Int] {
+  implicit object IntBuilderCompanion extends BuilderCompanion[Int] {
     /** Adds Int to array builder. */
     def add(value: Int)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
@@ -539,7 +539,7 @@ object Implicits {
   }
 
   /** Adds Long to requested builder. */
-  implicit object LongContextAdder extends ContextAdder[Long] {
+  implicit object LongBuilderCompanion extends BuilderCompanion[Long] {
     /** Adds Long to array builder. */
     def add(value: Long)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
@@ -550,7 +550,7 @@ object Implicits {
   }
 
   /** Adds Double to requested builder. */
-  implicit object DoubleContextAdder extends ContextAdder[Double] {
+  implicit object DoubleBuilderCompanion extends BuilderCompanion[Double] {
     /** Adds Double to array builder. */
     def add(value: Double)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
@@ -561,7 +561,7 @@ object Implicits {
   }
 
   /** Adds BigInt to requested builder. */
-  implicit object BigIntContextAdder extends ContextAdder[BigInt] {
+  implicit object BigIntBuilderCompanion extends BuilderCompanion[BigInt] {
     /** Adds BigInt to array builder. */
     def add(value: BigInt)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value.bigInteger)
@@ -572,7 +572,7 @@ object Implicits {
   }
 
   /** Adds BigDecimal to requested builder. */
-  implicit object BigDecimalContextAdder extends ContextAdder[BigDecimal] {
+  implicit object BigDecimalBuilderCompanion extends BuilderCompanion[BigDecimal] {
     /** Adds BigDecimal to array builder. */
     def add(value: BigDecimal)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value.bigDecimal)
@@ -583,7 +583,7 @@ object Implicits {
   }
 
   /** Adds Boolean to requested builder. */
-  implicit object BooleanContextAdder extends ContextAdder[Boolean] {
+  implicit object BooleanBuilderCompanion extends BuilderCompanion[Boolean] {
     /** Adds Boolean to array builder. */
     def add(value: Boolean)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)

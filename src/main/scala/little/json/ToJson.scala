@@ -23,7 +23,7 @@ import javax.json.stream.JsonGenerator
  *
  * @see [[FromJson]]
  */
-trait ToJson[T] extends (T => JsonValue) with ContextAdder[T] with ContextWriter[T] {
+trait ToJson[T] extends (T => JsonValue) with BuilderCompanion[T] with ContextWriter[T] {
   /** Converts value to JsonValue. */
   def apply(value: T): JsonValue
 
