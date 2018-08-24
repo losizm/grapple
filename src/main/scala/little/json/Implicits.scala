@@ -6,7 +6,6 @@ import javax.json.stream.{ JsonGenerator, JsonParser }
 import scala.collection.convert.ImplicitConversionsToScala.`iterable AsScalaIterable`
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
-import scala.reflect.ClassTag
 import scala.util.Try
 
 /** Provides implicit values and types. */
@@ -79,6 +78,26 @@ object Implicits {
    * @see [[JsonArrayType]], [[JsonObjectType]]
    */
   implicit class JsonValueType(val json: JsonValue) extends AnyVal {
+    /**
+     * Gets value in JsonArray.
+     *
+     * Alias to {@code get(index)}.
+     */
+    def \(index: Int): JsonValue = get(index)
+
+    /**
+     * Gets value in JsonObject.
+     *
+     * Alias to {@code get(name)}.
+     */
+    def \(name: String): JsonValue = get(name)
+
+    /** Gets value in JsonArray. */
+    def get(index: Int): JsonValue = asArray.get(index)
+
+    /** Gets value in JsonObject. */
+    def get(name: String): JsonValue = asObject.get(name)
+
     /** Converts json to requested type. */
     def as[T](implicit convert: FromJson[T]): T =
       convert(json)
