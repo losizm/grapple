@@ -62,6 +62,22 @@ class JsonSpec extends FlatSpec {
     assert(arr.getOrElse(1, BigInt(1)) == BigInt(1))
   }
 
+  it should "be converted to and from collection" in {
+    val users = Seq(User(0, "root"), User(500, "guest", false))
+    val json = Json.toJson(users)
+
+    assert(json.as[Array[User]].corresponds(users)(_ == _))
+    assert(json.as[IndexedSeq[User]].corresponds(users)(_ == _))
+    assert(json.as[Iterable[User]] == users)
+    assert(json.as[Iterator[User]].corresponds(users)(_ == _))
+    assert(json.as[List[User]].corresponds(users)(_ == _))
+    assert(json.as[Seq[User]] == users)
+    assert(json.as[Set[User]] == users.toSet)
+    assert(json.as[Stream[User]].corresponds(users)(_ == _))
+    assert(json.as[Vector[User]].corresponds(users)(_ == _))
+    assert(json.as[Traversable[User]] == users)
+  }
+
   "JSON object" should "be parsed" in {
     val obj = Json.parse[JsonObject]("""{ "id": 0, "name": "root", "enabled": true }""")
     assert(obj.getInt("id") == 0)
@@ -115,7 +131,7 @@ class JsonSpec extends FlatSpec {
     assert(obj.getOrElse("b", BigInt(1)) == BigInt(1))
   }
 
-  "JSON value" should "be converted to and from case class" in {
+  it should "be converted to and from case class" in {
     val user = User(0, "root", true)
     val json = Json.toJson(user).asObject
 
@@ -127,19 +143,18 @@ class JsonSpec extends FlatSpec {
     assert(json.asTry[User] == Success(user))
   }
 
-  "JSON array of objects" should "be converted to and from collection" in {
-    val users = Seq(User(0, "root"), User(500, "guest", false))
-    val json = Json.toJson(users)
+  it should "be traversed" in {
+    val json = Json.parse[JsonObject]("""{
+      "users": [
+        { "id": 0, "name": "root" },
+        { "id": 500, "name": "guest", "enabled": false }
+      ]
+    }""")
 
-    assert(json.as[Array[User]].corresponds(users)(_ == _))
-    assert(json.as[IndexedSeq[User]].corresponds(users)(_ == _))
-    assert(json.as[Iterable[User]] == users)
-    assert(json.as[Iterator[User]].corresponds(users)(_ == _))
-    assert(json.as[List[User]].corresponds(users)(_ == _))
-    assert(json.as[Seq[User]] == users)
-    assert(json.as[Set[User]] == users.toSet)
-    assert(json.as[Stream[User]].corresponds(users)(_ == _))
-    assert(json.as[Vector[User]].corresponds(users)(_ == _))
-    assert(json.as[Traversable[User]] == users)
+    assert((json \ "users" \ 0 \ "id").as[Int] == 0)
+    assert((json \ "users" \ 0 \ "name").as[String] == "root")
+    assert((json \ "users" \ 1 \ "id").as[Int] == 500)
+    assert((json \ "users" \ 1 \ "name").as[String] == "guest")
+    assert(!(json \ "users" \ 1 \ "enabled").as[Boolean])
   }
 }
