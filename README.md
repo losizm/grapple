@@ -1,8 +1,43 @@
 # little-json &ndash; Scala library for javax.json
 
-**little-json** is a Scala library that provides extension methods (i.e., _type classes_) to `javax.json`.
+**little-json** is a Scala library that provides extension methods (i.e., _type classes_)
+to _javax.json_.
 
-Here's a taste of what the library offers.
+## Getting Started
+---
+To use **little-json**, start by adding it to your project:
+
+* sbt
+```scala
+libraryDependencies += "losizm" %% "little-json" %% "1.0.0"
+```
+* Gradle
+```groovy
+compile group: 'losizm', name: 'little-json_2.12', version: '1.0.0'
+```
+* Maven
+```xml
+<dependency>
+  <groupId>losizm</groupId>
+  <artifactId>little-json_2.12</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+
+### Using an implementation of javax.json
+**little-json** is compiled against version 1.1.2 of _javax.json_, and you must
+add an implementation of _javax.json_ to your project.
+
+So, for example, include the following to add the Glassfish reference
+implementation as a dependency to your sbt build:
+
+```scala
+libraryDependencies += "org.glassfish" %% "javax.json" %% "1.1.2"
+```
+
+## A Little Taste of little-json
+---
+Here's a taste of what **little-json** offers:
 
 ```scala
 import javax.json.{ JsonArray, JsonObject, JsonException }
@@ -43,6 +78,9 @@ val name = (json \ 1 \ "name").as[String]
 val otherJson = Json.toJson(users)
 ```
 
-### License
+See the project's scaladoc for more information.
+
+## License
 ---
-**little-json** is licensed under the Apache license, version 2. See LICENSE file for more information.
+**little-json** is licensed under the Apache license, version 2. See LICENSE
+file for more information.
