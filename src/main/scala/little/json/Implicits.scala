@@ -54,6 +54,13 @@ object Implicits {
     case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
   }
 
+  /** Converts json to container M[T]. */
+  implicit def jsonToContainer[T, M[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) = new FromJson[M[T]] {
+    def apply(json: JsonValue): M[T] =
+      if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).to[M]
+      else throw new JsonException(s"required ARRAY found ${json.getValueType}")
+  }
+
   /** Converts TraversableOnce[T] to json. */
   implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) = new ToJson[M[T]] {
     def apply(values: M[T]): JsonValue =
@@ -66,20 +73,6 @@ object Implicits {
       values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
   }
 
-  /** Converts json to TraversableOnce[T]. */
-  implicit def jsonToTraversableOnce[T, M[T] <: TraversableOnce[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) = new FromJson[M[T]] {
-    def apply(json: JsonValue): M[T] =
-      if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).to[M]
-      else throw new JsonException(s"required ARRAY found ${json.getValueType}")
-  }
-
-  /** Converts json to Array[T]. */
-  implicit def jsonToArray[T](implicit convert: FromJson[T], tag: ClassTag[T]) = new FromJson[Array[T]] {
-    def apply(json: JsonValue): Array[T] =
-      if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).toArray
-      else throw new JsonException(s"required ARRAY found ${json.getValueType}")
-  }
-
   /**
    * Provides extension methods to {@code javax.json.JsonValue}.
    *
@@ -90,7 +83,7 @@ object Implicits {
     def as[T](implicit convert: FromJson[T]): T =
       convert(json)
 
-     /** Optionally converts json to requested type. */
+    /** Optionally converts json to requested type. */
     def asOption[T](implicit convert: FromJson[T]): Option[T] =
       asTry[T].toOption
 
@@ -283,86 +276,86 @@ object Implicits {
     import JsonParser.Event._
 
     /**
-     * Parses next array.
+     * Parses next JSON array.
      *
-     * Throws {@code JsonException} if parser position is not at start of array.
+     * Throws {@code JsonException} if next parser state is not start of array.
      */
-    def nextArray(): JsonArray = {
-      if (parser.next() != START_ARRAY)
-        throw new JsonException("Not start of array")
+    def nextArray(): JsonArray =
+      parser.next() match {
+        case START_ARRAY => getArray()
+        case event => throw new JsonException(s"expected START_ARRAY but found $event")
+      }
 
-      finishArray()
-    }
 
     /**
-     * Parses next object.
+     * Parses next JSON object.
      *
-     * Throws {@code JsonException} if parser position is not at start of object.
+     * Throws {@code JsonException} if next parser state is not start of object.
      */
-    def nextObject(): JsonObject = {
-      if (parser.next() != START_OBJECT)
-        throw new JsonException("Not start of object")
-
-      finishObject()
-    }
+    def nextObject(): JsonObject =
+      parser.next() match {
+        case START_OBJECT => getObject()
+        case event => throw new JsonException(s"expected START_OBJECT but found $event")
+      }
 
     /**
-     * Parses remainder of array.
+     * Gets JSON array.
      *
-     * Throws {@code JsonException} if unexpected parser event is encountered.
+     * Throws {@code JsonException} if parser enters unexpected state.
      */
-    def finishArray(): JsonArray = {
+    def getArray(): JsonArray = {
       val builder = Json.createArrayBuilder()
-      var evt = parser.next()
 
-      while (evt != END_ARRAY) {
-        evt match {
-          case VALUE_STRING => builder.add(parser.getString())
-          case VALUE_NUMBER => builder.add(parser.getBigDecimal())
-          case VALUE_TRUE   => builder.add(true)
-          case VALUE_FALSE  => builder.add(false)
-          case VALUE_NULL   => builder.addNull()
-          case START_ARRAY  => builder.add(finishArray())
-          case START_OBJECT => builder.add(finishObject())
-          case event        => throw new JsonException(s"Unexpected event: $event")
-        }
-
-        evt = parser.next()
+      nextUntil(END_ARRAY) {
+        case VALUE_STRING => builder.add(parser.getString())
+        case VALUE_NUMBER => builder.add(parser.getBigDecimal())
+        case VALUE_TRUE   => builder.add(true)
+        case VALUE_FALSE  => builder.add(false)
+        case VALUE_NULL   => builder.addNull()
+        case START_ARRAY  => builder.add(getArray())
+        case START_OBJECT => builder.add(getObject())
+        case event        => throw new JsonException(s"unexpected parser event: $event")
       }
 
       builder.build()
     }
 
     /**
-     * Parses remainder of object.
+     * Gets JSON object.
      *
-     * Throws {@code JsonException} if unexpected parser event is encountered.
+     * Throws {@code JsonException} if parser enters unexpected state.
      */
-    def finishObject(): JsonObject = {
+    def getObject(): JsonObject = {
       val builder = Json.createObjectBuilder()
-      var evt = parser.next()
 
-      while (evt != END_OBJECT) {
-        if (evt != KEY_NAME)
-          throw new JsonException(s"Unexpected event: $evt")
+      nextUntil(END_OBJECT) {
+        case KEY_NAME =>
+          val key = parser.getString()
 
-        val key = parser.getString()
+          parser.next() match {
+            case VALUE_STRING => builder.add(key, parser.getString())
+            case VALUE_NUMBER => builder.add(key, parser.getBigDecimal())
+            case VALUE_TRUE   => builder.add(key, true)
+            case VALUE_FALSE  => builder.add(key, false)
+            case VALUE_NULL   => builder.addNull(key)
+            case START_ARRAY  => builder.add(key, getArray())
+            case START_OBJECT => builder.add(key, getObject())
+            case event        => throw new JsonException(s"unexpected parser event: $event")
+          }
 
-        parser.next() match {
-          case VALUE_STRING => builder.add(key, parser.getString())
-          case VALUE_NUMBER => builder.add(key, parser.getBigDecimal())
-          case VALUE_TRUE   => builder.add(key, true)
-          case VALUE_FALSE  => builder.add(key, false)
-          case VALUE_NULL   => builder.addNull(key)
-          case START_ARRAY  => builder.add(key, finishArray())
-          case START_OBJECT => builder.add(key, finishObject())
-          case event        => throw new JsonException(s"Unexpected event: $event")
-        }
-
-        evt = parser.next()
+        case event => throw new JsonException(s"expected KEY_NAME but found $event")
       }
 
       builder.build()
+    }
+
+    private def nextUntil(terminal: JsonParser.Event)(f: JsonParser.Event => Unit): Unit = {
+      var event = parser.next()
+
+      while (event != terminal) {
+        f(event)
+        parser.next()
+      }
     }
   }
 
