@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018 Carlos Conyers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package little.json
 
 import javax.json._
@@ -379,7 +394,7 @@ object Implicits {
   }
 
   /**
-   * Provides extension methods for {@code javax.json.JsonArrayBuilder}.
+   * Provides extension methods to {@code javax.json.JsonArrayBuilder}.
    *
    * @see [[JsonObjectBuilderType]]
    */
@@ -402,7 +417,7 @@ object Implicits {
   }
 
   /**
-   * Provides extension methods for {@code javax.json.JsonObjectBuilder}.
+   * Provides extension methods to {@code javax.json.JsonObjectBuilder}.
    *
    * @see [[JsonArrayBuilderType]]
    */
@@ -501,79 +516,79 @@ object Implicits {
       generator.write(name, value)
   }
 
-  /** Adds String in requested context. */
+  /** Adds String to requested builder. */
   implicit object StringContextAdder extends ContextAdder[String] {
-    /** Adds String in array context. */
+    /** Adds String to array builder. */
     def add(value: String)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
 
-    /** Adds String in object context. */
+    /** Adds String to object builder. */
     def add(name: String, value: String)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
       builder.add(name, value)
   }
 
-  /** Adds Int in requested context. */
+  /** Adds Int to requested builder. */
   implicit object IntContextAdder extends ContextAdder[Int] {
-    /** Adds Int in array context. */
+    /** Adds Int to array builder. */
     def add(value: Int)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
 
-    /** Adds Int in object context. */
+    /** Adds Int to object builder. */
     def add(name: String, value: Int)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
       builder.add(name, value)
   }
 
-  /** Adds Long in requested context. */
+  /** Adds Long to requested builder. */
   implicit object LongContextAdder extends ContextAdder[Long] {
-    /** Adds Long in array context. */
+    /** Adds Long to array builder. */
     def add(value: Long)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
 
-    /** Adds Long in object context. */
+    /** Adds Long to object builder. */
     def add(name: String, value: Long)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
       builder.add(name, value)
   }
 
-  /** Adds Double in requested context. */
+  /** Adds Double to requested builder. */
   implicit object DoubleContextAdder extends ContextAdder[Double] {
-    /** Adds Double in array context. */
+    /** Adds Double to array builder. */
     def add(value: Double)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
 
-    /** Adds Double in object context. */
+    /** Adds Double to object builder. */
     def add(name: String, value: Double)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
       builder.add(name, value)
   }
 
-  /** Adds BigInt in requested context. */
+  /** Adds BigInt to requested builder. */
   implicit object BigIntContextAdder extends ContextAdder[BigInt] {
-    /** Adds BigInt in array context. */
+    /** Adds BigInt to array builder. */
     def add(value: BigInt)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value.bigInteger)
 
-    /** Adds BigInt in object context. */
+    /** Adds BigInt to object builder. */
     def add(name: String, value: BigInt)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
       builder.add(name, value.bigInteger)
   }
 
-  /** Adds BigDecimal in requested context. */
+  /** Adds BigDecimal to requested builder. */
   implicit object BigDecimalContextAdder extends ContextAdder[BigDecimal] {
-    /** Adds BigDecimal in array context. */
+    /** Adds BigDecimal to array builder. */
     def add(value: BigDecimal)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value.bigDecimal)
 
-    /** Adds BigDecimal in object context. */
+    /** Adds BigDecimal to object builder. */
     def add(name: String, value: BigDecimal)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
       builder.add(name, value.bigDecimal)
   }
 
-  /** Adds Boolean in requested context. */
+  /** Adds Boolean to requested builder. */
   implicit object BooleanContextAdder extends ContextAdder[Boolean] {
-    /** Adds Boolean in array context. */
+    /** Adds Boolean to array builder. */
     def add(value: Boolean)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
       builder.add(value)
 
-    /** Adds Boolean in object context. */
+    /** Adds Boolean to object builder. */
     def add(name: String, value: Boolean)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
       builder.add(name, value)
   }

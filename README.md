@@ -1,6 +1,6 @@
 # little-json &ndash; Scala library for javax.json
 
-**little-json** is a Scala library that provides extension methods to `javax.json`.
+**little-json** is a Scala library that provides extension methods (i.e., _type classes_) to `javax.json`.
 
 Here's a taste of what the library offers.
 
@@ -42,3 +42,7 @@ val name = (json \ 1 \ "name").as[String]
 // Converts users back to JSON array
 val otherJson = Json.toJson(users)
 ```
+
+### License
+---
+**little-json** is licensed under the Apache license, version 2. See LICENSE file for more information.
