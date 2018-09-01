@@ -9,18 +9,18 @@ To use **little-json**, start by adding it to your project:
 
 * sbt
 ```scala
-libraryDependencies += "losizm" %% "little-json" % "1.0.0"
+libraryDependencies += "losizm" %% "little-json" % "1.1.0"
 ```
 * Gradle
 ```groovy
-compile group: 'losizm', name: 'little-json_2.12', version: '1.0.0'
+compile group: 'losizm', name: 'little-json_2.12', version: '1.1.0'
 ```
 * Maven
 ```xml
 <dependency>
   <groupId>losizm</groupId>
   <artifactId>little-json_2.12</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
