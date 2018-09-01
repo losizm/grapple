@@ -20,6 +20,25 @@ import javax.json.JsonValue
 /**
  * Converts JsonValue to value of type T.
  *
+ * {{{
+ * import javax.json.{ JsonObject, JsonException }
+ * import little.json.{ Json, FromJson }
+ * import little.json.Implicits.JsonValueType
+ *
+ * case class User(id: Int, name: String)
+ *
+ * // Define FromJson converter for User
+ * implicit val jsonToUser: FromJson[User] = {
+ *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
+ *   case json => throw new JsonException(s"Expected a JSON object")
+ * }
+ *
+ * // Parse text to JSON value
+ * val json = Json.parse("""{ "id": 0, "name": "root" }""")
+ *
+ * // Convert JSON value to User
+ * val user = json.as[User]
+ * }}}
  * @see [[ToJson]]
  */
 trait FromJson[T] extends (JsonValue => T) {

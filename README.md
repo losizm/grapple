@@ -60,8 +60,8 @@ implicit val jsonToUser: FromJson[User] = {
   case json => throw new JsonException(s"Expected a JSON object")
 }
 
-// Parses text to JSON array
-val json = Json.parse[JsonArray]("""
+// Parses text to JSON
+val json = Json.parse("""
   [{ "id": 0, "name": "root" }, { "id": 500, "name": "guest" }]
 """)
 
@@ -74,7 +74,7 @@ val user = json.get(0).as[User]
 // Gets name of user at index 1
 val name = (json \ 1 \ "name").as[String]
 
-// Converts users back to JSON array
+// Converts User collection back to JSON array
 val otherJson = Json.toJson(users)
 ```
 

@@ -26,14 +26,14 @@ import Test._
 
 class JsonSpec extends FlatSpec {
   "JSON array" should "be parsed" in {
-    val arr = Json.parse[JsonArray]("""[0, "root", true]""")
+    val arr = Json.parse("""[0, "root", true]""").asArray
     assert(arr.getInt(0) == 0)
     assert(arr.getString(1) == "root")
     assert(arr.getBoolean(2))
   }
 
   it should "provide access to number value" in {
-    val arr = Json.parse[JsonArray](s"""[${Long.MinValue}, ${Long.MaxValue}, -123.456, 123.456]""")
+    val arr = Json.parse(s"""[${Long.MinValue}, ${Long.MaxValue}, -123.456, 123.456]""").asArray
     assert(arr.getLong(0) == Long.MinValue)
     assert(arr.getLong(1) == Long.MaxValue)
     assert(arr.getDouble(2) == -123.456)
@@ -49,7 +49,7 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to number value with default" in {
-    val arr = Json.parse[JsonArray]("""["Not a number"]""")
+    val arr = Json.parse("""["Not a number"]""").asArray
     assert(arr.getLong(0, 1) == 1L)
     assert(arr.getDouble(0, 1.1) == 1.1)
     assert(arr.getBigInt(0, BigInt(1)) == BigInt(1))
@@ -61,14 +61,14 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to exact number value" in {
-    val arr = Json.parse[JsonArray]("[123]")
+    val arr = Json.parse("[123]")
     assert(arr.get(0).as[Int] == 123)
     assert(arr.get(0).as[Long] == 123L)
     assert(arr.get(0).as[BigInt] == BigInt(123))
   }
 
   it should "provide access to exact number value with default" in {
-    val arr = Json.parse[JsonArray]("""["Not a number"]""")
+    val arr = Json.parse("""["Not a number"]""").asArray
     assert(arr.getOrElse(0, 1) == 1)
     assert(arr.getOrElse(0, 1L) == 1L)
     assert(arr.getOrElse(0, BigInt(1)) == BigInt(1))
@@ -94,14 +94,14 @@ class JsonSpec extends FlatSpec {
   }
 
   "JSON object" should "be parsed" in {
-    val obj = Json.parse[JsonObject]("""{ "id": 0, "name": "root", "enabled": true }""")
+    val obj = Json.parse("""{ "id": 0, "name": "root", "enabled": true }""").asObject
     assert(obj.getInt("id") == 0)
     assert(obj.getString("name") == "root")
     assert(obj.getBoolean("enabled"))
   }
 
   it should "provide access to number value" in {
-    val obj = Json.parse[JsonObject](s"""{ "a": ${Long.MinValue}, "b": ${Long.MaxValue}, "c": -123.456, "d": 123.456 }""")
+    val obj = Json.parse(s"""{ "a": ${Long.MinValue}, "b": ${Long.MaxValue}, "c": -123.456, "d": 123.456 }""").asObject
     assert(obj.getLong("a") == Long.MinValue)
     assert(obj.getLong("b") == Long.MaxValue)
     assert(obj.getDouble("c") == -123.456)
@@ -117,7 +117,7 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to number value with default" in {
-    val obj = Json.parse[JsonObject]("""{ "a": "Not a number" }""")
+    val obj = Json.parse("""{ "a": "Not a number" }""").asObject
     assert(obj.getLong("a", 1) == 1L)
     assert(obj.getDouble("a", 1.1) == 1.1)
     assert(obj.getBigInt("a", BigInt(1)) == BigInt(1))
@@ -129,14 +129,14 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to exact number value" in {
-    val obj = Json.parse[JsonObject]("""{ "a": 123 }""")
+    val obj = Json.parse("""{ "a": 123 }""")
     assert(obj.get("a").as[Int] == 123)
     assert(obj.get("a").as[Long] == 123L)
     assert(obj.get("a").as[BigInt] == BigInt(123))
   }
 
   it should "provide access to exact number value with default" in {
-    val obj = Json.parse[JsonObject]("""{ "a": "Not a number" }""")
+    val obj = Json.parse("""{ "a": "Not a number" }""").asObject
     assert(obj.getOrElse("a", 1) == 1)
     assert(obj.getOrElse("a", 1L) == 1L)
     assert(obj.getOrElse("a", BigInt(1)) == BigInt(1))
@@ -159,7 +159,7 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "be traversed" in {
-    val json = Json.parse[JsonObject]("""{
+    val json = Json.parse("""{
       "users": [
         { "id": 0, "name": "root" },
         { "id": 500, "name": "guest", "enabled": false }

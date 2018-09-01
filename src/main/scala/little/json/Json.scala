@@ -30,28 +30,28 @@ object Json {
     convert(value)
 
   /** Parses given text to JsonStructure. */
-  def parse[T <: JsonStructure](text: String): T = {
+  def parse(text: String): JsonStructure = {
     val in = new StringReader(text)
     try parse(in)
     finally Try(in.close())
   }
 
   /** Parses text from given input stream to JsonStructure. */
-  def parse[T <: JsonStructure](in: InputStream): T = {
+  def parse(in: InputStream): JsonStructure = {
     val json = createReader(in)
-    try json.read().asInstanceOf[T]
+    try json.read()
     finally Try(json.close())
   }
 
   /** Parses text from given reader to JsonStructure. */
-  def parse[T <: JsonStructure](reader: Reader): T = {
+  def parse(reader: Reader): JsonStructure = {
     val json = createReader(reader)
-    try json.read().asInstanceOf[T]
+    try json.read()
     finally Try(json.close())
   }
 
   /** Parses text from given file to JsonStructure. */
-  def parse[T <: JsonStructure](file: File): T = {
+  def parse(file: File): JsonStructure = {
     val in = new FileReader(file)
     try parse(in)
     finally Try(in.close())
