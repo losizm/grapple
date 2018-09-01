@@ -4,7 +4,6 @@
 to _javax.json_.
 
 ## Getting Started
----
 To use **little-json**, start by adding it to your project:
 
 * sbt
@@ -36,7 +35,6 @@ libraryDependencies += "org.glassfish" % "javax.json" % "1.1.2"
 ```
 
 ## A Little Taste of little-json
----
 Here's a taste of what **little-json** offers:
 
 ```scala
@@ -81,6 +79,5 @@ val otherJson = Json.toJson(users)
 See the project's scaladoc for more information.
 
 ## License
----
 **little-json** is licensed under the Apache license, version 2. See LICENSE
 file for more information.
