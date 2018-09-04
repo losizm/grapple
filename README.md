@@ -1,30 +1,30 @@
-# little-json &ndash; Scala library for javax.json
+# little-json
 
-**little-json** is a Scala library that provides extension methods to _javax.json_.
+Scala library that provides extension methods to _javax.json_.
 
 ## Getting Started
 To use **little-json**, start by adding it to your project:
 
 * sbt
 ```scala
-libraryDependencies += "losizm" %% "little-json" % "1.1.0"
+libraryDependencies += "losizm" %% "little-json" % "1.2.0"
 ```
 * Gradle
 ```groovy
-compile group: 'losizm', name: 'little-json_2.12', version: '1.1.0'
+compile group: 'losizm', name: 'little-json_2.12', version: '1.2.0'
 ```
 * Maven
 ```xml
 <dependency>
   <groupId>losizm</groupId>
   <artifactId>little-json_2.12</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
 </dependency>
 ```
 
 ### Using an implementation of javax.json
-**little-json** is compiled against version 1.1.2 of _javax.json_, and you must
-add an implementation of _javax.json_ to your project.
+**little-json** is compiled with version 1.1.2 of _javax.json_, and you must add
+an implementation of _javax.json_ to your project.
 
 So, for example, include the following to add the Glassfish reference
 implementation as a dependency to your sbt build:
