@@ -42,7 +42,7 @@ Here's a taste of what **little-json** offers.
 provide implementations of these to convert your objects to and from JSON.
 
 ```scala
-import javax.json.{ JsonObject, JsonException }
+import javax.json.{ JsonValue, JsonObject, JsonException }
 import little.json.{ Json, FromJson, ToJson }
 import little.json.Implicits._ // Unleash the power
 
@@ -127,6 +127,18 @@ val name = (json \ "computer" \ "users" \ 1 \ "name").as[String]
 // Use long form
 val alias = json.get("computer").get("users").get(1).get("name").as[String]
 ```
+
+You can also do a recursive lookup.
+
+```scala
+// Get value of all "name" fields
+val names: Seq[JsonValue] = (json \\ "name")
+
+assert(names.map(_.as[String]).sameElements(Seq("localhost", "root", "guest")))
+```
+
+Note that the computer name (_localhost_), as well as the user names (_root_ and
+_guest_), is included.
 
 ### Streaming JSON
 
