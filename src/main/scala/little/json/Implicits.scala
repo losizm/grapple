@@ -107,6 +107,21 @@ object Implicits {
      */
     def \(name: String): JsonValue = get(name)
 
+    /**
+     * Gets value of all fields with specified name.
+     *
+     * A lookup is performed in current JsonValue and all descendents.
+     */
+    def \\(name: String): Seq[JsonValue] =
+      json match {
+        case arr: JsonArray => arr.flatMap(_ \\ name).toSeq
+
+        case obj: JsonObject =>
+          Option(obj.get(name)).toSeq ++: obj.values.flatMap(_ \\ name).toSeq
+
+        case _ => Nil
+      }
+
     /** Gets value in JsonArray. */
     def get(index: Int): JsonValue = asArray.get(index)
 
