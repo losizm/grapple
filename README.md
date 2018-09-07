@@ -42,7 +42,7 @@ Here's a taste of what **little-json** offers.
 provide implementations of these to convert your objects to and from JSON.
 
 ```scala
-import javax.json.{ JsonValue, JsonObject, JsonException }
+import javax.json.{ JsonObject, JsonException }
 import little.json.{ Json, FromJson, ToJson }
 import little.json.Implicits._ // Unleash the power
 
@@ -132,9 +132,7 @@ You can also do a recursive lookup.
 
 ```scala
 // Get value of all "name" fields
-val names: Seq[JsonValue] = (json \\ "name")
-
-assert(names.map(_.as[String]).sameElements(Seq("localhost", "root", "guest")))
+val names = (json \\ "name") // Seq[JsonValue]("localhost", "root", "guest")
 ```
 
 Note that the computer name (_localhost_), as well as the user names (_root_ and
