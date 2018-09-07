@@ -81,15 +81,15 @@ class JsonSpec extends FlatSpec {
     val users = Seq(User(0, "root"), User(500, "guest", false))
     val json = Json.toJson(users)
 
-    assert(json.as[Array[User]].corresponds(users)(_ == _))
-    assert(json.as[IndexedSeq[User]].corresponds(users)(_ == _))
+    assert(json.as[Array[User]].sameElements(users))
+    assert(json.as[IndexedSeq[User]].sameElements(users))
     assert(json.as[Iterable[User]] == users)
     assert(json.as[Iterator[User]].corresponds(users)(_ == _))
-    assert(json.as[List[User]].corresponds(users)(_ == _))
+    assert(json.as[List[User]].sameElements(users))
     assert(json.as[Seq[User]] == users)
     assert(json.as[Set[User]] == users.toSet)
-    assert(json.as[Stream[User]].corresponds(users)(_ == _))
-    assert(json.as[Vector[User]].corresponds(users)(_ == _))
+    assert(json.as[Stream[User]].sameElements(users))
+    assert(json.as[Vector[User]].sameElements(users))
     assert(json.as[Traversable[User]] == users)
   }
 
@@ -160,16 +160,22 @@ class JsonSpec extends FlatSpec {
 
   it should "be traversed" in {
     val json = Json.parse("""{
-      "users": [
-        { "id": 0, "name": "root" },
-        { "id": 500, "name": "guest", "enabled": false }
-      ]
+      "computer": {
+        "name": "localhost",
+        "users": [
+          { "id": 0, "name": "root" },
+          { "id": 500, "name": "guest", "enabled": false }
+        ]
+      }
     }""")
 
-    assert((json \ "users" \ 0 \ "id").as[Int] == 0)
-    assert((json \ "users" \ 0 \ "name").as[String] == "root")
-    assert((json \ "users" \ 1 \ "id").as[Int] == 500)
-    assert((json \ "users" \ 1 \ "name").as[String] == "guest")
-    assert(!(json \ "users" \ 1 \ "enabled").as[Boolean])
+    assert((json \ "computer" \ "users" \ 0 \ "id").as[Int] == 0)
+    assert((json \ "computer" \ "users" \ 0 \ "name").as[String] == "root")
+    assert((json \ "computer" \ "users" \ 1 \ "id").as[Int] == 500)
+    assert((json \ "computer" \ "users" \ 1 \ "name").as[String] == "guest")
+    assert(!(json \ "computer" \ "users" \ 1 \ "enabled").as[Boolean])
+
+    val names = (json \\ "name").map(_.as[String])
+    assert(names.sameElements(Seq("localhost", "root", "guest")))
   }
 }
