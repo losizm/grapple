@@ -2,32 +2,34 @@
 
 Scala library that provides extension methods to _javax.json_.
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_2.12.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_2.12%22)
+
 ## Getting Started
 To use **little-json**, start by adding it to your project:
 
 * sbt
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "1.3.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "1.3.1"
 ```
 * Gradle
 ```groovy
-compile group: 'com.github.losizm', name: 'little-json_2.12', version: '1.3.0'
+compile group: 'com.github.losizm', name: 'little-json_2.12', version: '1.3.1'
 ```
 * Maven
 ```xml
 <dependency>
   <groupId>com.github.losizm</groupId>
   <artifactId>little-json_2.12</artifactId>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
 </dependency>
 ```
 
 ### Using an implementation of javax.json
-**little-json** is compiled with version 1.1.2 of _javax.json_, and you must add
-an implementation of _javax.json_ to your project.
+**little-json** is compiled with _javax.json_ 1.1.2, and you must add
+the implementation of _javax.json_ to your project.
 
-So, for example, include the following to add the Glassfish reference
-implementation as a dependency to your sbt build:
+So, for example, include the following in your sbt build to add the
+Glassfish reference implementation as a dependency:
 
 ```scala
 libraryDependencies += "org.glassfish" % "javax.json" % "1.1.2"
@@ -135,8 +137,8 @@ You can also do a recursive lookup.
 val names = (json \\ "name") // Seq[JsonValue]("localhost", "root", "guest")
 ```
 
-Note that the computer name (_localhost_), as well as the user names (_root_ and
-_guest_), is included.
+Note that computer name (_localhost_) and user names (_root_ and _guest_) are
+included.
 
 ### Streaming JSON
 
