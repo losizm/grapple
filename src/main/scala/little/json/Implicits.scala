@@ -25,67 +25,164 @@ import scala.util.Try
 
 /** Provides implicit values and types. */
 object Implicits {
-  /** Converts json to String. */
+  private case class LittleJsonString(value: String) extends JsonString {
+    val getValueType: JsonValue.ValueType = JsonValue.ValueType.STRING
+    val getChars: CharSequence = value
+    val getString: String = value
+
+    override lazy val toString: String = {
+      val buf = new StringBuilder(value.length + 16)
+      buf += '"'
+
+      value.foreach {
+        case c if c >= 0x20 && c <= 0x10ffff =>
+          if (c == '"' || c == '\\')
+            buf += '\\'
+          buf += c
+
+        case '\n' => buf += '\\' += 'n'
+        case '\r' => buf += '\\' += 'r'
+        case '\b' => buf += '\\' += 'b'
+        case '\t' => buf += '\\' += 't'
+
+        case c =>
+          val hex = c.toHexString
+          val pad = "0" * (4 - hex.length)
+          buf ++= "\\u" ++= pad ++= hex
+      }
+
+      buf += '"'
+      buf.toString
+    }
+  }
+
+  private case class LittleJsonNumber(value: java.math.BigDecimal) extends JsonNumber {
+    val getValueType: JsonValue.ValueType = JsonValue.ValueType.NUMBER
+    def intValue: Int = value.intValue
+    def intValueExact: Int = value.intValueExact
+    def longValue: Long = value.longValue
+    def longValueExact: Long = value.longValueExact
+    def doubleValue: Double = value.doubleValue
+    def bigIntegerValue: java.math.BigInteger = value.toBigInteger
+    def bigIntegerValueExact: java.math.BigInteger = value.toBigIntegerExact
+    def bigDecimalValue: java.math.BigDecimal = value
+    lazy val isIntegral: Boolean = Try(bigIntegerValueExact).isSuccess
+    override lazy val toString: String = value.toPlainString
+  }
+
+  /** Converts JsonValue to String. */
   implicit val jsonToString: FromJson[String] = {
     case json: JsonString => json.getString
     case json => throw new JsonException(s"required STRING but found ${json.getValueType}")
   }
 
-  /** Converts json to Int (exact). */
-  implicit val jsonToInt: FromJson[Int] = {
-    case json: JsonNumber => json.intValueExact
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
-  }
-
-  /** Converts json to Long (exact). */
-  implicit val jsonToLong: FromJson[Long] = {
-    case json: JsonNumber => json.longValueExact
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
-  }
-
-  /** Converts json to Double. */
-  implicit val jsonToDouble: FromJson[Double] = {
-    case json: JsonNumber => json.doubleValue
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
-  }
-
-  /** Converts json to BigInt (exact). */
-  implicit val jsonToBigInt: FromJson[BigInt] = {
-    case json: JsonNumber => json.bigIntegerValueExact
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
-  }
-
-  /** Converts json to BigDecimal. */
-  implicit val jsonToBigDecimal: FromJson[BigDecimal] = {
-    case json: JsonNumber => json.bigDecimalValue
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
-  }
-
-  /** Converts json to Boolean. */
+  /** Converts JsonValue to Boolean. */
   implicit val jsonToBoolean: FromJson[Boolean] = {
     case JsonValue.TRUE => true
     case JsonValue.FALSE => false
     case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
   }
 
-  /** Converts json to container M[T]. */
-  implicit def jsonToContainer[T, M[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) = new FromJson[M[T]] {
-    def apply(json: JsonValue): M[T] =
-      if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).to[M]
-      else throw new JsonException(s"required ARRAY found ${json.getValueType}")
+  /** Converts JsonValue to Int (exact). */
+  implicit val jsonToInt: FromJson[Int] = {
+    case json: JsonNumber => json.intValueExact
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
   }
 
-  /** Converts TraversableOnce[T] to json. */
-  implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) = new ToJson[M[T]] {
-    def apply(values: M[T]): JsonValue =
-      values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
+  /** Converts JsonValue to Long (exact). */
+  implicit val jsonToLong: FromJson[Long] = {
+    case json: JsonNumber => json.longValueExact
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
   }
 
-  /** Converts Array[T] to json. */
-  implicit def arrayToJson[T](implicit convert: ToJson[T]) = new ToJson[Array[T]] {
-    def apply(values: Array[T]): JsonValue =
-      values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
+  /** Converts JsonValue to Double. */
+  implicit val jsonToDouble: FromJson[Double] = {
+    case json: JsonNumber => json.doubleValue
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
   }
+
+  /** Converts JsonValue to BigInt (exact). */
+  implicit val jsonToBigInt: FromJson[BigInt] = {
+    case json: JsonNumber => json.bigIntegerValueExact
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+  }
+
+  /** Converts JsonValue to BigDecimal. */
+  implicit val jsonToBigDecimal: FromJson[BigDecimal] = {
+    case json: JsonNumber => json.bigDecimalValue
+    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+  }
+
+  /** Creates FromJson for converting JsonArray to collection. */
+  implicit def jsonToCollection[T, M[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) =
+    new FromJson[M[T]] {
+      def apply(json: JsonValue): M[T] =
+        if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).to[M]
+        else throw new JsonException(s"required ARRAY found ${json.getValueType}")
+    }
+
+  /** Converts String to JsonValue. */
+  implicit val stringToJson: ToJson[String] = (value) => new LittleJsonString(value)
+
+  /** Converts Boolean to JsonValue. */
+  implicit val booleanToJson: ToJson[Boolean] = (value) => if (value) JsonValue.TRUE else JsonValue.FALSE
+
+  /** Converts Int to JsonValue. */
+  implicit val intToJson: ToJson[Int] = (value) => LittleJsonNumber(new java.math.BigDecimal(value))
+
+  /** Converts Long to JsonValue. */
+  implicit val longToJson: ToJson[Long] = (value) => LittleJsonNumber(new java.math.BigDecimal(value))
+
+  /** Converts Double to JsonValue. */
+  implicit val doubleToJson: ToJson[Double] = (value) => LittleJsonNumber(new java.math.BigDecimal(value))
+
+  /** Converts BigInt to JsonValue. */
+  implicit val bigIntToJson: ToJson[BigInt] = (value) => LittleJsonNumber(new java.math.BigDecimal(value.bigInteger))
+
+  /** Converts BigDecimal to JsonValue. */
+  implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => LittleJsonNumber(value.bigDecimal)
+
+  /** Creates ToJson instance for converting Traversable to JsonArray. */
+  implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) =
+    new ToJson[M[T]] {
+      def apply(values: M[T]): JsonValue =
+        values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
+    }
+
+  /** Creates ToJson for converting Array to JsonArray. */
+  implicit def arrayToJson[T](implicit convert: ToJson[T]) =
+    new ToJson[Array[T]] {
+      def apply(values: Array[T]): JsonValue =
+        values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
+    }
+
+  /** Creates ArrayBuilderCompanion for adding Option to JsonArrayBuilder. */
+  implicit def optionArrayBuilderCompanion[T, M[T] <: Option[T]](implicit companion: ArrayBuilderCompanion[T]) =
+    new ArrayBuilderCompanion[M[T]] {
+      def add(value: M[T])(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
+        value.fold(builder.addNull()) { x => builder.add(x) }
+    }
+
+  /** Creates ObjectBuilderCompanion for adding Option to JsonObjectBuilder. */
+  implicit def optionObjectBuilderCompanion[T, M[T] <: Option[T]](implicit companion: ObjectBuilderCompanion[T]) =
+    new ObjectBuilderCompanion[M[T]] {
+      def add(name: String, value: M[T])(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
+        value.fold(builder.addNull(name)) { x => builder.add(name, x) }
+    }
+
+  /** Creates ArrayContextWriter for writing Option to JsonGenerator. */
+  implicit def optionArrayContextWriter[T, M[T] <: Option[T]](implicit writer: ArrayContextWriter[T]) =
+    new ArrayContextWriter[M[T]] {
+      def write(value: M[T])(implicit generator: JsonGenerator): JsonGenerator =
+        value.fold(generator.writeNull()) { x => generator.write(x) }
+    }
+
+  /** Creates ObjectContextWriter for writing Option to JsonGenerator. */
+  implicit def optionObjectContextWriter[T, M[T] <: Option[T]](implicit writer: ObjectContextWriter[T]) =
+    new ObjectContextWriter[M[T]] {
+      def write(name: String, value: M[T])(implicit generator: JsonGenerator): JsonGenerator =
+        value.fold(generator.writeNull(name)) { x => generator.write(name, x) }
+    }
 
   /**
    * Provides extension methods to {@code javax.json.JsonValue}.
@@ -278,6 +375,38 @@ object Implicits {
   }
 
   /**
+   * Provides extension methods to {@code javax.json.JsonArrayBuilder}.
+   *
+   * @see [[JsonObjectBuilderType]]
+   */
+  implicit class JsonArrayBuilderType(val builder: JsonArrayBuilder) extends AnyVal {
+    /** Adds value to array builder. */
+    def add[T](value: T)(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
+      companion.add(value)(builder)
+
+    /** Adds value to array builder or adds null if value is null. */
+    def addNullable[T](value: T)(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
+      if (value == null) builder.addNull()
+      else companion.add(value)(builder)
+  }
+
+  /**
+   * Provides extension methods to {@code javax.json.JsonObjectBuilder}.
+   *
+   * @see [[JsonArrayBuilderType]]
+   */
+  implicit class JsonObjectBuilderType(val builder: JsonObjectBuilder) extends AnyVal {
+    /** Adds value to object builder. */
+    def add[T](name: String, value: T)(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
+      companion.add(name, value)(builder)
+
+    /** Adds value to object builder or adds null if value is null. */
+    def addNullable[T](name: String, value: T)(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
+      if (value == null) builder.addNull(name)
+      else companion.add(name, value)(builder)
+  }
+
+  /**
    * Provides extension methods to {@code javax.json.stream.JsonGenerator}.
    *
    * @see [[JsonParserType]]
@@ -292,13 +421,6 @@ object Implicits {
       if (value == null) generator.writeNull()
       else writer.write(value)(generator)
 
-    /**
-     * Writes value in array context if {@code Some}; otherwise, writes null if
-     * {@code None}.
-     */
-    def writeOption[T](value: Option[T])(implicit writer: ArrayContextWriter[T]): JsonGenerator =
-      value.fold(generator.writeNull()) { x => writer.write(x)(generator) }
-
     /** Writes value in object context. */
     def write[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
       writer.write(name, value)(generator)
@@ -307,13 +429,6 @@ object Implicits {
     def writeNullable[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
       if (value == null) generator.writeNull(name)
       else writer.write(name, value)(generator)
-
-    /**
-     * Writes value in object context if {@code Some}; otherwise, writes null if
-     * {@code None}.
-     */
-    def writeOption[T](name: String, value: Option[T])(implicit writer: ObjectContextWriter[T]): JsonGenerator =
-      value.fold(generator.writeNull(name)) { x => writer.write(name, x)(generator) }
   }
 
   /**
@@ -334,7 +449,6 @@ object Implicits {
         case START_ARRAY => getArray()
         case event => throw new JsonException(s"expected START_ARRAY but found $event")
       }
-
 
     /**
      * Parses next JSON object.
@@ -406,205 +520,5 @@ object Implicits {
         event = parser.next()
       }
     }
-  }
-
-  /**
-   * Provides extension methods to {@code javax.json.JsonArrayBuilder}.
-   *
-   * @see [[JsonObjectBuilderType]]
-   */
-  implicit class JsonArrayBuilderType(val builder: JsonArrayBuilder) extends AnyVal {
-    /** Adds value to array builder. */
-    def add[T](value: T)(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
-      companion.add(value)(builder)
-
-    /** Adds value to array builder or adds null if value is null. */
-    def addNullable[T](value: T)(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
-      if (value == null) builder.addNull()
-      else companion.add(value)(builder)
-
-    /**
-     * Adds value to array builder if {@code Some}; otherwise, adds null if
-     * {@code None}.
-     */
-    def addOption[T](value: Option[T])(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
-      value.fold(builder.addNull()) { x => companion.add(x)(builder) }
-  }
-
-  /**
-   * Provides extension methods to {@code javax.json.JsonObjectBuilder}.
-   *
-   * @see [[JsonArrayBuilderType]]
-   */
-  implicit class JsonObjectBuilderType(val builder: JsonObjectBuilder) extends AnyVal {
-    /** Adds value to object builder. */
-    def add[T](name: String, value: T)(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
-      companion.add(name, value)(builder)
-
-    /** Adds value to object builder or adds null if value is null. */
-    def addNullable[T](name: String, value: T)(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
-      if (value == null) builder.addNull(name)
-      else companion.add(name, value)(builder)
-
-    /**
-     * Adds value to object builder if {@code Some}; otherwise, adds null if
-     * {@code None}.
-     */
-    def addOption[T](name: String, value: Option[T])(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
-      value.fold(builder.addNull(name)) { x => companion.add(name, x)(builder) }
-  }
-
-  /** Writes String in requested context. */
-  implicit object StringContextWriter extends ContextWriter[String] {
-    /** Writes String in array context. */
-    def write(value: String)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(value)
-
-    /** Writes String in object context. */
-    def write(name: String, value: String)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(name, value)
-  }
-
-  /** Writes Int in requested context. */
-  implicit object IntContextWriter extends ContextWriter[Int] {
-    /** Writes Int in array context. */
-    def write(value: Int)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(value)
-
-    /** Writes Int in object context. */
-    def write(name: String, value: Int)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(name, value)
-  }
-
-  /** Writes Long in requested context. */
-  implicit object LongContextWriter extends ContextWriter[Long] {
-    /** Writes Long in array context. */
-    def write(value: Long)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(value)
-
-    /** Writes Long in object context. */
-    def write(name: String, value: Long)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(name, value)
-  }
-
-  /** Writes Double in requested context. */
-  implicit object DoubleContextWriter extends ContextWriter[Double] {
-    /** Writes Double in array context. */
-    def write(value: Double)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(value)
-
-    /** Writes Double in object context. */
-    def write(name: String, value: Double)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(name, value)
-  }
-
-  /** Writes BigInt in requested context. */
-  implicit object BigIntContextWriter extends ContextWriter[BigInt] {
-    /** Writes BigInt in array context. */
-    def write(value: BigInt)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(value.bigInteger)
-
-    /** Writes BigInt in object context. */
-    def write(name: String, value: BigInt)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(name, value.bigInteger)
-  }
-
-  /** Writes BigDecimal in requested context. */
-  implicit object BigDecimalContextWriter extends ContextWriter[BigDecimal] {
-    /** Writes BigDecimal in array context. */
-    def write(value: BigDecimal)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(value.bigDecimal)
-
-    /** Writes BigDecimal in object context. */
-    def write(name: String, value: BigDecimal)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(name, value.bigDecimal)
-  }
-
-  /** Writes Boolean in requested context. */
-  implicit object BooleanContextWriter extends ContextWriter[Boolean] {
-    /** Writes Boolean in array context. */
-    def write(value: Boolean)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(value)
-
-    /** Writes Boolean in object context. */
-    def write(name: String, value: Boolean)(implicit generator: JsonGenerator): JsonGenerator =
-      generator.write(name, value)
-  }
-
-  /** Adds String to requested builder. */
-  implicit object StringBuilderCompanion extends BuilderCompanion[String] {
-    /** Adds String to array builder. */
-    def add(value: String)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-      builder.add(value)
-
-    /** Adds String to object builder. */
-    def add(name: String, value: String)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-      builder.add(name, value)
-  }
-
-  /** Adds Int to requested builder. */
-  implicit object IntBuilderCompanion extends BuilderCompanion[Int] {
-    /** Adds Int to array builder. */
-    def add(value: Int)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-      builder.add(value)
-
-    /** Adds Int to object builder. */
-    def add(name: String, value: Int)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-      builder.add(name, value)
-  }
-
-  /** Adds Long to requested builder. */
-  implicit object LongBuilderCompanion extends BuilderCompanion[Long] {
-    /** Adds Long to array builder. */
-    def add(value: Long)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-      builder.add(value)
-
-    /** Adds Long to object builder. */
-    def add(name: String, value: Long)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-      builder.add(name, value)
-  }
-
-  /** Adds Double to requested builder. */
-  implicit object DoubleBuilderCompanion extends BuilderCompanion[Double] {
-    /** Adds Double to array builder. */
-    def add(value: Double)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-      builder.add(value)
-
-    /** Adds Double to object builder. */
-    def add(name: String, value: Double)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-      builder.add(name, value)
-  }
-
-  /** Adds BigInt to requested builder. */
-  implicit object BigIntBuilderCompanion extends BuilderCompanion[BigInt] {
-    /** Adds BigInt to array builder. */
-    def add(value: BigInt)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-      builder.add(value.bigInteger)
-
-    /** Adds BigInt to object builder. */
-    def add(name: String, value: BigInt)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-      builder.add(name, value.bigInteger)
-  }
-
-  /** Adds BigDecimal to requested builder. */
-  implicit object BigDecimalBuilderCompanion extends BuilderCompanion[BigDecimal] {
-    /** Adds BigDecimal to array builder. */
-    def add(value: BigDecimal)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-      builder.add(value.bigDecimal)
-
-    /** Adds BigDecimal to object builder. */
-    def add(name: String, value: BigDecimal)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-      builder.add(name, value.bigDecimal)
-  }
-
-  /** Adds Boolean to requested builder. */
-  implicit object BooleanBuilderCompanion extends BuilderCompanion[Boolean] {
-    /** Adds Boolean to array builder. */
-    def add(value: Boolean)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-      builder.add(value)
-
-    /** Adds Boolean to object builder. */
-    def add(name: String, value: Boolean)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-      builder.add(name, value)
   }
 }
