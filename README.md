@@ -1,6 +1,6 @@
 # little-json
 
-Scala library that provides extension methods to _javax.json_.
+The Scala library that provides extension methods to _javax.json_.
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_2.12.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_2.12%22)
 
@@ -9,18 +9,18 @@ To use **little-json**, start by adding it to your project:
 
 * sbt
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "2.0.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "2.0.1"
 ```
 * Gradle
 ```groovy
-compile group: 'com.github.losizm', name: 'little-json_2.12', version: '2.0.0'
+compile group: 'com.github.losizm', name: 'little-json_2.12', version: '2.0.1'
 ```
 * Maven
 ```xml
 <dependency>
   <groupId>com.github.losizm</groupId>
   <artifactId>little-json_2.12</artifactId>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
 </dependency>
 ```
 
@@ -50,7 +50,7 @@ import little.json.Implicits._ // Unleash the power
 
 case class User(id: Int, name: String)
 
-// Convert User to JsonObject
+// Define how to convert User to JsonObject
 implicit val userToJson: ToJson[User] = { user =>
   Json.createObjectBuilder()
     .add("id", user.id)
@@ -58,7 +58,7 @@ implicit val userToJson: ToJson[User] = { user =>
     .build()
 }
 
-// Convert JsonObject to User
+// Define how to convert JsonObject to User
 implicit val jsonToUser: FromJson[User] = {
   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
   case json => throw new JsonException(s"Expected a JSON object")
@@ -100,7 +100,7 @@ val arrayOfUsers = json.as[Array[User]]
 val dupe = Json.toJson(users)
 ```
 
-### Extracting Values from JSON Structures
+### Extracting Values from JSON Structure
 
 You can navigate your way through a JSON array or object to extract values deep
 inside its structure.
@@ -133,7 +133,7 @@ val alias = json.get("computer").get("users").get(1).get("name").as[String]
 You can also do a recursive lookup.
 
 ```scala
-// Get value of all "name" fields
+// Get all "name" values
 val names = (json \\ "name") // Seq[JsonValue]("localhost", "root", "guest")
 ```
 
