@@ -42,6 +42,6 @@ import javax.json.JsonValue
  * @see [[ToJson]]
  */
 trait FromJson[T] extends (JsonValue => T) {
-  /** Converts json to T. */
+  /** Converts JsonValue to T. */
   def apply(json: JsonValue): T
 }
