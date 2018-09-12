@@ -40,10 +40,11 @@ object Implicits {
             buf += '\\'
           buf += c
 
-        case '\n' => buf += '\\' += 'n'
-        case '\r' => buf += '\\' += 'r'
-        case '\b' => buf += '\\' += 'b'
         case '\t' => buf += '\\' += 't'
+        case '\r' => buf += '\\' += 'r'
+        case '\n' => buf += '\\' += 'n'
+        case '\f' => buf += '\\' += 'f'
+        case '\b' => buf += '\\' += 'b'
 
         case c =>
           val hex = c.toHexString
