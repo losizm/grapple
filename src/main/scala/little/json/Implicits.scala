@@ -72,50 +72,50 @@ object Implicits {
   }
 
   /** Converts JsonValue to String. */
-  implicit val jsonToString: FromJson[String] = {
+  implicit val stringFromJson: FromJson[String] = {
     case json: JsonString => json.getString
     case json => throw new JsonException(s"required STRING but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Boolean. */
-  implicit val jsonToBoolean: FromJson[Boolean] = {
+  implicit val booleanFromJson: FromJson[Boolean] = {
     case JsonValue.TRUE => true
     case JsonValue.FALSE => false
     case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Int (exact). */
-  implicit val jsonToInt: FromJson[Int] = {
+  implicit val intFromJson: FromJson[Int] = {
     case json: JsonNumber => json.intValueExact
     case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Long (exact). */
-  implicit val jsonToLong: FromJson[Long] = {
+  implicit val longFromJson: FromJson[Long] = {
     case json: JsonNumber => json.longValueExact
     case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Double. */
-  implicit val jsonToDouble: FromJson[Double] = {
+  implicit val doubleFromJson: FromJson[Double] = {
     case json: JsonNumber => json.doubleValue
     case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to BigInt (exact). */
-  implicit val jsonToBigInt: FromJson[BigInt] = {
+  implicit val bigIntFromJson: FromJson[BigInt] = {
     case json: JsonNumber => json.bigIntegerValueExact
     case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to BigDecimal. */
-  implicit val jsonToBigDecimal: FromJson[BigDecimal] = {
+  implicit val bigDecimalFromJson: FromJson[BigDecimal] = {
     case json: JsonNumber => json.bigDecimalValue
     case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Creates FromJson for converting JsonArray to collection. */
-  implicit def jsonToCollection[T, M[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) =
+  implicit def collectionFromJson[T, M[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) =
     new FromJson[M[T]] {
       def apply(json: JsonValue): M[T] =
         if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).to[M]
@@ -143,7 +143,7 @@ object Implicits {
   /** Converts BigDecimal to JsonValue. */
   implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => LittleJsonNumber(value.bigDecimal)
 
-  /** Creates ToJson instance for converting Traversable to JsonArray. */
+  /** Creates ToJson instance for converting TraversableOnce to JsonArray. */
   implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) =
     new ToJson[M[T]] {
       def apply(values: M[T]): JsonValue =
