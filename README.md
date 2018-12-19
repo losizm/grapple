@@ -9,24 +9,24 @@ To use **little-json**, start by adding it to your project:
 
 * sbt
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "2.1.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "2.1.1"
 ```
 * Gradle
 ```groovy
-compile group: 'com.github.losizm', name: 'little-json_2.12', version: '2.1.0'
+compile group: 'com.github.losizm', name: 'little-json_2.12', version: '2.1.1'
 ```
 * Maven
 ```xml
 <dependency>
   <groupId>com.github.losizm</groupId>
   <artifactId>little-json_2.12</artifactId>
-  <version>2.1.0</version>
+  <version>2.1.1</version>
 </dependency>
 ```
 
-### Using an implementation of javax.json
-**little-json** is compiled with _javax.json_ 1.1.2, and you must add
-the implementation of _javax.json_ to your project.
+### Using Implementation of javax.json
+**little-json** has a runtime dependency to _javax.json 1.1.2_, and you must add
+an implementation to your project.
 
 So, for example, include the following in your sbt build to add the
 Glassfish reference implementation as a dependency:
@@ -44,13 +44,13 @@ Here's a taste of what **little-json** offers.
 provide implementations of these to convert your objects to and from JSON.
 
 ```scala
-import javax.json.{ JsonObject, JsonException }
+import javax.json.JsonObject
 import little.json.{ Json, FromJson, ToJson }
 import little.json.Implicits._ // Unleash the power
 
 case class User(id: Int, name: String)
 
-// Define how to convert User to JsonObject
+// Define how to convert User to JSON
 implicit val userToJson: ToJson[User] = { user =>
   Json.createObjectBuilder()
     .add("id", user.id)
@@ -58,20 +58,20 @@ implicit val userToJson: ToJson[User] = { user =>
     .build()
 }
 
-// Define how to convert JsonObject to User
+// Define how to create User from JSON
 implicit val userFromJson: FromJson[User] = {
   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
-  case json => throw new JsonException(s"Expected a JSON object")
+  case json => throw new IllegalArgumentException("Not a JSON object")
 }
 
-// Parse String to JsonObject
-var json = Json.parse("""{ "id": 0, "name": "root" }""")
+// Parse text to JSON
+val json = Json.parse("""{ "id": 0, "name": "root" }""")
 
-// Convert JsonObject to User
+// Create User from JSON
 val user = json.as[User]
 
-// Convert User back to JsonObject
-val dupe = Json.toJson(user)
+// Convert User back to JSON
+val jsonToo = Json.toJson(user)
 ```
 
 A special implementation of `ToJson` is available for converting a collection of
@@ -137,14 +137,14 @@ You can also do a recursive lookup.
 val names = (json \\ "name") // Seq[JsonValue]("localhost", "root", "guest")
 ```
 
-Note that computer name (_localhost_) and user names (_root_ and _guest_) are
-included.
+Note, in above example, computer name (_localhost_) and user names (_root_ and
+_guest_) are included in the result.
 
 ### Streaming JSON
 
 `JsonGenerator` and `JsonParser` are defined in `javax.json.stream` for
 generating and parsing potentially large JSON structures. JSON is written to and
-read from streams, instead of the entire structure being managed in memory.
+read from streams, instead of entire structure being managed in memory.
 
 **little-json** gives these classes a bit more power, making it easier for you
 to read and write your objects in JSON.
@@ -205,6 +205,11 @@ val users = parser.nextArray().as[Seq[User]]
 assert(parser.next() == ParserEvent.END_OBJECT)
 parser.close()
 ```
+
+## API Documentation
+
+See [scaladoc](https://losizm.github.io/little-json/latest/api/little-json/index.html)
+for additional details.
 
 ## License
 **little-json** is licensed under the Apache License, Version 2. See LICENSE
