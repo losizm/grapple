@@ -1,8 +1,8 @@
 name := "little-json"
-version := "2.1.0"
+version := "2.1.1-SNAPSHOT"
 organization := "com.github.losizm"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.12.8"
 scalacOptions ++= Seq("-deprecation", "-feature", "-Xcheckinit")
 
 libraryDependencies ++= Seq(
