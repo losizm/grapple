@@ -208,7 +208,7 @@ parser.close()
 
 ## API Documentation
 
-See [scaladoc](https://losizm.github.io/little-json/latest/api/little-json/index.html)
+See [scaladoc](https://losizm.github.io/little-json/latest/api/little/json/index.html)
 for additional details.
 
 ## License
