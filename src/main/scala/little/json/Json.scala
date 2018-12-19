@@ -23,7 +23,40 @@ import javax.json.stream.{ JsonGenerator, JsonParser }
 
 import scala.util.Try
 
-/** Provides factory methods and other utilities. */
+/**
+ * Provides factory methods and other utilities.
+ *
+ * {{{
+ * import javax.json.JsonObject
+ * import little.json.{ Json, FromJson, ToJson }
+ * import little.json.Implicits.JsonValueType
+ *
+ * case class User(id: Int, name: String)
+ *
+ * // Define how to convert User to JSON
+ * implicit val userToJson: ToJson[User] = { user =>
+ *   Json.createObjectBuilder()
+ *     .add("id", user.id)
+ *     .add("name", user.name)
+ *     .build()
+ * }
+ *
+ * // Define how to create User from JSON
+ * implicit val userFromJson: FromJson[User] = {
+ *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
+ *   case json => throw new IllegalArgumentException("Not a JSON object")
+ * }
+ *
+ * // Parse text to JSON
+ * val json = Json.parse("""{ "id": 0, "name": "root" }""")
+ *
+ * // Create User from JSON
+ * val user = json.as[User]
+ *
+ * // Convert User back to JSON
+ * val jsonToo = Json.toJson(user)
+ * }}}
+ */
 object Json {
   /** Converts value to JsonValue. */
   def toJson[T](value: T)(implicit convert: ToJson[T]): JsonValue =
