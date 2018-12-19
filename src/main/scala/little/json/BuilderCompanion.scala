@@ -18,7 +18,7 @@ package little.json
 import javax.json.{ JsonArrayBuilder, JsonObjectBuilder }
 
 /**
- * Adds value of type T to array builder.
+ * Adds value to array builder.
  *
  * @see [[ObjectBuilderCompanion]]
  */
@@ -28,7 +28,7 @@ trait ArrayBuilderCompanion[T] extends Any {
 }
 
 /**
- * Adds value of type T to object builder.
+ * Adds value to object builder.
  *
  * @see [[ArrayBuilderCompanion]]
  */
@@ -37,5 +37,5 @@ trait ObjectBuilderCompanion[T] extends Any {
   def add(name: String, value: T)(implicit builder: JsonObjectBuilder): JsonObjectBuilder
 }
 
-/** Adds value of type T to requested builder. */
+/** Adds value to builder. */
 trait BuilderCompanion[T] extends ArrayBuilderCompanion[T] with ObjectBuilderCompanion[T]
