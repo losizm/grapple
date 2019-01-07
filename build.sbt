@@ -6,8 +6,8 @@ scalaVersion := "2.12.8"
 scalacOptions ++= Seq("-deprecation", "-feature", "-Xcheckinit")
 
 libraryDependencies ++= Seq(
-  "javax.json"    %  "javax.json-api" % "1.1.2" % "provided",
-  "org.glassfish" %  "javax.json"     % "1.1.2" % "test",
+  "javax.json"    %  "javax.json-api" % "1.1.4" % "provided",
+  "org.glassfish" %  "javax.json"     % "1.1.4" % "test",
   "org.scalatest" %% "scalatest"      % "3.0.5" % "test"
 )
 
