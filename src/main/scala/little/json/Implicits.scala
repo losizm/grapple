@@ -25,7 +25,7 @@ import scala.util.Try
 
 /** Provides implicit values and types. */
 object Implicits {
-  private case class LittleJsonString(value: String) extends JsonString {
+  private case class JsonStringImpl(value: String) extends JsonString {
     val getValueType: JsonValue.ValueType = JsonValue.ValueType.STRING
     val getChars: CharSequence = value
     val getString: String = value
@@ -57,7 +57,7 @@ object Implicits {
     }
   }
 
-  private case class LittleJsonNumber(value: java.math.BigDecimal) extends JsonNumber {
+  private case class JsonNumberImpl(value: java.math.BigDecimal) extends JsonNumber {
     val getValueType: JsonValue.ValueType = JsonValue.ValueType.NUMBER
     def intValue: Int = value.intValue
     def intValueExact: Int = value.intValueExact
@@ -123,25 +123,25 @@ object Implicits {
     }
 
   /** Converts String to JsonValue. */
-  implicit val stringToJson: ToJson[String] = (value) => new LittleJsonString(value)
+  implicit val stringToJson: ToJson[String] = (value) => new JsonStringImpl(value)
 
   /** Converts Boolean to JsonValue. */
   implicit val booleanToJson: ToJson[Boolean] = (value) => if (value) JsonValue.TRUE else JsonValue.FALSE
 
   /** Converts Int to JsonValue. */
-  implicit val intToJson: ToJson[Int] = (value) => LittleJsonNumber(new java.math.BigDecimal(value))
+  implicit val intToJson: ToJson[Int] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts Long to JsonValue. */
-  implicit val longToJson: ToJson[Long] = (value) => LittleJsonNumber(new java.math.BigDecimal(value))
+  implicit val longToJson: ToJson[Long] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts Double to JsonValue. */
-  implicit val doubleToJson: ToJson[Double] = (value) => LittleJsonNumber(new java.math.BigDecimal(value))
+  implicit val doubleToJson: ToJson[Double] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts BigInt to JsonValue. */
-  implicit val bigIntToJson: ToJson[BigInt] = (value) => LittleJsonNumber(new java.math.BigDecimal(value.bigInteger))
+  implicit val bigIntToJson: ToJson[BigInt] = (value) => JsonNumberImpl(new java.math.BigDecimal(value.bigInteger))
 
   /** Converts BigDecimal to JsonValue. */
-  implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => LittleJsonNumber(value.bigDecimal)
+  implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => JsonNumberImpl(value.bigDecimal)
 
   /** Creates ToJson instance for converting TraversableOnce to JsonArray. */
   implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) =
