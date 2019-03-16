@@ -93,6 +93,21 @@ class JsonSpec extends FlatSpec {
     assert(json.as[Traversable[User]] == users)
   }
 
+  it should "be created from list of values" in {
+    val arr = Json.arr("1", 2, 3L, 4.0, BigDecimal(5), true, false, null, User(501, "guest"), Json.parse("""[0, "root", true]"""))
+
+    assert(arr.getString(0) == "1")
+    assert(arr.getInt(1) == 2)
+    assert(arr.getLong(2) == 3L)
+    assert(arr.getDouble(3) == 4.0)
+    assert(arr.getBigDecimal(4) == BigDecimal(5))
+    assert(arr.getBoolean(5))
+    assert(!arr.getBoolean(6))
+    assert(arr.isNull(7))
+    assert(arr.get(8).as[User] == User(501, "guest"))
+    assert(arr.get(9).isInstanceOf[JsonArray])
+  }
+
   "JSON object" should "be parsed" in {
     val obj = Json.parse("""{ "id": 0, "name": "root", "enabled": true }""").asObject
     assert(obj.getInt("id") == 0)
@@ -156,6 +171,32 @@ class JsonSpec extends FlatSpec {
     assert(json.as[User] == user)
     assert(json.asOption[User] == Some(user))
     assert(json.asTry[User] == Success(user))
+  }
+
+  it should "be created from list of fields" in {
+    val obj = Json.obj(
+      "a" -> "1",
+      "b" -> 2,
+      "c" -> 3L,
+      "d" -> 4.0,
+      "e" -> BigDecimal(5),
+      "f" -> true,
+      "g" -> false,
+      "h" -> null,
+      "i" -> User(501, "guest"),
+      "j" -> Json.parse("""[0, "root", true]""")
+    )
+
+    assert(obj.getString("a") == "1")
+    assert(obj.getInt("b") == 2)
+    assert(obj.getLong("c") == 3L)
+    assert(obj.getDouble("d") == 4.0)
+    assert(obj.getBigDecimal("e") == BigDecimal(5))
+    assert(obj.getBoolean("f"))
+    assert(!obj.getBoolean("g"))
+    assert(obj.isNull("h"))
+    assert(obj.get("i").as[User] == User(501, "guest"))
+    assert(obj.get("j").isInstanceOf[JsonArray])
   }
 
   it should "be traversed" in {
