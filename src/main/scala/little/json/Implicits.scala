@@ -25,93 +25,47 @@ import scala.util.Try
 
 /** Provides implicit values and types. */
 object Implicits {
-  private case class JsonStringImpl(value: String) extends JsonString {
-    val getValueType: JsonValue.ValueType = JsonValue.ValueType.STRING
-    val getChars: CharSequence = value
-    val getString: String = value
-
-    override lazy val toString: String = {
-      val buf = new StringBuilder(value.length + 16)
-      buf += '"'
-
-      value.foreach {
-        case c if c >= 0x20 && c <= 0x10ffff =>
-          if (c == '"' || c == '\\')
-            buf += '\\'
-          buf += c
-
-        case '\t' => buf += '\\' += 't'
-        case '\r' => buf += '\\' += 'r'
-        case '\n' => buf += '\\' += 'n'
-        case '\f' => buf += '\\' += 'f'
-        case '\b' => buf += '\\' += 'b'
-
-        case c =>
-          val hex = c.toHexString
-          val pad = "0" * (4 - hex.length)
-          buf ++= "\\u" ++= pad ++= hex
-      }
-
-      buf += '"'
-      buf.toString
-    }
-  }
-
-  private case class JsonNumberImpl(value: java.math.BigDecimal) extends JsonNumber {
-    val getValueType: JsonValue.ValueType = JsonValue.ValueType.NUMBER
-    def intValue: Int = value.intValue
-    def intValueExact: Int = value.intValueExact
-    def longValue: Long = value.longValue
-    def longValueExact: Long = value.longValueExact
-    def doubleValue: Double = value.doubleValue
-    def bigIntegerValue: java.math.BigInteger = value.toBigInteger
-    def bigIntegerValueExact: java.math.BigInteger = value.toBigIntegerExact
-    def bigDecimalValue: java.math.BigDecimal = value
-    lazy val isIntegral: Boolean = Try(bigIntegerValueExact).isSuccess
-    override lazy val toString: String = value.toPlainString
-  }
-
   /** Converts JsonValue to String. */
   implicit val stringFromJson: FromJson[String] = {
     case json: JsonString => json.getString
-    case json => throw new JsonException(s"required STRING but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"required STRING but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Boolean. */
   implicit val booleanFromJson: FromJson[Boolean] = {
     case JsonValue.TRUE => true
     case JsonValue.FALSE => false
-    case json => throw new JsonException(s"required TRUE or FALSE but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"required TRUE or FALSE but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Int (exact). */
   implicit val intFromJson: FromJson[Int] = {
     case json: JsonNumber => json.intValueExact
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Long (exact). */
   implicit val longFromJson: FromJson[Long] = {
     case json: JsonNumber => json.longValueExact
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Double. */
   implicit val doubleFromJson: FromJson[Double] = {
     case json: JsonNumber => json.doubleValue
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to BigInt (exact). */
   implicit val bigIntFromJson: FromJson[BigInt] = {
     case json: JsonNumber => json.bigIntegerValueExact
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to BigDecimal. */
   implicit val bigDecimalFromJson: FromJson[BigDecimal] = {
     case json: JsonNumber => json.bigDecimalValue
-    case json => throw new JsonException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
   }
 
   /** Creates FromJson for converting JsonArray to collection. */
@@ -119,7 +73,7 @@ object Implicits {
     new FromJson[M[T]] {
       def apply(json: JsonValue): M[T] =
         if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).to[M]
-        else throw new JsonException(s"required ARRAY found ${json.getValueType}")
+        else throw new IllegalArgumentException(s"required ARRAY found ${json.getValueType}")
     }
 
   /** Converts String to JsonValue. */
@@ -315,6 +269,14 @@ object Implicits {
     /** Tests whether value in array is integral. */
     def isIntegral(index: Int): Boolean =
       Try(json.getJsonNumber(index).isIntegral).getOrElse(false)
+
+    /** Creates new JsonArray with additional value. */
+    def %%(value: JsonValue): JsonArray =
+      new CombinedJsonArray(json, Json.arr(value))
+
+    /** Creates new JsonArray by concatenating other array to this array. */
+    def ++(other: JsonArray): JsonArray =
+      new CombinedJsonArray(json, other)
   }
 
   /**
@@ -373,6 +335,22 @@ object Implicits {
     /** Tests whether value in object is integral. */
     def isIntegral(name: String): Boolean =
       Try(json.getJsonNumber(name).isIntegral).getOrElse(false)
+
+    /**
+     * Creates new JsonObject with additional field.
+     *
+     * If the field already exists, its value is replaced.
+     */
+    def %%(field: (String, JsonValue)): JsonObject =
+      new MergedJsonObject(json, Json.obj(field))
+
+    /**
+     * Creates new JsonObject by combining this object with other.
+     *
+     * If a field exists in both objects, the field from `other` is used.
+     */
+    def ++(other: JsonObject): JsonObject =
+      new MergedJsonObject(json, other)
   }
 
   /**
