@@ -9,18 +9,18 @@ To use **little-json**, start by adding it to your project:
 
 * sbt
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "2.1.2"
+libraryDependencies += "com.github.losizm" %% "little-json" % "2.2.0"
 ```
 * Gradle
 ```groovy
-compile group: 'com.github.losizm', name: 'little-json_2.12', version: '2.1.2'
+compile group: 'com.github.losizm', name: 'little-json_2.12', version: '2.2.0'
 ```
 * Maven
 ```xml
 <dependency>
   <groupId>com.github.losizm</groupId>
   <artifactId>little-json_2.12</artifactId>
-  <version>2.1.2</version>
+  <version>2.2.0</version>
 </dependency>
 ```
 
@@ -51,11 +51,8 @@ import little.json.Implicits._ // Unleash the power
 case class User(id: Int, name: String)
 
 // Define how to convert User to JSON
-implicit val userToJson: ToJson[User] = { user =>
-  Json.createObjectBuilder()
-    .add("id", user.id)
-    .add("name", user.name)
-    .build()
+implicit val userToJson: ToJson[User] = {
+  case User(id, name) => Json.obj("id" -> id, "name" -> name)
 }
 
 // Define how to create User from JSON
