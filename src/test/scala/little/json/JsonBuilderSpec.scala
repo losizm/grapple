@@ -15,6 +15,8 @@
  */
 package little.json
 
+import scala.util.{ Failure, Success, Try }
+
 import org.scalatest.FlatSpec
 
 import Implicits._
@@ -30,6 +32,8 @@ class JsonBuilderSpec extends FlatSpec {
       .addNullable(null.asInstanceOf[User])
       .add(Some(user))
       .add(None.asInstanceOf[Option[User]])
+      .add(Success(user))
+      .add(Failure(new Exception).asInstanceOf[Try[User]])
       .add("hello")
       .add(1)
       .add(1L)
@@ -66,6 +70,8 @@ class JsonBuilderSpec extends FlatSpec {
       .addNullable("b2", null.asInstanceOf[User])
       .add("c1", Some(user))
       .add("c2", None.asInstanceOf[Option[User]])
+      .add("c3", Success(user))
+      .add("c4", Failure(new Exception).asInstanceOf[Try[User]])
       .add("d", 1)
       .add("e", 1L)
       .add("f", 1.1)

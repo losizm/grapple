@@ -17,6 +17,8 @@ package little.json
 
 import java.io.StringWriter
 
+import scala.util.{ Failure, Success, Try }
+
 import org.scalatest.FlatSpec
 
 import Implicits._
@@ -35,6 +37,8 @@ class JsonGeneratorSpec extends FlatSpec {
       .writeNullable(null.asInstanceOf[User])
       .write(Some(user))
       .write(None.asInstanceOf[Option[User]])
+      .write(Success(user))
+      .write(Failure(new Exception).asInstanceOf[Try[User]])
       .write(1)
       .write(1L)
       .write(1.1)
@@ -75,6 +79,8 @@ class JsonGeneratorSpec extends FlatSpec {
       .writeNullable("b2", null.asInstanceOf[User])
       .write("c1", Some(user))
       .write("c2", None.asInstanceOf[Option[User]])
+      .write("c3", Success(user))
+      .write("c4", Failure(new Exception).asInstanceOf[Try[User]])
       .write("d", 1)
       .write("e", 1L)
       .write("f", 1.1)

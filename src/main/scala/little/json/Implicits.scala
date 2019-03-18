@@ -68,6 +68,32 @@ object Implicits {
     case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
   }
 
+  /**
+   * Creates FromJson for converting JsonValue to Option.
+   *
+   * The instance of FromJson returns `Some` if the value is successfully
+   * converted, and `None` if the value is JSON null (i.e., `JsonValue.NULL`);
+   * otherwise it throws the exception thrown by the implicit `convert`.
+   *
+   * <strong>Note:</strong> This behavior is different from
+   * [[JsonValueType.asOption]], which returns `Some` if the value is
+   * successfully converted and returns `None` if the value is JSON null or if
+   * an exception was thrown during conversion.
+   */
+  implicit def optionFromJson[T](implicit convert: FromJson[T]) =
+    new FromJson[Option[T]] {
+      def apply(json: JsonValue): Option[T] =
+        if (json == JsonValue.NULL)
+          None
+        else Some(convert(json))
+    }
+
+  /** Creates FromJson for converting JsonValue to Try. */
+  implicit def tryFromJson[T](implicit convert: FromJson[T]) =
+    new FromJson[Try[T]] {
+      def apply(json: JsonValue): Try[T] = Try(convert(json))
+    }
+
   /** Creates FromJson for converting JsonArray to collection. */
   implicit def collectionFromJson[T, M[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) =
     new FromJson[M[T]] {
@@ -98,8 +124,12 @@ object Implicits {
   implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => JsonNumberImpl(value.bigDecimal)
 
   /** Converts Option to JsonValue. */
-  implicit def optionToJson[T, M[T] <: Option[T]](value: M[T])(implicit convert: ToJson[T]) =
+  implicit def optionToJson[T](value: Option[T])(implicit convert: ToJson[T]) =
     value.fold(JsonValue.NULL)(convert)
+
+  /** Converts Try to JsonValue. */
+  implicit def tryToJson[T](value: Try[T])(implicit convert: ToJson[T]) =
+    value.fold(_ => JsonValue.NULL, convert)
 
   /** Creates ToJson instance for converting TraversableOnce to JsonArray. */
   implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) =

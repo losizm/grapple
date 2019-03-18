@@ -17,7 +17,7 @@ package little.json
 
 import javax.json.{ JsonArray, JsonObject }
 
-import scala.util.Success
+import scala.util.{ Failure, Success, Try }
 
 import org.scalatest.FlatSpec
 
@@ -25,6 +25,9 @@ import Implicits._
 import Test._
 
 class JsonSpec extends FlatSpec {
+  val root = User(0, "root")
+  val guest = User(500, "guest", false)
+
   "JSON array" should "be parsed" in {
     val arr = Json.parse("""[0, "root", true]""").asArray
     assert(arr.getInt(0) == 0)
@@ -78,7 +81,7 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "be converted to and from collection" in {
-    val users = Seq(User(0, "root"), User(500, "guest", false))
+    val users = Seq(root, guest)
     val json = Json.toJson(users)
 
     assert(json.as[Array[User]].sameElements(users))
@@ -103,13 +106,15 @@ class JsonSpec extends FlatSpec {
       true,
       false,
       null,
-      User(501, "guest"),
+      guest,
       Json.parse("""[0, "root", true]"""),
       Some("groups"),
-      None.asInstanceOf[Option[User]]
+      None.asInstanceOf[Option[User]],
+      Success(root),
+      Failure(new Exception).asInstanceOf[Try[User]]
     )
 
-    assert(arr.size == 12)
+    assert(arr.size == 14)
     assert(arr.getString(0) == "1")
     assert(arr.getInt(1) == 2)
     assert(arr.getLong(2) == 3L)
@@ -118,10 +123,12 @@ class JsonSpec extends FlatSpec {
     assert(arr.getBoolean(5))
     assert(!arr.getBoolean(6))
     assert(arr.isNull(7))
-    assert(arr.get(8).as[User] == User(501, "guest"))
+    assert(arr.get(8).as[User] == guest)
     assert(arr.get(9).isInstanceOf[JsonArray])
     assert(arr.getString(10) == "groups")
     assert(arr.isNull(11))
+    assert(arr.get(12).as[User] == root)
+    assert(arr.isNull(13))
   }
 
   "JSON object" should "be parsed" in {
@@ -178,15 +185,16 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "be converted to and from case class" in {
-    val user = User(0, "root", true)
-    val json = Json.toJson(user).asObject
+    val json = Json.toJson(root).asObject
 
     assert(json.getInt("id") == 0)
     assert(json.getString("name") == "root")
     assert(json.getBoolean("enabled"))
-    assert(json.as[User] == user)
-    assert(json.asOption[User] == Some(user))
-    assert(json.asTry[User] == Success(user))
+    assert(json.as[User] == root)
+    assert(json.asOption[User] == Some(root))
+    assert(json.asTry[User] == Success(root))
+    assert(json.as[Option[User]] == Some(root))
+    assert(json.as[Try[User]] == Success(root))
   }
 
   it should "be created from list of fields" in {
@@ -199,13 +207,15 @@ class JsonSpec extends FlatSpec {
       "f" -> true,
       "g" -> false,
       "h" -> null,
-      "i" -> User(501, "guest"),
+      "i" -> guest,
       "j" -> Json.parse("""[0, "root", true]"""),
       "k" -> Some("groups"),
-      "l" -> None.asInstanceOf[Option[User]]
+      "l" -> None.asInstanceOf[Option[User]],
+      "m" -> Success(root),
+      "n" -> Failure(new Exception).asInstanceOf[Try[User]]
     )
 
-    assert(obj.size == 12)
+    assert(obj.size == 14)
     assert(obj.getString("a") == "1")
     assert(obj.getInt("b") == 2)
     assert(obj.getLong("c") == 3L)
@@ -214,10 +224,12 @@ class JsonSpec extends FlatSpec {
     assert(obj.getBoolean("f"))
     assert(!obj.getBoolean("g"))
     assert(obj.isNull("h"))
-    assert(obj.get("i").as[User] == User(501, "guest"))
+    assert(obj.get("i").as[User] == guest)
     assert(obj.get("j").isInstanceOf[JsonArray])
     assert(obj.getString("k") == "groups")
     assert(obj.isNull("l"))
+    assert(obj.get("m").as[User] == root)
+    assert(obj.isNull("n"))
   }
 
   it should "be traversed" in {
