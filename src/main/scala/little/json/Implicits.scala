@@ -20,7 +20,7 @@ import javax.json.stream.{ JsonGenerator, JsonParser }
 
 import scala.collection.convert.ImplicitConversionsToScala.`iterable AsScalaIterable`
 import scala.collection.generic.CanBuildFrom
-import scala.language.higherKinds
+import scala.language.{ higherKinds, implicitConversions }
 import scala.util.Try
 
 /** Provides implicit values and types. */
@@ -97,6 +97,10 @@ object Implicits {
   /** Converts BigDecimal to JsonValue. */
   implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => JsonNumberImpl(value.bigDecimal)
 
+  /** Converts Option to JsonValue. */
+  implicit def optionToJson[T, M[T] <: Option[T]](value: M[T])(implicit convert: ToJson[T]) =
+    value.fold(JsonValue.NULL)(convert)
+
   /** Creates ToJson instance for converting TraversableOnce to JsonArray. */
   implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) =
     new ToJson[M[T]] {
@@ -109,34 +113,6 @@ object Implicits {
     new ToJson[Array[T]] {
       def apply(values: Array[T]): JsonValue =
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
-    }
-
-  /** Creates ArrayBuilderCompanion for adding Option to JsonArrayBuilder. */
-  implicit def optionArrayBuilderCompanion[T, M[T] <: Option[T]](implicit companion: ArrayBuilderCompanion[T]) =
-    new ArrayBuilderCompanion[M[T]] {
-      def add(value: M[T])(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-        value.fold(builder.addNull()) { x => builder.add(x) }
-    }
-
-  /** Creates ObjectBuilderCompanion for adding Option to JsonObjectBuilder. */
-  implicit def optionObjectBuilderCompanion[T, M[T] <: Option[T]](implicit companion: ObjectBuilderCompanion[T]) =
-    new ObjectBuilderCompanion[M[T]] {
-      def add(name: String, value: M[T])(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-        value.fold(builder.addNull(name)) { x => builder.add(name, x) }
-    }
-
-  /** Creates ArrayContextWriter for writing Option to JsonGenerator. */
-  implicit def optionArrayContextWriter[T, M[T] <: Option[T]](implicit writer: ArrayContextWriter[T]) =
-    new ArrayContextWriter[M[T]] {
-      def write(value: M[T])(implicit generator: JsonGenerator): JsonGenerator =
-        value.fold(generator.writeNull()) { x => generator.write(x) }
-    }
-
-  /** Creates ObjectContextWriter for writing Option to JsonGenerator. */
-  implicit def optionObjectContextWriter[T, M[T] <: Option[T]](implicit writer: ObjectContextWriter[T]) =
-    new ObjectContextWriter[M[T]] {
-      def write(name: String, value: M[T])(implicit generator: JsonGenerator): JsonGenerator =
-        value.fold(generator.writeNull(name)) { x => generator.write(name, x) }
     }
 
   /**

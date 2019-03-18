@@ -27,7 +27,9 @@ class JsonBuilderSpec extends FlatSpec {
     Json.createArrayBuilder()
       .add(user)
       .addNullable(user)
+      .addNullable(null.asInstanceOf[User])
       .add(Some(user))
+      .add(None.asInstanceOf[Option[User]])
       .add("hello")
       .add(1)
       .add(1L)
@@ -54,13 +56,16 @@ class JsonBuilderSpec extends FlatSpec {
       .add(Array(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
       .add(Seq(true, false, false))
       .add(Array(true, false, true))
+      .build()
   }
 
   it should "build object" in {
     Json.createObjectBuilder()
       .add("a", user)
-      .addNullable("b", user)
-      .add("c", Some(user))
+      .addNullable("b1", user)
+      .addNullable("b2", null.asInstanceOf[User])
+      .add("c1", Some(user))
+      .add("c2", None.asInstanceOf[Option[User]])
       .add("d", 1)
       .add("e", 1L)
       .add("f", 1.1)
@@ -86,5 +91,6 @@ class JsonBuilderSpec extends FlatSpec {
       .add("s2", Array(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
       .add("t1", Seq(true, false, false))
       .add("t2", Array(true, false, true))
+      .build()
   }
 }
