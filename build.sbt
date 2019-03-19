@@ -1,5 +1,5 @@
 name := "little-json"
-version := "2.3.1"
+version := "2.4.0"
 organization := "com.github.losizm"
 
 scalaVersion := "2.12.8"
