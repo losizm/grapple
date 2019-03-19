@@ -65,6 +65,8 @@ class JsonGeneratorSpec extends FlatSpec {
       .write(Array(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
       .write(Seq(true, false, false))
       .write(Array(true, false, true))
+      .write(Left[String, Int]("z"))
+      .write(Right[String, Int](26))
       .writeEnd()
       .close()
   }
@@ -106,6 +108,8 @@ class JsonGeneratorSpec extends FlatSpec {
       .write("s2", Array(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
       .write("t1", Seq(true, false, false))
       .write("t2", Array(true, false, true))
+      .write("u", Left[String, Int]("z"))
+      .write("v", Right[String, Int](26))
       .writeEnd()
       .close()
   }

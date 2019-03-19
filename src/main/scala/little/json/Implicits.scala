@@ -156,6 +156,10 @@ object Implicits {
   implicit def containerAsJson[T, M[T]](value: M[T])(implicit convert: ToJson[M[T]]): JsonValue =
     convert(value)
 
+  /** Converts Either to JsonValue. */
+  implicit def eitherAsJson[L, R](value: Either[L, R])(implicit left: ToJson[L], right: ToJson[R]) =
+    value.fold(left, right)
+
   /**
    * Provides extension methods to {@code javax.json.JsonValue}.
    *

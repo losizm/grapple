@@ -117,10 +117,12 @@ class JsonSpec extends FlatSpec {
       Seq(true, false, true),
       Array(0, 1, 2),
       Array[String]("a", "b", "c"),
-      Array(true, false, true)
+      Array(true, false, true),
+      Left[String, Int]("z"),
+      Right[String, Int](26)
     )
 
-    assert(arr.size == 20)
+    assert(arr.size == 22)
     assert(arr.getString(0) == "1")
     assert(arr.getInt(1) == 2)
     assert(arr.getLong(2) == 3L)
@@ -141,6 +143,8 @@ class JsonSpec extends FlatSpec {
     assert(arr.get(17).as[Array[Int]].sameElements(Array(0, 1, 2)))
     assert(arr.get(18).as[Array[String]].sameElements(Array("a", "b", "c")))
     assert(arr.get(19).as[Array[Boolean]].sameElements(Array(true, false, true)))
+    assert(arr.getString(20) == "z")
+    assert(arr.getInt(21) == 26)
   }
 
   "JSON object" should "be parsed" in {
@@ -230,10 +234,12 @@ class JsonSpec extends FlatSpec {
       "q" -> Seq(true, false, true),
       "r" -> Array(0, 1, 2),
       "s" -> Array[String]("a", "b", "c"),
-      "t" -> Array(true, false, true)
+      "t" -> Array(true, false, true),
+      "u" -> Left[String, Int]("z"),
+      "v" -> Right[String, Int](26)
     )
 
-    assert(obj.size == 20)
+    assert(obj.size == 22)
     assert(obj.getString("a") == "1")
     assert(obj.getInt("b") == 2)
     assert(obj.getLong("c") == 3L)
@@ -254,6 +260,8 @@ class JsonSpec extends FlatSpec {
     assert(obj.get("r").as[Array[Int]].sameElements(Array(0, 1, 2)))
     assert(obj.get("s").as[Array[String]].sameElements(Array("a", "b", "c")))
     assert(obj.get("t").as[Array[Boolean]].sameElements(Array(true, false, true)))
+    assert(obj.getString("u") == "z")
+    assert(obj.getInt("v") == 26)
   }
 
   it should "be traversed" in {

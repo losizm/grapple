@@ -62,6 +62,8 @@ class JsonBuilderSpec extends FlatSpec {
       .add(Array(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
       .add(Seq(true, false, false))
       .add(Array(true, false, true))
+      .add(Left[String, Int]("z"))
+      .add(Right[String, Int](26))
       .build()
   }
 
@@ -101,6 +103,8 @@ class JsonBuilderSpec extends FlatSpec {
       .add("s2", Array(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
       .add("t1", Seq(true, false, false))
       .add("t2", Array(true, false, true))
+      .add("u", Left[String, Int]("z"))
+      .add("v", Right[String, Int](26))
       .build()
   }
 }
