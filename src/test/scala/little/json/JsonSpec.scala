@@ -111,10 +111,16 @@ class JsonSpec extends FlatSpec {
       Some("groups"),
       None.asInstanceOf[Option[User]],
       Success(root),
-      Failure(new Exception).asInstanceOf[Try[User]]
+      Failure(new Exception).asInstanceOf[Try[User]],
+      Seq(0, 1, 2),
+      Seq("a", "b", "c"),
+      Seq(true, false, true),
+      Array(0, 1, 2),
+      Array[String]("a", "b", "c"),
+      Array(true, false, true)
     )
 
-    assert(arr.size == 14)
+    assert(arr.size == 20)
     assert(arr.getString(0) == "1")
     assert(arr.getInt(1) == 2)
     assert(arr.getLong(2) == 3L)
@@ -129,6 +135,12 @@ class JsonSpec extends FlatSpec {
     assert(arr.isNull(11))
     assert(arr.get(12).as[User] == root)
     assert(arr.isNull(13))
+    assert(arr.get(14).as[Seq[Int]] == Seq(0, 1, 2))
+    assert(arr.get(15).as[Seq[String]] == Seq("a", "b", "c"))
+    assert(arr.get(16).as[Seq[Boolean]] == Seq(true, false, true))
+    assert(arr.get(17).as[Array[Int]].sameElements(Array(0, 1, 2)))
+    assert(arr.get(18).as[Array[String]].sameElements(Array("a", "b", "c")))
+    assert(arr.get(19).as[Array[Boolean]].sameElements(Array(true, false, true)))
   }
 
   "JSON object" should "be parsed" in {
@@ -212,10 +224,16 @@ class JsonSpec extends FlatSpec {
       "k" -> Some("groups"),
       "l" -> None.asInstanceOf[Option[User]],
       "m" -> Success(root),
-      "n" -> Failure(new Exception).asInstanceOf[Try[User]]
+      "n" -> Failure(new Exception).asInstanceOf[Try[User]],
+      "o" -> Seq(0, 1, 2),
+      "p" -> Seq("a", "b", "c"),
+      "q" -> Seq(true, false, true),
+      "r" -> Array(0, 1, 2),
+      "s" -> Array[String]("a", "b", "c"),
+      "t" -> Array(true, false, true)
     )
 
-    assert(obj.size == 14)
+    assert(obj.size == 20)
     assert(obj.getString("a") == "1")
     assert(obj.getInt("b") == 2)
     assert(obj.getLong("c") == 3L)
@@ -230,6 +248,12 @@ class JsonSpec extends FlatSpec {
     assert(obj.isNull("l"))
     assert(obj.get("m").as[User] == root)
     assert(obj.isNull("n"))
+    assert(obj.get("o").as[Seq[Int]] == Seq(0, 1, 2))
+    assert(obj.get("p").as[Seq[String]] == Seq("a", "b", "c"))
+    assert(obj.get("q").as[Seq[Boolean]] == Seq(true, false, true))
+    assert(obj.get("r").as[Array[Int]].sameElements(Array(0, 1, 2)))
+    assert(obj.get("s").as[Array[String]].sameElements(Array("a", "b", "c")))
+    assert(obj.get("t").as[Array[Boolean]].sameElements(Array(true, false, true)))
   }
 
   it should "be traversed" in {

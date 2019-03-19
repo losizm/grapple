@@ -18,6 +18,7 @@ package little.json
 import javax.json._
 import javax.json.stream.{ JsonGenerator, JsonParser }
 
+import scala.collection.GenTraversableOnce
 import scala.collection.convert.ImplicitConversionsToScala.`iterable AsScalaIterable`
 import scala.collection.generic.CanBuildFrom
 import scala.language.{ higherKinds, implicitConversions }
@@ -123,16 +124,22 @@ object Implicits {
   /** Converts BigDecimal to JsonValue. */
   implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => JsonNumberImpl(value.bigDecimal)
 
-  /** Converts Option to JsonValue. */
-  implicit def optionToJson[T](value: Option[T])(implicit convert: ToJson[T]) =
-    value.fold(JsonValue.NULL)(convert)
+  /** Creates ToJson for converting Option to JsonValue. */
+  implicit def optionToJson[T, M[T] <: Option[T]](implicit convert: ToJson[T]) =
+    new ToJson[M[T]] {
+      def apply(value: M[T]): JsonValue =
+        value.fold(JsonValue.NULL)(convert)
+    }
 
-  /** Converts Try to JsonValue. */
-  implicit def tryToJson[T](value: Try[T])(implicit convert: ToJson[T]) =
-    value.fold(_ => JsonValue.NULL, convert)
+  /** Creates ToJson for converting Try to JsonValue. */
+  implicit def tryToJson[T, M[T] <: Try[T]](implicit convert: ToJson[T]) =
+    new ToJson[M[T]] {
+      def apply(value: M[T]): JsonValue =
+        value.fold(_ => JsonValue.NULL, convert)
+    }
 
-  /** Creates ToJson instance for converting TraversableOnce to JsonArray. */
-  implicit def traversableOnceToJson[T, M[T] <: TraversableOnce[T]](implicit convert: ToJson[T]) =
+  /** Creates ToJson for converting GenTraversableOnce to JsonArray. */
+  implicit def genTraversableOnceToJson[T, M[T] <: GenTraversableOnce[T]](implicit convert: ToJson[T]) =
     new ToJson[M[T]] {
       def apply(values: M[T]): JsonValue =
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
@@ -145,33 +152,9 @@ object Implicits {
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
     }
 
-  /** Creates ArrayBuilderCompanion for adding Option to JsonArrayBuilder. */
-  implicit def optionArrayBuilderCompanion[T, M[T] <: Option[T]](implicit companion: ArrayBuilderCompanion[T]) =
-    new ArrayBuilderCompanion[M[T]] {
-      def add(value: M[T])(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-        value.fold(builder.addNull()) { x => builder.add(x) }
-    }
-
-  /** Creates ObjectBuilderCompanion for adding Option to JsonObjectBuilder. */
-  implicit def optionObjectBuilderCompanion[T, M[T] <: Option[T]](implicit companion: ObjectBuilderCompanion[T]) =
-    new ObjectBuilderCompanion[M[T]] {
-      def add(name: String, value: M[T])(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-        value.fold(builder.addNull(name)) { x => builder.add(name, x) }
-    }
-
-  /** Creates ArrayContextWriter for writing Option to JsonGenerator. */
-  implicit def optionArrayContextWriter[T, M[T] <: Option[T]](implicit writer: ArrayContextWriter[T]) =
-    new ArrayContextWriter[M[T]] {
-      def write(value: M[T])(implicit generator: JsonGenerator): JsonGenerator =
-        value.fold(generator.writeNull()) { x => generator.write(x) }
-    }
-
-  /** Creates ObjectContextWriter for writing Option to JsonGenerator. */
-  implicit def optionObjectContextWriter[T, M[T] <: Option[T]](implicit writer: ObjectContextWriter[T]) =
-    new ObjectContextWriter[M[T]] {
-      def write(name: String, value: M[T])(implicit generator: JsonGenerator): JsonGenerator =
-        value.fold(generator.writeNull(name)) { x => generator.write(name, x) }
-    }
+  /** Converts container M[T] to JsonValue. */
+  implicit def containerAsJson[T, M[T]](value: M[T])(implicit convert: ToJson[M[T]]): JsonValue =
+    convert(value)
 
   /**
    * Provides extension methods to {@code javax.json.JsonValue}.
@@ -393,6 +376,14 @@ object Implicits {
    * @see [[JsonObjectBuilderType]]
    */
   implicit class JsonArrayBuilderType(val builder: JsonArrayBuilder) extends AnyVal {
+    /** Adds value to array builder if `Some`; otherwise, adds null if `None`. */
+    def add(value: Option[JsonValue]): JsonArrayBuilder =
+      value.fold(builder.addNull()) { builder.add(_) }
+
+    /** Adds value to array builder if `Success`; otherwise, adds null if `Failure`. */
+    def add(value: Try[JsonValue]): JsonArrayBuilder =
+      value.fold(_ => builder.addNull(), builder.add(_))
+
     /** Adds value to array builder. */
     def add[T](value: T)(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
       companion.add(value)(builder)
@@ -409,6 +400,14 @@ object Implicits {
    * @see [[JsonArrayBuilderType]]
    */
   implicit class JsonObjectBuilderType(val builder: JsonObjectBuilder) extends AnyVal {
+    /** Adds value to object builder if `Some`; otherwise, adds null if `None`. */
+    def add(name: String, value: Option[JsonValue]): JsonObjectBuilder =
+      value.fold(builder.addNull(name)) { builder.add(name, _) }
+
+    /** Adds value to object builder if `Success`; otherwise, adds null if `Failure`. */
+    def add(name: String, value: Try[JsonValue]): JsonObjectBuilder =
+      value.fold(_ => builder.addNull(name), builder.add(name, _))
+
     /** Adds value to object builder. */
     def add[T](name: String, value: T)(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
       companion.add(name, value)(builder)
@@ -425,6 +424,14 @@ object Implicits {
    * @see [[JsonParserType]]
    */
   implicit class JsonGeneratorType(val generator: JsonGenerator) extends AnyVal {
+    /** Writes value to array context if `Some`; otherwise, writes null if `None`. */
+    def write(value: Option[JsonValue]): JsonGenerator =
+      value.fold(generator.writeNull()) { generator.write(_) }
+
+    /** Writes value to array context if `Success`; otherwise, writes null if `Failure`. */
+    def write(value: Try[JsonValue]): JsonGenerator =
+      value.fold(_ => generator.writeNull(), generator.write(_))
+
     /** Writes value in array context. */
     def write[T](value: T)(implicit writer: ArrayContextWriter[T]): JsonGenerator =
       writer.write(value)(generator)
@@ -433,6 +440,14 @@ object Implicits {
     def writeNullable[T](value: T)(implicit writer: ArrayContextWriter[T]): JsonGenerator =
       if (value == null) generator.writeNull()
       else writer.write(value)(generator)
+
+    /** Writes value to object context if `Some`; otherwise, writes null if `None`. */
+    def write(name: String, value: Option[JsonValue]): JsonGenerator =
+      value.fold(generator.writeNull(name)) { generator.write(name, _) }
+
+    /** Writes value to object context if `Success`; otherwise, writes null if `Failure`. */
+    def write(name: String, value: Try[JsonValue]): JsonGenerator =
+      value.fold(_ => generator.writeNull(name), generator.write(name, _))
 
     /** Writes value in object context. */
     def write[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
