@@ -152,12 +152,16 @@ object Implicits {
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
     }
 
+  /** Converts Array[String] to JsonValue. */
+  implicit def arrayOfStringAsJson(values: Array[String])(implicit convert: ToJson[Array[String]]): JsonValue =
+    convert(values)
+
   /** Converts container M[T] to JsonValue. */
   implicit def containerAsJson[T, M[T]](value: M[T])(implicit convert: ToJson[M[T]]): JsonValue =
     convert(value)
 
   /** Converts Either to JsonValue. */
-  implicit def eitherAsJson[L, R](value: Either[L, R])(implicit left: ToJson[L], right: ToJson[R]) =
+  implicit def eitherAsJson[L, R](value: Either[L, R])(implicit left: ToJson[L], right: ToJson[R]): JsonValue =
     value.fold(left, right)
 
   /**

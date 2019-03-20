@@ -116,7 +116,7 @@ class JsonSpec extends FlatSpec {
       Seq("a", "b", "c"),
       Seq(true, false, true),
       Array(0, 1, 2),
-      Array[String]("a", "b", "c"),
+      Array("a", "b", "c"),
       Array(true, false, true),
       Left[String, Int]("z"),
       Right[String, Int](26)
@@ -233,7 +233,7 @@ class JsonSpec extends FlatSpec {
       "p" -> Seq("a", "b", "c"),
       "q" -> Seq(true, false, true),
       "r" -> Array(0, 1, 2),
-      "s" -> Array[String]("a", "b", "c"),
+      "s" -> Array("a", "b", "c"),
       "t" -> Array(true, false, true),
       "u" -> Left[String, Int]("z"),
       "v" -> Right[String, Int](26)
