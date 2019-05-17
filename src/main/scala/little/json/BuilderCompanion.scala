@@ -22,7 +22,7 @@ import javax.json.{ JsonArrayBuilder, JsonObjectBuilder }
  *
  * @see [[ObjectBuilderCompanion]]
  */
-trait ArrayBuilderCompanion[T] extends Any {
+trait ArrayBuilderCompanion[T] {
   /** Adds value to array builder. */
   def add(value: T)(implicit builder: JsonArrayBuilder): JsonArrayBuilder
 }
@@ -32,7 +32,7 @@ trait ArrayBuilderCompanion[T] extends Any {
  *
  * @see [[ArrayBuilderCompanion]]
  */
-trait ObjectBuilderCompanion[T] extends Any {
+trait ObjectBuilderCompanion[T] {
   /** Adds value to object builder. */
   def add(name: String, value: T)(implicit builder: JsonObjectBuilder): JsonObjectBuilder
 }

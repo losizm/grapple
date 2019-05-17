@@ -22,7 +22,7 @@ import javax.json.stream.JsonGenerator
  *
  * @see [[ObjectContextWriter]]
  */
-trait ArrayContextWriter[T] extends Any {
+trait ArrayContextWriter[T] {
   /** Writes value to array context. */
   def write(value: T)(implicit generator: JsonGenerator): JsonGenerator
 }
@@ -32,7 +32,7 @@ trait ArrayContextWriter[T] extends Any {
  *
  * @see [[ArrayContextWriter]]
  */
-trait ObjectContextWriter[T] extends Any {
+trait ObjectContextWriter[T] {
   /** Writes value to object context. */
   def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator
 }
