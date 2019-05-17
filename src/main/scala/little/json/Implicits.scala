@@ -72,7 +72,7 @@ object Implicits {
   /**
    * Creates FromJson for converting JsonValue to Option.
    *
-   * The instance of FromJson returns `Some` if the value is successfully
+   * The instance of `FromJson` returns `Some` if the value is successfully
    * converted, and `None` if the value is JSON null (i.e., `JsonValue.NULL`);
    * otherwise it throws the exception thrown by the implicit `convert`.
    *
@@ -165,7 +165,7 @@ object Implicits {
     value.fold(left, right)
 
   /**
-   * Provides extension methods to {@code javax.json.JsonValue}.
+   * Provides extension methods to `javax.json.JsonValue`.
    *
    * @see [[JsonArrayType]], [[JsonObjectType]]
    */
@@ -173,14 +173,14 @@ object Implicits {
     /**
      * Gets value in JsonArray.
      *
-     * Alias to {@code get(index)}.
+     * Alias to `get(index)`.
      */
     def \(index: Int): JsonValue = get(index)
 
     /**
      * Gets value in JsonObject.
      *
-     * Alias to {@code get(name)}.
+     * Alias to `get(name)`.
      */
     def \(name: String): JsonValue = get(name)
 
@@ -239,7 +239,7 @@ object Implicits {
   }
 
   /**
-   * Provides extension methods to {@code javax.json.JsonArray}.
+   * Provides extension methods to `javax.json.JsonArray`.
    *
    * @see [[JsonValueType]], [[JsonObjectType]]
    */
@@ -305,7 +305,7 @@ object Implicits {
   }
 
   /**
-   * Provides extension methods to {@code javax.json.JsonObject}.
+   * Provides extension methods to `javax.json.JsonObject`.
    *
    * @see [[JsonValueType]], [[JsonArrayType]]
    */
@@ -370,16 +370,16 @@ object Implicits {
       new MergedJsonObject(json, Json.obj(field))
 
     /**
-     * Creates new JsonObject by combining this object with other.
+     * Creates new JsonObject by merging other object with this one.
      *
-     * If a field exists in both objects, the field from `other` is used.
+     * If a field exists in both objects, the value from `other` is used.
      */
     def ++(other: JsonObject): JsonObject =
       new MergedJsonObject(json, other)
   }
 
   /**
-   * Provides extension methods to {@code javax.json.JsonArrayBuilder}.
+   * Provides extension methods to `javax.json.JsonArrayBuilder`.
    *
    * @see [[JsonObjectBuilderType]]
    */
@@ -403,7 +403,7 @@ object Implicits {
   }
 
   /**
-   * Provides extension methods to {@code javax.json.JsonObjectBuilder}.
+   * Provides extension methods to `javax.json.JsonObjectBuilder`.
    *
    * @see [[JsonArrayBuilderType]]
    */
@@ -427,7 +427,7 @@ object Implicits {
   }
 
   /**
-   * Provides extension methods to {@code javax.json.stream.JsonGenerator}.
+   * Provides extension methods to `javax.json.stream.JsonGenerator`.
    *
    * @see [[JsonParserType]]
    */
@@ -468,7 +468,7 @@ object Implicits {
   }
 
   /**
-   * Provides extension methods to {@code javax.json.stream.JsonParser}.
+   * Provides extension methods to `javax.json.stream.JsonParser`.
    *
    * @see [[JsonGeneratorType]]
    */
@@ -478,7 +478,7 @@ object Implicits {
     /**
      * Parses next JSON array.
      *
-     * Throws {@code JsonException} if next parser state is not start of array.
+     * Throws `JsonException` if next parser state is not start of array.
      */
     def nextArray(): JsonArray =
       parser.next() match {
@@ -489,7 +489,7 @@ object Implicits {
     /**
      * Parses next JSON object.
      *
-     * Throws {@code JsonException} if next parser state is not start of object.
+     * Throws `JsonException` if next parser state is not start of object.
      */
     def nextObject(): JsonObject =
       parser.next() match {
@@ -500,7 +500,7 @@ object Implicits {
     /**
      * Gets JSON array.
      *
-     * Throws {@code JsonException} if parser enters unexpected state.
+     * Throws `JsonException` if parser enters unexpected state.
      */
     def getArray(): JsonArray = {
       val builder = Json.createArrayBuilder()
@@ -522,7 +522,7 @@ object Implicits {
     /**
      * Gets JSON object.
      *
-     * Throws {@code JsonException} if parser enters unexpected state.
+     * Throws `JsonException` if parser enters unexpected state.
      */
     def getObject(): JsonObject = {
       val builder = Json.createObjectBuilder()

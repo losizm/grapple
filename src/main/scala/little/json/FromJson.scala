@@ -18,7 +18,7 @@ package little.json
 import javax.json.JsonValue
 
 /**
- * Creates value of type T from JSON.
+ * Converts JsonValue to T value.
  *
  * {{{
  * import javax.json.JsonObject
@@ -27,21 +27,21 @@ import javax.json.JsonValue
  *
  * case class User(id: Int, name: String)
  *
- * // Define how to create User from JSON
+ * // Define how to convert JsonObject to User
  * implicit val userFromJson: FromJson[User] = {
  *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
- *   case json => throw new IllegalArgumentException("Not a JSON object")
+ *   case json => throw new IllegalArgumentException("JsonObject required")
  * }
  *
- * // Parse text to JSON
+ * // Parse String to JsonObject
  * val json = Json.parse("""{ "id": 0, "name": "root" }""")
  *
- * // Create User from JSON
+ * // Convert JsonObject to User
  * val user = json.as[User]
  * }}}
  * @see [[ToJson]]
  */
 trait FromJson[T] extends (JsonValue => T) {
-  /** Creates value from JSON. */
+  /** Converts JsonValue to T value. */
   def apply(json: JsonValue): T
 }

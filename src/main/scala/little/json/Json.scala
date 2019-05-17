@@ -29,31 +29,28 @@ import scala.util.Try
  * {{{
  * import javax.json.JsonObject
  * import little.json.{ Json, FromJson, ToJson }
- * import little.json.Implicits.JsonValueType
+ * import little.json.Implicits._
  *
  * case class User(id: Int, name: String)
  *
- * // Define how to convert User to JSON
+ * // Define how to convert User to JsonObject
  * implicit val userToJson: ToJson[User] = { user =>
- *   Json.createObjectBuilder()
- *     .add("id", user.id)
- *     .add("name", user.name)
- *     .build()
+ *   Json.obj("id" -> user.id, "name" -> user.name)
  * }
  *
- * // Define how to create User from JSON
+ * // Define how to convert JsonObject to User
  * implicit val userFromJson: FromJson[User] = {
  *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
- *   case json => throw new IllegalArgumentException("Not a JSON object")
+ *   case json => throw new IllegalArgumentException("JsonObject required")
  * }
  *
- * // Parse text to JSON
+ * // Parse String to JsonObject
  * val json = Json.parse("""{ "id": 0, "name": "root" }""")
  *
- * // Create User from JSON
+ * // Convert JsonObject to User
  * val user = json.as[User]
  *
- * // Convert User back to JSON
+ * // Convert User to JsonObject
  * val jsonToo = Json.toJson(user)
  * }}}
  */

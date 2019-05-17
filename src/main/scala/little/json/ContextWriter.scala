@@ -18,24 +18,24 @@ package little.json
 import javax.json.stream.JsonGenerator
 
 /**
- * Writes value to array context.
+ * Writes value in array context to JsonGenerator.
  *
  * @see [[ObjectContextWriter]]
  */
 trait ArrayContextWriter[T] {
-  /** Writes value to array context. */
+  /** Writes value in array context. */
   def write(value: T)(implicit generator: JsonGenerator): JsonGenerator
 }
 
 /**
- * Writes value to object context.
+ * Writes value in object context to JsonGenerator.
  *
  * @see [[ArrayContextWriter]]
  */
 trait ObjectContextWriter[T] {
-  /** Writes value to object context. */
+  /** Writes value in object context. */
   def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator
 }
 
-/** Writes value to context. */
+/** Writes value to JsonGenerator. */
 trait ContextWriter[T] extends ArrayContextWriter[T] with ObjectContextWriter[T]

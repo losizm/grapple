@@ -18,7 +18,7 @@ package little.json
 import javax.json.{ JsonArrayBuilder, JsonObjectBuilder }
 
 /**
- * Adds value to array builder.
+ * Adds value to JsonArrayBuilder.
  *
  * @see [[ObjectBuilderCompanion]]
  */
@@ -28,7 +28,7 @@ trait ArrayBuilderCompanion[T] {
 }
 
 /**
- * Adds value to object builder.
+ * Adds value to JsonObjectBuilder.
  *
  * @see [[ArrayBuilderCompanion]]
  */
