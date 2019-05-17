@@ -99,7 +99,7 @@ object Implicits {
   implicit def collectionFromJson[T, M[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) =
     new FromJson[M[T]] {
       def apply(json: JsonValue): M[T] =
-        if (json.isInstanceOf[JsonArray]) json.asArray.map(_.as[T]).to[M]
+        if (json.isInstanceOf[JsonArray]) json.asArray.map(convert).to[M]
         else throw new IllegalArgumentException(s"required ARRAY found ${json.getValueType}")
     }
 

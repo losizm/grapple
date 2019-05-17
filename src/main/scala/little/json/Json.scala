@@ -58,9 +58,13 @@ import scala.util.Try
  * }}}
  */
 object Json {
-  /** Converts value to JsonValue. */
+  /** Converts T value to JsonValue. */
   def toJson[T](value: T)(implicit convert: ToJson[T]): JsonValue =
     convert(value)
+
+  /** Converts JsonValue to T value. */
+  def fromJson[T](json: JsonValue)(implicit convert: FromJson[T]): T =
+    convert(json)
 
   /** Creates JsonArray from list of values. */
   def arr(values: JsonValue*): JsonArray =
