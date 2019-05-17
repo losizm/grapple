@@ -24,7 +24,10 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.{ higherKinds, implicitConversions }
 import scala.util.Try
 
-/** Provides implicit values and types. */
+/**
+ * Provides type classes for `javax.json` and implicit implementations of
+ * `ToJson` and `FromJson`.
+ */
 object Implicits {
   /** Converts JsonValue to String. */
   implicit val stringFromJson: FromJson[String] = {
