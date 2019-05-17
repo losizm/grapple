@@ -29,44 +29,44 @@ object Implicits {
   /** Converts JsonValue to String. */
   implicit val stringFromJson: FromJson[String] = {
     case json: JsonString => json.getString
-    case json => throw new IllegalArgumentException(s"required STRING but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"STRING required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Boolean. */
   implicit val booleanFromJson: FromJson[Boolean] = {
     case JsonValue.TRUE => true
     case JsonValue.FALSE => false
-    case json => throw new IllegalArgumentException(s"required TRUE or FALSE but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"TRUE or FALSE required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Int (exact). */
   implicit val intFromJson: FromJson[Int] = {
     case json: JsonNumber => json.intValueExact
-    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Long (exact). */
   implicit val longFromJson: FromJson[Long] = {
     case json: JsonNumber => json.longValueExact
-    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Double. */
   implicit val doubleFromJson: FromJson[Double] = {
     case json: JsonNumber => json.doubleValue
-    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to BigInt (exact). */
   implicit val bigIntFromJson: FromJson[BigInt] = {
     case json: JsonNumber => json.bigIntegerValueExact
-    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to BigDecimal. */
   implicit val bigDecimalFromJson: FromJson[BigDecimal] = {
     case json: JsonNumber => json.bigDecimalValue
-    case json => throw new IllegalArgumentException(s"required NUMBER but found ${json.getValueType}")
+    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /**
@@ -100,7 +100,7 @@ object Implicits {
     new FromJson[M[T]] {
       def apply(json: JsonValue): M[T] =
         if (json.isInstanceOf[JsonArray]) json.asArray.map(convert).to[M]
-        else throw new IllegalArgumentException(s"required ARRAY found ${json.getValueType}")
+        else throw new IllegalArgumentException(s"ARRAY required but found ${json.getValueType}")
     }
 
   /** Converts String to JsonValue. */
@@ -483,7 +483,7 @@ object Implicits {
     def nextArray(): JsonArray =
       parser.next() match {
         case START_ARRAY => getArray()
-        case event => throw new JsonException(s"expected START_ARRAY but found $event")
+        case event => throw new JsonException(s"START_ARRAY expected but found $event")
       }
 
     /**
@@ -494,7 +494,7 @@ object Implicits {
     def nextObject(): JsonObject =
       parser.next() match {
         case START_OBJECT => getObject()
-        case event => throw new JsonException(s"expected START_OBJECT but found $event")
+        case event => throw new JsonException(s"START_OBJECT expected but found $event")
       }
 
     /**
@@ -542,7 +542,7 @@ object Implicits {
             case event        => throw new JsonException(s"unexpected parser event: $event")
           }
 
-        case event => throw new JsonException(s"expected KEY_NAME but found $event")
+        case event => throw new JsonException(s"KEY_NAME expected but found $event")
       }
 
       builder.build()
