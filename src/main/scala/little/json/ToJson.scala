@@ -23,15 +23,13 @@ import javax.json.stream.JsonGenerator
  *
  * {{{
  * import little.json.{ Json, ToJson }
+ * import little.json.Implicits._
  *
  * case class User(id: Int, name: String)
  *
  * // Define how to convert User to JsonObject
  * implicit val userToJson: ToJson[User] = { user =>
- *   Json.createObjectBuilder()
- *     .add("id", user.id)
- *     .add("name", user.name)
- *     .build()
+ *   Json.obj("id" -> user.id, "name" -> user.name)
  * }
  *
  * // Convert User to JsonObject

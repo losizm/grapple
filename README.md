@@ -9,18 +9,18 @@ To use **little-json**, start by adding it to your project:
 
 * sbt
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "2.5.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "2.6.0"
 ```
 * Gradle
 ```groovy
-compile group: 'com.github.losizm', name: 'little-json_2.12', version: '2.5.0'
+compile group: 'com.github.losizm', name: 'little-json_2.12', version: '2.6.0'
 ```
 * Maven
 ```xml
 <dependency>
   <groupId>com.github.losizm</groupId>
   <artifactId>little-json_2.12</artifactId>
-  <version>2.5.0</version>
+  <version>2.6.0</version>
 </dependency>
 ```
 
@@ -50,29 +50,29 @@ import little.json.Implicits._ // Unleash the power
 
 case class User(id: Int, name: String)
 
-// Define how to convert User to JSON
+// Define how to convert User to JsonObject
 implicit val userToJson: ToJson[User] = {
   case User(id, name) => Json.obj("id" -> id, "name" -> name)
 }
 
-// Define how to create User from JSON
+// Define how to convert JsonObject to User
 implicit val userFromJson: FromJson[User] = {
   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
-  case json => throw new IllegalArgumentException("Not a JSON object")
+  case json => throw new IllegalArgumentException("JsonObject required")
 }
 
-// Parse text to JSON
+// Parse String to JsonValue
 val json = Json.parse("""{ "id": 0, "name": "root" }""")
 
-// Create User from JSON
+// Convert JsonValue to User
 val user = json.as[User]
 
-// Convert User back to JSON
+// Convert User back to JsonValue
 val jsonToo = Json.toJson(user)
 ```
 
 A special implementation of `ToJson` is available for converting a collection of
-objects to a JSON array. So, for example, if you define `ToJson[User]`, you
+objects to a `JsonArray`. So, for example, if you define `ToJson[User]`, you
 automagically get `ToJson[Seq[User]]`.
 
 The same applies to `FromJson[User]`. You get `FromJson[Seq[User]]` for free.
@@ -99,8 +99,8 @@ val dupe = Json.toJson(users)
 
 ### Extracting Values from JSON Structure
 
-You can navigate your way through a JSON array or object to extract values deep
-inside its structure.
+You can navigate your way through a `JsonArray` or `JsonObject` to extract
+values deep inside its structure.
 
 ```scala
 val json = Json.parse("""
