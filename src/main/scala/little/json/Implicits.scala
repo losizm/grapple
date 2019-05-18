@@ -92,6 +92,20 @@ object Implicits {
         else Some(convert(json))
     }
 
+  /**
+   * Creates FromJson for converting JsonValue to Either.
+   *
+   * An attempt is made to first convert the value to Right value. If that
+   * attempt fails, then an attempt is made to convert it to Left value.
+   */
+  implicit def eitherFromJson[A, B](implicit left: FromJson[A], right: FromJson[B]) =
+    new FromJson[Either[A, B]] {
+      def apply(json: JsonValue): Either[A, B] = {
+        val result = Try(right(json))
+        Either.cond(result.isSuccess, result.get, left(json))
+      }
+    }
+
   /** Creates FromJson for converting JsonValue to Try. */
   implicit def tryFromJson[T](implicit convert: FromJson[T]) =
     new FromJson[Try[T]] {
@@ -99,9 +113,9 @@ object Implicits {
     }
 
   /** Creates FromJson for converting JsonArray to collection. */
-  implicit def collectionFromJson[T, M[T]](implicit convert: FromJson[T], build: CanBuildFrom[Nothing, T, M[T]]) =
-    new FromJson[M[T]] {
-      def apply(json: JsonValue): M[T] =
+  implicit def collectionFromJson[A, M[A]](implicit convert: FromJson[A], build: CanBuildFrom[Nothing, A, M[A]]) =
+    new FromJson[M[A]] {
+      def apply(json: JsonValue): M[A] =
         if (json.isInstanceOf[JsonArray]) json.asArray.map(convert).to[M]
         else throw new IllegalArgumentException(s"ARRAY required but found ${json.getValueType}")
     }
@@ -128,23 +142,29 @@ object Implicits {
   implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => JsonNumberImpl(value.bigDecimal)
 
   /** Creates ToJson for converting Option to JsonValue. */
-  implicit def optionToJson[T, M[T] <: Option[T]](implicit convert: ToJson[T]) =
-    new ToJson[M[T]] {
-      def apply(value: M[T]): JsonValue =
+  implicit def optionToJson[A, M[A] <: Option[A]](implicit convert: ToJson[A]) =
+    new ToJson[M[A]] {
+      def apply(value: M[A]): JsonValue =
         value.fold(JsonValue.NULL)(convert)
     }
 
+  /** Creates ToJson for converting Either to JsonValue. */
+  implicit def eitherToJson[A, B, M[A, B] <: Either[A, B]](implicit left: ToJson[A], right: ToJson[B]) =
+    new ToJson[M[A, B]] {
+      def apply(value: M[A, B]): JsonValue = value.fold(left, right)
+    }
+
   /** Creates ToJson for converting Try to JsonValue. */
-  implicit def tryToJson[T, M[T] <: Try[T]](implicit convert: ToJson[T]) =
-    new ToJson[M[T]] {
-      def apply(value: M[T]): JsonValue =
+  implicit def tryToJson[A, M[A] <: Try[A]](implicit convert: ToJson[A]) =
+    new ToJson[M[A]] {
+      def apply(value: M[A]): JsonValue =
         value.fold(_ => JsonValue.NULL, convert)
     }
 
   /** Creates ToJson for converting GenTraversableOnce to JsonArray. */
-  implicit def genTraversableOnceToJson[T, M[T] <: GenTraversableOnce[T]](implicit convert: ToJson[T]) =
-    new ToJson[M[T]] {
-      def apply(values: M[T]): JsonValue =
+  implicit def genTraversableOnceToJson[A, M[A] <: GenTraversableOnce[A]](implicit convert: ToJson[A]) =
+    new ToJson[M[A]] {
+      def apply(values: M[A]): JsonValue =
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
     }
 
@@ -159,12 +179,12 @@ object Implicits {
   implicit def arrayOfStringAsJson(values: Array[String])(implicit convert: ToJson[Array[String]]): JsonValue =
     convert(values)
 
-  /** Converts container M[T] to JsonValue. */
-  implicit def containerAsJson[T, M[T]](value: M[T])(implicit convert: ToJson[M[T]]): JsonValue =
+  /** Converts M[A] to JsonValue. */
+  implicit def containerAsJson[A, M[A]](value: M[A])(implicit convert: ToJson[M[A]]): JsonValue =
     convert(value)
 
-  /** Converts Either to JsonValue. */
-  implicit def eitherAsJson[L, R](value: Either[L, R])(implicit left: ToJson[L], right: ToJson[R]): JsonValue =
+  /** Converts Either[A, B] to JsonValue. */
+  implicit def eitherAsJson[A, B](value: Either[A, B])(implicit left: ToJson[A], right: ToJson[B]): JsonValue =
     value.fold(left, right)
 
   /**

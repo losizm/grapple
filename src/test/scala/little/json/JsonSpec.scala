@@ -29,10 +29,23 @@ class JsonSpec extends FlatSpec {
   val guest = User(500, "guest", false)
 
   "JSON array" should "be parsed" in {
-    val arr = Json.parse("""[0, "root", true]""").asArray
+    val arr = Json.parse("""[0, "root", true, ["root", "wheel", "admin"]]""").asArray
     assert(arr.getInt(0) == 0)
     assert(arr.getString(1) == "root")
     assert(arr.getBoolean(2))
+    assert(arr.get(3).as[Seq[String]] == Seq("root", "wheel", "admin"))
+
+    assert(arr.get(0).as[Either[String, Int]] == Right(0))
+    assert(arr.get(0).as[Either[Int, String]] == Left(0))
+
+    assert(arr.get(1).as[Either[Int, String]] == Right("root"))
+    assert(arr.get(1).as[Either[String, Int]] == Left("root"))
+
+    assert(arr.get(2).as[Either[String, Boolean]] == Right(true))
+    assert(arr.get(2).as[Either[Boolean, String]] == Left(true))
+
+    assert(arr.get(3).as[Either[String, Seq[String]]] == Right(Seq("root", "wheel", "admin")))
+    assert(arr.get(3).as[Either[Seq[String], String]] == Left(Seq("root", "wheel", "admin")))
   }
 
   it should "provide access to number value" in {
@@ -111,7 +124,7 @@ class JsonSpec extends FlatSpec {
       Some("groups"),
       None.asInstanceOf[Option[User]],
       Success(root),
-      Failure(new Exception).asInstanceOf[Try[User]],
+      Failure[User](new Exception),
       Seq(0, 1, 2),
       Seq("a", "b", "c"),
       Seq(true, false, true),
@@ -148,10 +161,26 @@ class JsonSpec extends FlatSpec {
   }
 
   "JSON object" should "be parsed" in {
-    val obj = Json.parse("""{ "id": 0, "name": "root", "enabled": true }""").asObject
+    val obj = Json.parse("""{ "id": 0, "name": "root", "enabled": true, "groups": ["root", "wheel", "admin"] }""").asObject
     assert(obj.getInt("id") == 0)
     assert(obj.getString("name") == "root")
     assert(obj.getBoolean("enabled"))
+    assert(obj.get("groups").as[Seq[String]] == Seq("root", "wheel", "admin"))
+
+    assert(obj.get("id").as[Either[String, Int]] == Right(0))
+    assert(obj.get("id").as[Either[Int, String]] == Left(0))
+
+    assert(obj.get("name").as[Either[Int, String]] == Right("root"))
+    assert(obj.get("name").as[Either[String, Int]] == Left("root"))
+
+    assert(obj.get("enabled").as[Either[String, Boolean]] == Right(true))
+    assert(obj.get("enabled").as[Either[Boolean, String]] == Left(true))
+
+    assert(obj.get("groups").as[Either[String, Seq[String]]] == Right(Seq("root", "wheel", "admin")))
+    assert(obj.get("groups").as[Either[Seq[String], String]] == Left(Seq("root", "wheel", "admin")))
+
+    assert(obj.as[Either[Int, User]] == Right(User(0, "root", true)))
+    assert(obj.as[Either[User, Int]] == Left(User(0, "root", true)))
   }
 
   it should "provide access to number value" in {
@@ -228,7 +257,7 @@ class JsonSpec extends FlatSpec {
       "k" -> Some("groups"),
       "l" -> None.asInstanceOf[Option[User]],
       "m" -> Success(root),
-      "n" -> Failure(new Exception).asInstanceOf[Try[User]],
+      "n" -> Failure[User](new Exception),
       "o" -> Seq(0, 1, 2),
       "p" -> Seq("a", "b", "c"),
       "q" -> Seq(true, false, true),
