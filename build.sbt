@@ -2,13 +2,24 @@ name := "little-json"
 version := "2.7.0-SNAPSHOT"
 organization := "com.github.losizm"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.0"
 scalacOptions ++= Seq("-deprecation", "-feature", "-Xcheckinit")
+
+crossScalaVersions := Seq("2.12.8")
+
+unmanagedSourceDirectories in Compile += {
+  val sourceDir = (sourceDirectory in Compile).value
+  CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 13)) => sourceDir / "scala-2.13"
+    case Some((2, 12)) => sourceDir / "scala-2.12"
+    case _ => throw new Exception("Scala version must be either 2.12 or 2.13")
+  }
+}
 
 libraryDependencies ++= Seq(
   "javax.json"    %  "javax.json-api" % "1.1.4" % "provided",
   "org.glassfish" %  "javax.json"     % "1.1.4" % "test",
-  "org.scalatest" %% "scalatest"      % "3.0.5" % "test"
+  "org.scalatest" %% "scalatest"      % "3.0.8" % "test"
 )
 
 scmInfo := Some(
