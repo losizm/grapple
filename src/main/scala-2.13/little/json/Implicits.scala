@@ -193,7 +193,7 @@ object Implicits {
    *
    * @see [[JsonArrayType]], [[JsonObjectType]]
    */
-  implicit class JsonValueType(val json: JsonValue) extends AnyVal {
+  implicit class JsonValueType(private val json: JsonValue) extends AnyVal {
     /**
      * Gets value in JsonArray.
      *
@@ -267,7 +267,7 @@ object Implicits {
    *
    * @see [[JsonValueType]], [[JsonObjectType]]
    */
-  implicit class JsonArrayType(val json: JsonArray) extends AnyVal {
+  implicit class JsonArrayType(private val json: JsonArray) extends AnyVal {
     /**
      * Gets value from array and converts it to requested type or returns
      * evaluated default.
@@ -333,7 +333,7 @@ object Implicits {
    *
    * @see [[JsonValueType]], [[JsonArrayType]]
    */
-  implicit class JsonObjectType(val json: JsonObject) extends AnyVal {
+  implicit class JsonObjectType(private val json: JsonObject) extends AnyVal {
     /**
      * Gets value from object and converts it to requested type or returns
      * evaluated default.
@@ -407,7 +407,7 @@ object Implicits {
    *
    * @see [[JsonObjectBuilderType]]
    */
-  implicit class JsonArrayBuilderType(val builder: JsonArrayBuilder) extends AnyVal {
+  implicit class JsonArrayBuilderType(private val builder: JsonArrayBuilder) extends AnyVal {
     /** Adds value to array builder if `Some`; otherwise, adds null if `None`. */
     def add(value: Option[JsonValue]): JsonArrayBuilder =
       value.fold(builder.addNull()) { builder.add(_) }
@@ -431,7 +431,7 @@ object Implicits {
    *
    * @see [[JsonArrayBuilderType]]
    */
-  implicit class JsonObjectBuilderType(val builder: JsonObjectBuilder) extends AnyVal {
+  implicit class JsonObjectBuilderType(private val builder: JsonObjectBuilder) extends AnyVal {
     /** Adds value to object builder if `Some`; otherwise, adds null if `None`. */
     def add(name: String, value: Option[JsonValue]): JsonObjectBuilder =
       value.fold(builder.addNull(name)) { builder.add(name, _) }
@@ -455,7 +455,7 @@ object Implicits {
    *
    * @see [[JsonParserType]]
    */
-  implicit class JsonGeneratorType(val generator: JsonGenerator) extends AnyVal {
+  implicit class JsonGeneratorType(private val generator: JsonGenerator) extends AnyVal {
     /** Writes value to array context if `Some`; otherwise, writes null if `None`. */
     def write(value: Option[JsonValue]): JsonGenerator =
       value.fold(generator.writeNull()) { generator.write(_) }
@@ -496,7 +496,7 @@ object Implicits {
    *
    * @see [[JsonGeneratorType]]
    */
-  implicit class JsonParserType(val parser: JsonParser) extends AnyVal {
+  implicit class JsonParserType(private val parser: JsonParser) extends AnyVal {
     import JsonParser.Event._
 
     /**
