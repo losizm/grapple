@@ -43,6 +43,12 @@ object Implicits {
     case json => throw new IllegalArgumentException(s"TRUE or FALSE required but found ${json.getValueType}")
   }
 
+  /** Converts JsonValue to Short (exact). */
+  implicit val shortFromJson: FromJson[Short] = {
+    case json: JsonNumber => json.bigDecimalValue.shortValueExact
+    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
+  }
+
   /** Converts JsonValue to Int (exact). */
   implicit val intFromJson: FromJson[Int] = {
     case json: JsonNumber => json.intValueExact
@@ -52,6 +58,12 @@ object Implicits {
   /** Converts JsonValue to Long (exact). */
   implicit val longFromJson: FromJson[Long] = {
     case json: JsonNumber => json.longValueExact
+    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
+  }
+
+  /** Converts JsonValue to Float. */
+  implicit val floatFromJson: FromJson[Float] = {
+    case json: JsonNumber => json.bigDecimalValue.floatValue
     case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
@@ -127,11 +139,17 @@ object Implicits {
   /** Converts Boolean to JsonValue. */
   implicit val booleanToJson: ToJson[Boolean] = (value) => if (value) JsonValue.TRUE else JsonValue.FALSE
 
+  /** Converts Short to JsonValue. */
+  implicit val shortToJson: ToJson[Short] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
+
   /** Converts Int to JsonValue. */
   implicit val intToJson: ToJson[Int] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts Long to JsonValue. */
   implicit val longToJson: ToJson[Long] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
+
+  /** Converts Float to JsonValue. */
+  implicit val floatToJson: ToJson[Float] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts Double to JsonValue. */
   implicit val doubleToJson: ToJson[Double] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
@@ -283,6 +301,14 @@ object Implicits {
     def getTry[T](index: Int)(implicit convert: FromJson[T]): Try[T] =
       Try(json.get(index).as[T])
 
+    /** Gets Short from array. */
+    def getShort(index: Int): Short =
+      json.getJsonNumber(index).bigDecimalValue.shortValue
+
+    /** Gets Short from array or returns default. */
+    def getShort(index: Int, default: Short): Short =
+      Try(getShort(index)).getOrElse(default)
+
     /** Gets Long from array. */
     def getLong(index: Int): Long =
       json.getJsonNumber(index).longValue
@@ -290,6 +316,14 @@ object Implicits {
     /** Gets Long from array or returns default. */
     def getLong(index: Int, default: Long): Long =
       Try(getLong(index)).getOrElse(default)
+
+    /** Gets Float from array. */
+    def getFloat(index: Int): Float =
+      json.getJsonNumber(index).bigDecimalValue.floatValue
+
+    /** Gets Float from array or returns default. */
+    def getFloat(index: Int, default: Float): Float =
+      Try(getFloat(index)).getOrElse(default)
 
     /** Gets Double from array. */
     def getDouble(index: Int): Double =
@@ -349,6 +383,14 @@ object Implicits {
     def getTry[T](name: String)(implicit convert: FromJson[T]): Try[T] =
       Try(json.get(name).as[T])
 
+    /** Gets Short from object. */
+    def getShort(name: String): Short =
+      json.getJsonNumber(name).bigDecimalValue.shortValue
+
+    /** Gets Short from object or returns default. */
+    def getShort(name: String, default: Short): Short =
+      Try(getShort(name)).getOrElse(default)
+
     /** Gets Long from object. */
     def getLong(name: String): Long =
       json.getJsonNumber(name).longValue
@@ -356,6 +398,14 @@ object Implicits {
     /** Gets Long from object or returns default. */
     def getLong(name: String, default: Long): Long =
       Try(getLong(name)).getOrElse(default)
+
+    /** Gets Float from object. */
+    def getFloat(name: String): Float =
+      json.getJsonNumber(name).bigDecimalValue.floatValue
+
+    /** Gets Float from object or returns default. */
+    def getFloat(name: String, default: Float): Float =
+      Try(getFloat(name)).getOrElse(default)
 
     /** Gets Double from object. */
     def getDouble(name: String): Double =

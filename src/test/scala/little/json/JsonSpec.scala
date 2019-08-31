@@ -49,9 +49,13 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to number value" in {
-    val arr = Json.parse(s"""[${Long.MinValue}, ${Long.MaxValue}, -123.456, 123.456]""").asArray
+    val arr = Json.parse(s"""[${Long.MinValue}, ${Long.MaxValue}, -123.456, 123.456, ${Short.MinValue}, ${Short.MaxValue}]""").asArray
+    assert(arr.getShort(4) == Short.MinValue)
+    assert(arr.getShort(5) == Short.MaxValue)
     assert(arr.getLong(0) == Long.MinValue)
     assert(arr.getLong(1) == Long.MaxValue)
+    assert(arr.getFloat(2) == -123.456f)
+    assert(arr.getFloat(3) == 123.456f)
     assert(arr.getDouble(2) == -123.456)
     assert(arr.getDouble(3) == 123.456)
     assert(arr.getBigInt(0) == BigInt(Long.MinValue))
@@ -66,7 +70,9 @@ class JsonSpec extends FlatSpec {
 
   it should "provide access to number value with default" in {
     val arr = Json.parse("""["Not a number"]""").asArray
+    assert(arr.getShort(0, 1) == 1)
     assert(arr.getLong(0, 1) == 1L)
+    assert(arr.getFloat(0, 1.1f) == 1.1f)
     assert(arr.getDouble(0, 1.1) == 1.1)
     assert(arr.getBigInt(0, BigInt(1)) == BigInt(1))
     assert(arr.getBigDecimal(0, BigDecimal(1.0)) == BigDecimal(1.0))
@@ -78,6 +84,7 @@ class JsonSpec extends FlatSpec {
 
   it should "provide access to exact number value" in {
     val arr = Json.parse("[123]")
+    assert(arr.get(0).as[Short] == 123)
     assert(arr.get(0).as[Int] == 123)
     assert(arr.get(0).as[Long] == 123L)
     assert(arr.get(0).as[BigInt] == BigInt(123))
@@ -85,6 +92,7 @@ class JsonSpec extends FlatSpec {
 
   it should "provide access to exact number value with default" in {
     val arr = Json.parse("""["Not a number"]""").asArray
+    assert(arr.getOrElse(0, 1.toShort) == 1)
     assert(arr.getOrElse(0, 1) == 1)
     assert(arr.getOrElse(0, 1L) == 1L)
     assert(arr.getOrElse(0, BigInt(1)) == BigInt(1))
@@ -150,7 +158,9 @@ class JsonSpec extends FlatSpec {
     assert(arr.isNull(11))
     assert(arr.get(12).as[User] == root)
     assert(arr.isNull(13))
+    assert(arr.get(14).as[Seq[Short]] == Seq(0, 1, 2))
     assert(arr.get(14).as[Seq[Int]] == Seq(0, 1, 2))
+    assert(arr.get(14).as[Seq[Long]] == Seq(0L, 1L, 2L))
     assert(arr.get(15).as[Seq[String]] == Seq("a", "b", "c"))
     assert(arr.get(16).as[Seq[Boolean]] == Seq(true, false, true))
     assert(arr.get(17).as[Array[Int]].sameElements(Array(0, 1, 2)))
@@ -184,9 +194,13 @@ class JsonSpec extends FlatSpec {
   }
 
   it should "provide access to number value" in {
-    val obj = Json.parse(s"""{ "a": ${Long.MinValue}, "b": ${Long.MaxValue}, "c": -123.456, "d": 123.456 }""").asObject
+    val obj = Json.parse(s"""{ "a": ${Long.MinValue}, "b": ${Long.MaxValue}, "c": -123.456, "d": 123.456, "e": ${Short.MinValue}, "f": ${Short.MaxValue} }""").asObject
+    assert(obj.getShort("e") == Short.MinValue)
+    assert(obj.getShort("f") == Short.MaxValue)
     assert(obj.getLong("a") == Long.MinValue)
     assert(obj.getLong("b") == Long.MaxValue)
+    assert(obj.getFloat("c") == -123.456f)
+    assert(obj.getFloat("d") == 123.456f)
     assert(obj.getDouble("c") == -123.456)
     assert(obj.getDouble("d") == 123.456)
     assert(obj.getBigInt("a") == BigInt(Long.MinValue))
@@ -201,7 +215,9 @@ class JsonSpec extends FlatSpec {
 
   it should "provide access to number value with default" in {
     val obj = Json.parse("""{ "a": "Not a number" }""").asObject
+    assert(obj.getShort("a", 1) == 1)
     assert(obj.getLong("a", 1) == 1L)
+    assert(obj.getFloat("a", 1.1f) == 1.1f)
     assert(obj.getDouble("a", 1.1) == 1.1)
     assert(obj.getBigInt("a", BigInt(1)) == BigInt(1))
     assert(obj.getBigDecimal("a", BigDecimal(1.0)) == BigDecimal(1.0))
@@ -220,6 +236,7 @@ class JsonSpec extends FlatSpec {
 
   it should "provide access to exact number value with default" in {
     val obj = Json.parse("""{ "a": "Not a number" }""").asObject
+    assert(obj.getOrElse("a", 1.toShort) == 1)
     assert(obj.getOrElse("a", 1) == 1)
     assert(obj.getOrElse("a", 1L) == 1L)
     assert(obj.getOrElse("a", BigInt(1)) == BigInt(1))
@@ -283,6 +300,7 @@ class JsonSpec extends FlatSpec {
     assert(obj.isNull("l"))
     assert(obj.get("m").as[User] == root)
     assert(obj.isNull("n"))
+    assert(obj.get("o").as[Seq[Short]] == Seq(0, 1, 2))
     assert(obj.get("o").as[Seq[Int]] == Seq(0, 1, 2))
     assert(obj.get("p").as[Seq[String]] == Seq("a", "b", "c"))
     assert(obj.get("q").as[Seq[Boolean]] == Seq(true, false, true))
