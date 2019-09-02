@@ -22,13 +22,13 @@ import javax.json.stream.JsonGenerator
  * Converts T value to JsonValue.
  *
  * {{{
- * import little.json.{ Json, ToJson }
+ * import little.json.{ Json, JsonOutput }
  * import little.json.Implicits._
  *
  * case class User(id: Int, name: String)
  *
  * // Define how to convert User to JsonObject
- * implicit val userToJson: ToJson[User] = { user =>
+ * implicit val userJsonOutput: JsonOutput[User] = { user =>
  *   Json.obj("id" -> user.id, "name" -> user.name)
  * }
  *
@@ -36,9 +36,9 @@ import javax.json.stream.JsonGenerator
  * val json = Json.toJson(User(0, "root"))
  * }}}
  *
- * @see [[FromJson]]
+ * @see [[JsonInput]]
  */
-trait ToJson[T] extends (T => JsonValue) with BuilderCompanion[T] with ContextWriter[T] {
+trait JsonOutput[T] extends (T => JsonValue) with BuilderCompanion[T] with ContextWriter[T] {
   /** Converts T value to JsonValue. */
   def apply(value: T): JsonValue
 

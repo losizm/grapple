@@ -26,183 +26,183 @@ import scala.util.Try
 
 /**
  * Provides type classes for `javax.json` and implicit implementations of
- * `ToJson` and `FromJson`.
+ * `JsonOutput` and `JsonInput`.
  */
 object Implicits {
   /** Converts JsonValue to String. */
-  implicit val stringFromJson: FromJson[String] = {
+  implicit val stringJsonInput: JsonInput[String] = {
     case json: JsonString => json.getString
     case json => throw new IllegalArgumentException(s"STRING required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Boolean. */
-  implicit val booleanFromJson: FromJson[Boolean] = {
+  implicit val booleanJsonInput: JsonInput[Boolean] = {
     case JsonValue.TRUE => true
     case JsonValue.FALSE => false
     case json => throw new IllegalArgumentException(s"TRUE or FALSE required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Short (exact). */
-  implicit val shortFromJson: FromJson[Short] = {
+  implicit val shortJsonInput: JsonInput[Short] = {
     case json: JsonNumber => json.bigDecimalValue.shortValueExact
     case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Int (exact). */
-  implicit val intFromJson: FromJson[Int] = {
+  implicit val intJsonInput: JsonInput[Int] = {
     case json: JsonNumber => json.intValueExact
     case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Long (exact). */
-  implicit val longFromJson: FromJson[Long] = {
+  implicit val longJsonInput: JsonInput[Long] = {
     case json: JsonNumber => json.longValueExact
     case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Float. */
-  implicit val floatFromJson: FromJson[Float] = {
+  implicit val floatJsonInput: JsonInput[Float] = {
     case json: JsonNumber => json.bigDecimalValue.floatValue
     case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to Double. */
-  implicit val doubleFromJson: FromJson[Double] = {
+  implicit val doubleJsonInput: JsonInput[Double] = {
     case json: JsonNumber => json.doubleValue
     case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to BigInt (exact). */
-  implicit val bigIntFromJson: FromJson[BigInt] = {
+  implicit val bigIntJsonInput: JsonInput[BigInt] = {
     case json: JsonNumber => json.bigIntegerValueExact
     case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /** Converts JsonValue to BigDecimal. */
-  implicit val bigDecimalFromJson: FromJson[BigDecimal] = {
+  implicit val bigDecimalJsonInput: JsonInput[BigDecimal] = {
     case json: JsonNumber => json.bigDecimalValue
     case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
   }
 
   /**
-   * Creates FromJson for converting JsonValue to Option.
+   * Creates JsonInput for converting JsonValue to Option.
    *
-   * The instance of `FromJson` returns `Some` if the value is successfully
+   * The instance of `JsonInput` returns `Some` if the value is successfully
    * converted, and `None` if the value is JSON null (i.e., `JsonValue.NULL`);
-   * otherwise it throws the exception thrown by the implicit `convert`.
+   * otherwise it throws the exception thrown by the implicit `input`.
    *
-   * <strong>Note:</strong> This behavior is different from
-   * [[JsonValueType.asOption]], which returns `Some` if the value is
-   * successfully converted and returns `None` if the value is JSON null or if
-   * an exception was thrown during conversion.
+   * '''Note:''' This behavior is different from [[JsonValueType.asOption]],
+   * which returns `Some` if the value is successfully converted and returns
+   * `None` if the value is JSON null or if an exception was thrown during
+   * conversion.
    */
-  implicit def optionFromJson[T](implicit convert: FromJson[T]) =
-    new FromJson[Option[T]] {
+  implicit def optionJsonInput[T](implicit input: JsonInput[T]) =
+    new JsonInput[Option[T]] {
       def apply(json: JsonValue): Option[T] =
         if (json == JsonValue.NULL)
           None
-        else Some(convert(json))
+        else Some(input(json))
     }
 
   /**
-   * Creates FromJson for converting JsonValue to Either.
+   * Creates JsonInput for converting JsonValue to Either.
    *
    * An attempt is made to first convert the value to Right value. If that
    * attempt fails, then an attempt is made to convert it to Left value.
    */
-  implicit def eitherFromJson[A, B](implicit left: FromJson[A], right: FromJson[B]) =
-    new FromJson[Either[A, B]] {
+  implicit def eitherJsonInput[A, B](implicit left: JsonInput[A], right: JsonInput[B]) =
+    new JsonInput[Either[A, B]] {
       def apply(json: JsonValue): Either[A, B] = {
         val result = Try(right(json))
         Either.cond(result.isSuccess, result.get, left(json))
       }
     }
 
-  /** Creates FromJson for converting JsonValue to Try. */
-  implicit def tryFromJson[T](implicit convert: FromJson[T]) =
-    new FromJson[Try[T]] {
-      def apply(json: JsonValue): Try[T] = Try(convert(json))
+  /** Creates JsonInput for converting JsonValue to Try. */
+  implicit def tryJsonInput[T](implicit input: JsonInput[T]) =
+    new JsonInput[Try[T]] {
+      def apply(json: JsonValue): Try[T] = Try(input(json))
     }
 
-  /** Creates FromJson for converting JsonArray to collection. */
-  implicit def collectionFromJson[A, M[A]](implicit convert: FromJson[A], build: CanBuildFrom[Nothing, A, M[A]]) =
-    new FromJson[M[A]] {
+  /** Creates JsonInput for converting JsonArray to collection. */
+  implicit def collectionJsonInput[A, M[A]](implicit input: JsonInput[A], build: CanBuildFrom[Nothing, A, M[A]]) =
+    new JsonInput[M[A]] {
       def apply(json: JsonValue): M[A] =
-        if (json.isInstanceOf[JsonArray]) json.asArray.map(convert).to[M]
+        if (json.isInstanceOf[JsonArray]) json.asArray.map(input).to[M]
         else throw new IllegalArgumentException(s"ARRAY required but found ${json.getValueType}")
     }
 
   /** Converts String to JsonValue. */
-  implicit val stringToJson: ToJson[String] = (value) => new JsonStringImpl(value)
+  implicit val stringJsonOutput: JsonOutput[String] = (value) => new JsonStringImpl(value)
 
   /** Converts Boolean to JsonValue. */
-  implicit val booleanToJson: ToJson[Boolean] = (value) => if (value) JsonValue.TRUE else JsonValue.FALSE
+  implicit val booleanJsonOutput: JsonOutput[Boolean] = (value) => if (value) JsonValue.TRUE else JsonValue.FALSE
 
   /** Converts Short to JsonValue. */
-  implicit val shortToJson: ToJson[Short] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
+  implicit val shortJsonOutput: JsonOutput[Short] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts Int to JsonValue. */
-  implicit val intToJson: ToJson[Int] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
+  implicit val intJsonOutput: JsonOutput[Int] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts Long to JsonValue. */
-  implicit val longToJson: ToJson[Long] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
+  implicit val longJsonOutput: JsonOutput[Long] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts Float to JsonValue. */
-  implicit val floatToJson: ToJson[Float] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
+  implicit val floatJsonOutput: JsonOutput[Float] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts Double to JsonValue. */
-  implicit val doubleToJson: ToJson[Double] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
+  implicit val doubleJsonOutput: JsonOutput[Double] = (value) => JsonNumberImpl(new java.math.BigDecimal(value))
 
   /** Converts BigInt to JsonValue. */
-  implicit val bigIntToJson: ToJson[BigInt] = (value) => JsonNumberImpl(new java.math.BigDecimal(value.bigInteger))
+  implicit val bigIntJsonOutput: JsonOutput[BigInt] = (value) => JsonNumberImpl(new java.math.BigDecimal(value.bigInteger))
 
   /** Converts BigDecimal to JsonValue. */
-  implicit val bigDecimalToJson: ToJson[BigDecimal] = (value) => JsonNumberImpl(value.bigDecimal)
+  implicit val bigDecimalJsonOutput: JsonOutput[BigDecimal] = (value) => JsonNumberImpl(value.bigDecimal)
 
-  /** Creates ToJson for converting Option to JsonValue. */
-  implicit def optionToJson[A, M[A] <: Option[A]](implicit convert: ToJson[A]) =
-    new ToJson[M[A]] {
+  /** Creates JsonOutput for converting Option to JsonValue. */
+  implicit def optionJsonOutput[A, M[A] <: Option[A]](implicit output: JsonOutput[A]) =
+    new JsonOutput[M[A]] {
       def apply(value: M[A]): JsonValue =
-        value.fold(JsonValue.NULL)(convert)
+        value.fold(JsonValue.NULL)(output)
     }
 
-  /** Creates ToJson for converting Either to JsonValue. */
-  implicit def eitherToJson[A, B, M[A, B] <: Either[A, B]](implicit left: ToJson[A], right: ToJson[B]) =
-    new ToJson[M[A, B]] {
+  /** Creates JsonOutput for converting Either to JsonValue. */
+  implicit def eitherJsonOutput[A, B, M[A, B] <: Either[A, B]](implicit left: JsonOutput[A], right: JsonOutput[B]) =
+    new JsonOutput[M[A, B]] {
       def apply(value: M[A, B]): JsonValue = value.fold(left, right)
     }
 
-  /** Creates ToJson for converting Try to JsonValue. */
-  implicit def tryToJson[A, M[A] <: Try[A]](implicit convert: ToJson[A]) =
-    new ToJson[M[A]] {
+  /** Creates JsonOutput for converting Try to JsonValue. */
+  implicit def tryJsonOutput[A, M[A] <: Try[A]](implicit output: JsonOutput[A]) =
+    new JsonOutput[M[A]] {
       def apply(value: M[A]): JsonValue =
-        value.fold(_ => JsonValue.NULL, convert)
+        value.fold(_ => JsonValue.NULL, output)
     }
 
-  /** Creates ToJson for converting GenTraversableOnce to JsonArray. */
-  implicit def genTraversableOnceToJson[A, M[A] <: GenTraversableOnce[A]](implicit convert: ToJson[A]) =
-    new ToJson[M[A]] {
+  /** Creates JsonOutput for converting GenTraversableOnce to JsonArray. */
+  implicit def genTraversableOnceJsonOutput[A, M[A] <: GenTraversableOnce[A]](implicit output: JsonOutput[A]) =
+    new JsonOutput[M[A]] {
       def apply(values: M[A]): JsonValue =
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
     }
 
-  /** Creates ToJson for converting Array to JsonArray. */
-  implicit def arrayToJson[T](implicit convert: ToJson[T]) =
-    new ToJson[Array[T]] {
+  /** Creates JsonOutput for converting Array to JsonArray. */
+  implicit def arrayJsonOutput[T](implicit output: JsonOutput[T]) =
+    new JsonOutput[Array[T]] {
       def apply(values: Array[T]): JsonValue =
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
     }
 
   /** Converts Array[String] to JsonValue. */
-  implicit def arrayOfStringAsJson(values: Array[String])(implicit convert: ToJson[Array[String]]): JsonValue =
-    convert(values)
+  implicit def arrayOfStringAsJson(values: Array[String])(implicit output: JsonOutput[Array[String]]): JsonValue =
+    output(values)
 
   /** Converts M[A] to JsonValue. */
-  implicit def containerAsJson[A, M[A]](value: M[A])(implicit convert: ToJson[M[A]]): JsonValue =
-    convert(value)
+  implicit def containerAsJson[A, M[A]](value: M[A])(implicit output: JsonOutput[M[A]]): JsonValue =
+    output(value)
 
   /** Converts Either[A, B] to JsonValue. */
-  implicit def eitherAsJson[A, B](value: Either[A, B])(implicit left: ToJson[A], right: ToJson[B]): JsonValue =
+  implicit def eitherAsJson[A, B](value: Either[A, B])(implicit left: JsonOutput[A], right: JsonOutput[B]): JsonValue =
     value.fold(left, right)
 
   /**
@@ -247,15 +247,15 @@ object Implicits {
     def get(name: String): JsonValue = asObject.get(name)
 
     /** Converts json to requested type. */
-    def as[T](implicit convert: FromJson[T]): T =
-      convert(json)
+    def as[T](implicit input: JsonInput[T]): T =
+      input(json)
 
     /** Optionally converts json to requested type. */
-    def asOption[T](implicit convert: FromJson[T]): Option[T] =
+    def asOption[T](implicit input: JsonInput[T]): Option[T] =
       asTry[T].toOption
 
     /** Tries to convert json to requested type. */
-    def asTry[T](implicit convert: FromJson[T]): Try[T] =
+    def asTry[T](implicit input: JsonInput[T]): Try[T] =
       Try(as[T])
 
     /** Casts json to JsonString. */
@@ -289,15 +289,15 @@ object Implicits {
      * Gets value from array and converts it to requested type or returns
      * evaluated default.
      */
-    def getOrElse[T](index: Int, default: => T)(implicit convert: FromJson[T]): T =
+    def getOrElse[T](index: Int, default: => T)(implicit input: JsonInput[T]): T =
       getTry[T](index).getOrElse(default)
 
     /** Optionally gets value from array and converts it to requested type. */
-    def getOption[T](index: Int)(implicit convert: FromJson[T]): Option[T] =
+    def getOption[T](index: Int)(implicit input: JsonInput[T]): Option[T] =
       getTry[T](index).toOption
 
     /** Tries to get value from array and convert it to requested type. */
-    def getTry[T](index: Int)(implicit convert: FromJson[T]): Try[T] =
+    def getTry[T](index: Int)(implicit input: JsonInput[T]): Try[T] =
       Try(json.get(index).as[T])
 
     /** Gets Short from array. */
@@ -371,15 +371,15 @@ object Implicits {
      * Gets value from object and converts it to requested type or returns
      * evaluated default.
      */
-    def getOrElse[T](name: String, default: => T)(implicit convert: FromJson[T]): T =
+    def getOrElse[T](name: String, default: => T)(implicit input: JsonInput[T]): T =
       getTry[T](name).getOrElse(default)
 
     /** Optionally gets value from object and converts it to requested type. */
-    def getOption[T](name: String)(implicit convert: FromJson[T]): Option[T] =
+    def getOption[T](name: String)(implicit input: JsonInput[T]): Option[T] =
       getTry[T](name).toOption
 
     /** Tries to get value from object and convert it to requested type. */
-    def getTry[T](name: String)(implicit convert: FromJson[T]): Try[T] =
+    def getTry[T](name: String)(implicit input: JsonInput[T]): Try[T] =
       Try(json.get(name).as[T])
 
     /** Gets Short from object. */

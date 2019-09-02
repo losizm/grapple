@@ -28,18 +28,18 @@ import scala.util.Try
  *
  * {{{
  * import javax.json.JsonObject
- * import little.json.{ Json, FromJson, ToJson }
+ * import little.json.{ Json, JsonInput, JsonOutput }
  * import little.json.Implicits._
  *
  * case class User(id: Int, name: String)
  *
  * // Define how to convert User to JsonObject
- * implicit val userToJson: ToJson[User] = { user =>
+ * implicit val userJsonOutput: JsonOutput[User] = { user =>
  *   Json.obj("id" -> user.id, "name" -> user.name)
  * }
  *
  * // Define how to convert JsonObject to User
- * implicit val userFromJson: FromJson[User] = {
+ * implicit val userJsonInput: JsonInput[User] = {
  *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
  *   case json => throw new IllegalArgumentException("JsonObject required")
  * }
@@ -56,12 +56,12 @@ import scala.util.Try
  */
 object Json {
   /** Converts T value to JsonValue. */
-  def toJson[T](value: T)(implicit convert: ToJson[T]): JsonValue =
-    convert(value)
+  def toJson[T](value: T)(implicit output: JsonOutput[T]): JsonValue =
+    output(value)
 
   /** Converts JsonValue to T value. */
-  def fromJson[T](json: JsonValue)(implicit convert: FromJson[T]): T =
-    convert(json)
+  def fromJson[T](json: JsonValue)(implicit input: JsonInput[T]): T =
+    input(json)
 
   /** Creates JsonArray from list of values. */
   def arr(values: JsonValue*): JsonArray =

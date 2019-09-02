@@ -22,7 +22,7 @@ import scala.util.Success
 object Test {
   case class User(id: Int, name: String, enabled: Boolean = true)
 
-  implicit val userToJson: ToJson[User] = { user =>
+  implicit val userJsonOutput: JsonOutput[User] = { user =>
     val json = Json.createObjectBuilder()
     json.add("id", user.id)
     json.add("name", user.name)
@@ -30,7 +30,7 @@ object Test {
     json.build()
   }
 
-  implicit val jsonToUser: FromJson[User] = {
+  implicit val userJsonInput: JsonInput[User] = {
     case json: JsonObject => User(json.getInt("id"), json.getString("name"), json.getBoolean("enabled", true))
     case json => throw new JsonException(s"""required OBJECT but found ${json.getValueType}""")
   }

@@ -22,13 +22,13 @@ import javax.json.JsonValue
  *
  * {{{
  * import javax.json.JsonObject
- * import little.json.{ Json, FromJson }
+ * import little.json.{ Json, JsonInput }
  * import little.json.Implicits.JsonValueType
  *
  * case class User(id: Int, name: String)
  *
  * // Define how to convert JsonObject to User
- * implicit val userFromJson: FromJson[User] = {
+ * implicit val userJsonInput: JsonInput[User] = {
  *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
  *   case json => throw new IllegalArgumentException("JsonObject required")
  * }
@@ -39,9 +39,9 @@ import javax.json.JsonValue
  * // Convert JsonObject to User
  * val user = json.as[User]
  * }}}
- * @see [[ToJson]]
+ * @see [[JsonOutput]]
  */
-trait FromJson[T] extends (JsonValue => T) {
+trait JsonInput[T] extends (JsonValue => T) {
   /** Converts JsonValue to T value. */
   def apply(json: JsonValue): T
 }
