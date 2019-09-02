@@ -33,35 +33,35 @@ import scala.util.Try
  *
  * case class User(id: Int, name: String)
  *
- * // Define how to convert User to JsonObject
- * implicit val userJsonOutput: JsonOutput[User] = { user =>
- *   Json.obj("id" -> user.id, "name" -> user.name)
- * }
- *
- * // Define how to convert JsonObject to User
+ * // Define how to read User from JsonValue
  * implicit val userJsonInput: JsonInput[User] = {
  *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
  *   case json => throw new IllegalArgumentException("JsonObject required")
  * }
  *
- * // Parse String to JsonObject
+ * // Define how to write User to JsonValue
+ * implicit val userJsonOutput: JsonOutput[User] = { user =>
+ *   Json.obj("id" -> user.id, "name" -> user.name)
+ * }
+ *
+ * // Parse String to JsonValue
  * val json = Json.parse("""{ "id": 0, "name": "root" }""")
  *
- * // Convert JsonObject to User
+ * // Read User from JsonValue
  * val user = json.as[User]
  *
- * // Convert User to JsonObject
+ * // Write User to JsonValue
  * val jsonToo = Json.toJson(user)
  * }}}
  */
 object Json {
   /** Converts T value to JsonValue. */
   def toJson[T](value: T)(implicit output: JsonOutput[T]): JsonValue =
-    output(value)
+    output.writing(value)
 
   /** Converts JsonValue to T value. */
   def fromJson[T](json: JsonValue)(implicit input: JsonInput[T]): T =
-    input(json)
+    input.reading(json)
 
   /** Creates JsonArray from list of values. */
   def arr(values: JsonValue*): JsonArray =

@@ -19,7 +19,7 @@ import javax.json.{ JsonArrayBuilder, JsonObjectBuilder, JsonValue }
 import javax.json.stream.JsonGenerator
 
 /**
- * Converts T value to JsonValue.
+ * Writes value of type T to JsonValue.
  *
  * {{{
  * import little.json.{ Json, JsonOutput }
@@ -27,34 +27,34 @@ import javax.json.stream.JsonGenerator
  *
  * case class User(id: Int, name: String)
  *
- * // Define how to convert User to JsonObject
+ * // Define how to write User to JsonValue
  * implicit val userJsonOutput: JsonOutput[User] = { user =>
  *   Json.obj("id" -> user.id, "name" -> user.name)
  * }
  *
- * // Convert User to JsonObject
+ * // Write User to JsonValue
  * val json = Json.toJson(User(0, "root"))
  * }}}
  *
  * @see [[JsonInput]]
  */
-trait JsonOutput[T] extends (T => JsonValue) with BuilderCompanion[T] with ContextWriter[T] {
+trait JsonOutput[T] extends BuilderCompanion[T] with ContextWriter[T] {
   /** Converts T value to JsonValue. */
-  def apply(value: T): JsonValue
+  def writing(value: T): JsonValue
 
   /** Converts T value to JsonValue and adds it to array builder. */
   def add(value: T)(implicit builder: JsonArrayBuilder): JsonArrayBuilder =
-    builder.add(apply(value))
+    builder.add(writing(value))
 
   /** Converts T value to JsonValue and adds it to object builder. */
   def add(name: String, value: T)(implicit builder: JsonObjectBuilder): JsonObjectBuilder =
-    builder.add(name, apply(value))
+    builder.add(name, writing(value))
 
   /** Converts T value to JsonValue and writes it to array context. */
   def write(value: T)(implicit generator: JsonGenerator): JsonGenerator =
-    generator.write(apply(value))
+    generator.write(writing(value))
 
   /** Converts T value to JsonValue and writes it to object context. */
   def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator =
-    generator.write(name, apply(value))
+    generator.write(name, writing(value))
 }

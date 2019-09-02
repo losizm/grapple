@@ -29,6 +29,22 @@ import scala.util.Try
  * `JsonOutput` and `JsonInput`.
  */
 object Implicits {
+  /** Converts value of type T to JsonValue. */
+  implicit def asJson[T](value: T)(implicit output: JsonOutput[T]): JsonValue =
+    output.writing(value)
+
+  /** Converts Array[String] to JsonValue. */
+  implicit def stringArrayAsJson(values: Array[String])(implicit output: JsonOutput[Array[String]]): JsonValue =
+    output.writing(values)
+
+  /** Converts M[A] to JsonValue. */
+  implicit def containerAsJson[A, M[A]](value: M[A])(implicit output: JsonOutput[M[A]]): JsonValue =
+    output.writing(value)
+
+  /** Converts Either[A, B] to JsonValue. */
+  implicit def eitherAsJson[A, B](value: Either[A, B])(implicit left: JsonOutput[A], right: JsonOutput[B]): JsonValue =
+    value.fold(left.writing, right.writing)
+
   /** Converts JsonValue to String. */
   implicit val stringJsonInput: JsonInput[String] = {
     case json: JsonString => json.getString
@@ -98,10 +114,10 @@ object Implicits {
    */
   implicit def optionJsonInput[T](implicit input: JsonInput[T]) =
     new JsonInput[Option[T]] {
-      def apply(json: JsonValue): Option[T] =
+      def reading(json: JsonValue): Option[T] =
         if (json == JsonValue.NULL)
           None
-        else Some(input(json))
+        else Some(input.reading(json))
     }
 
   /**
@@ -112,23 +128,23 @@ object Implicits {
    */
   implicit def eitherJsonInput[A, B](implicit left: JsonInput[A], right: JsonInput[B]) =
     new JsonInput[Either[A, B]] {
-      def apply(json: JsonValue): Either[A, B] = {
-        val result = Try(right(json))
-        Either.cond(result.isSuccess, result.get, left(json))
+      def reading(json: JsonValue): Either[A, B] = {
+        val result = Try(right.reading(json))
+        Either.cond(result.isSuccess, result.get, left.reading(json))
       }
     }
 
   /** Creates JsonInput for converting JsonValue to Try. */
   implicit def tryJsonInput[T](implicit input: JsonInput[T]) =
     new JsonInput[Try[T]] {
-      def apply(json: JsonValue): Try[T] = Try(input(json))
+      def reading(json: JsonValue): Try[T] = Try(input.reading(json))
     }
 
   /** Creates JsonInput for converting JsonArray to collection. */
   implicit def collectionJsonInput[A, M[A]](implicit input: JsonInput[A], build: CanBuildFrom[Nothing, A, M[A]]) =
     new JsonInput[M[A]] {
-      def apply(json: JsonValue): M[A] =
-        if (json.isInstanceOf[JsonArray]) json.asArray.map(input).to[M]
+      def reading(json: JsonValue): M[A] =
+        if (json.isInstanceOf[JsonArray]) json.asArray.map(input.reading).to[M]
         else throw new IllegalArgumentException(s"ARRAY required but found ${json.getValueType}")
     }
 
@@ -162,48 +178,36 @@ object Implicits {
   /** Creates JsonOutput for converting Option to JsonValue. */
   implicit def optionJsonOutput[A, M[A] <: Option[A]](implicit output: JsonOutput[A]) =
     new JsonOutput[M[A]] {
-      def apply(value: M[A]): JsonValue =
-        value.fold(JsonValue.NULL)(output)
+      def writing(value: M[A]): JsonValue =
+        value.fold(JsonValue.NULL)(output.writing)
     }
 
   /** Creates JsonOutput for converting Either to JsonValue. */
   implicit def eitherJsonOutput[A, B, M[A, B] <: Either[A, B]](implicit left: JsonOutput[A], right: JsonOutput[B]) =
     new JsonOutput[M[A, B]] {
-      def apply(value: M[A, B]): JsonValue = value.fold(left, right)
+      def writing(value: M[A, B]): JsonValue = value.fold(left.writing, right.writing)
     }
 
   /** Creates JsonOutput for converting Try to JsonValue. */
   implicit def tryJsonOutput[A, M[A] <: Try[A]](implicit output: JsonOutput[A]) =
     new JsonOutput[M[A]] {
-      def apply(value: M[A]): JsonValue =
-        value.fold(_ => JsonValue.NULL, output)
+      def writing(value: M[A]): JsonValue =
+        value.fold(_ => JsonValue.NULL, output.writing)
     }
 
   /** Creates JsonOutput for converting GenTraversableOnce to JsonArray. */
   implicit def genTraversableOnceJsonOutput[A, M[A] <: GenTraversableOnce[A]](implicit output: JsonOutput[A]) =
     new JsonOutput[M[A]] {
-      def apply(values: M[A]): JsonValue =
+      def writing(values: M[A]): JsonValue =
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
     }
 
   /** Creates JsonOutput for converting Array to JsonArray. */
   implicit def arrayJsonOutput[T](implicit output: JsonOutput[T]) =
     new JsonOutput[Array[T]] {
-      def apply(values: Array[T]): JsonValue =
+      def writing(values: Array[T]): JsonValue =
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
     }
-
-  /** Converts Array[String] to JsonValue. */
-  implicit def arrayOfStringAsJson(values: Array[String])(implicit output: JsonOutput[Array[String]]): JsonValue =
-    output(values)
-
-  /** Converts M[A] to JsonValue. */
-  implicit def containerAsJson[A, M[A]](value: M[A])(implicit output: JsonOutput[M[A]]): JsonValue =
-    output(value)
-
-  /** Converts Either[A, B] to JsonValue. */
-  implicit def eitherAsJson[A, B](value: Either[A, B])(implicit left: JsonOutput[A], right: JsonOutput[B]): JsonValue =
-    value.fold(left, right)
 
   /**
    * Provides extension methods to `javax.json.JsonValue`.
@@ -248,7 +252,7 @@ object Implicits {
 
     /** Converts json to requested type. */
     def as[T](implicit input: JsonInput[T]): T =
-      input(json)
+      input.reading(json)
 
     /** Optionally converts json to requested type. */
     def asOption[T](implicit input: JsonInput[T]): Option[T] =
