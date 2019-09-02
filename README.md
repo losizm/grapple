@@ -8,7 +8,7 @@ The Scala library that provides extension methods to _javax.json_.
 To use **little-json**, start by adding it to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "2.9.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "3.0.0"
 ```
 
 ### Using Implementation of javax.json
@@ -25,63 +25,63 @@ libraryDependencies += "org.glassfish" % "javax.json" % "1.1.4"
 ## A Taste of little-json
 Here's a taste of what **little-json** offers.
 
-### Converting to and from JSON
+### Reading and Writing JSON
 
-**little-json** is powered by a pair of traits, `ToJson` and `FromJson`.  You
-provide implementations of these to convert your objects to and from JSON.
+**little-json** is powered by a pair of traits, `JsonInput` and `JsonOutput`. You
+provide implementations of these to read and write JSON values.
 
 ```scala
-import javax.json.JsonObject
-import little.json.{ Json, FromJson, ToJson }
+import javax.json.{ JsonObject, JsonValue }
+import little.json.{ Json, JsonInput, JsonOutput }
 import little.json.Implicits._ // Unleash the power
 
 case class User(id: Int, name: String)
 
-// Define how to convert User to JsonObject
-implicit val userToJson: ToJson[User] = {
-  case User(id, name) => Json.obj("id" -> id, "name" -> name)
+// Define how to read User from JsonValue
+implicit val userJsonInput: JsonInput[User] = {
+  case json: JsonObject => User(json.getInt("id"), json.getString("name"))
+  case json: JsonValue  => throw new IllegalArgumentException("JsonObject required")
 }
 
-// Define how to convert JsonObject to User
-implicit val userFromJson: FromJson[User] = {
-  case json: JsonObject => User(json.getInt("id"), json.getString("name"))
-  case json => throw new IllegalArgumentException("JsonObject required")
+// Define how to write User to JsonValue
+implicit val userJsonOutput: JsonOutput[User] = {
+  case User(id, name) => Json.obj("id" -> id, "name" -> name)
 }
 
 // Parse String to JsonValue
 val json = Json.parse("""{ "id": 0, "name": "root" }""")
 
-// Convert JsonValue to User
+// Read User from JsonValue
 val user = json.as[User]
 
-// Convert User back to JsonValue
-val jsonToo = Json.toJson(user)
+// Write User to JsonValue
+val jsonUser = Json.toJson(user)
 ```
 
-A special implementation of `ToJson` is available for converting a collection of
-objects to a `JsonArray`. So, for example, if you define `ToJson[User]`, you
-automagically get `ToJson[Seq[User]]`.
+A special implementation of `JsonOutput` is available for writing a collection of
+objects to a `JsonArray`. So, for example, if you define `JsonOutput[User]`, you
+automagically get `JsonOutput[Seq[User]]`.
 
-The same applies to `FromJson[User]`. You get `FromJson[Seq[User]]` for free.
+The same applies to `JsonInput[User]`. You get `JsonInput[Seq[User]]` for free.
 
 ```scala
 val json = Json.parse("""
   [{ "id": 0, "name": "root" }, { "id": 500, "name": "guest" }]
 """)
 
-// Convert JsonArray to Seq[User]
+// Read Seq[User] from JsonArray
 val users = json.as[Seq[User]]
 
 // In fact, any Traversable will do
-val listOfUsers = json.as[List[User]]
-val iterOfUsers = json.as[Iterator[User]]
-val setOfUsers = json.as[Set[User]]
+val userList = json.as[List[User]]
+val userIter = json.as[Iterator[User]]
+val userSet  = json.as[Set[User]]
 
-// Or even an Array
-val arrayOfUsers = json.as[Array[User]]
+// Or even Array
+val userArray = json.as[Array[User]]
 
-// Convert Seq[User] back to JsonArray
-val dupe = Json.toJson(users)
+// Write Seq[User] to JsonArray
+val jsonUsers = Json.toJson(users)
 ```
 
 ### Extracting Values from JSON Structure
