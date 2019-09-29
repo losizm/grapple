@@ -22,16 +22,17 @@ import scala.util.Success
 object Test {
   case class User(id: Int, name: String, enabled: Boolean = true)
 
-  implicit val userJsonOutput: JsonOutput[User] = { user =>
-    val json = Json.createObjectBuilder()
-    json.add("id", user.id)
-    json.add("name", user.name)
-    json.add("enabled", user.enabled)
-    json.build()
-  }
+  implicit object UserAdapter extends JsonAdapter[User] {
+    def reading(json: JsonValue): User =
+      json.asInstanceOf[JsonObject] match {
+        case obj => User(obj.getInt("id"), obj.getString("name"), obj.getBoolean("enabled", true))
+      }
 
-  implicit val userJsonInput: JsonInput[User] = {
-    case json: JsonObject => User(json.getInt("id"), json.getString("name"), json.getBoolean("enabled", true))
-    case json => throw new JsonException(s"""required OBJECT but found ${json.getValueType}""")
+    def writing(user: User): JsonValue =
+      Json.createObjectBuilder()
+        .add("id", user.id)
+        .add("name", user.name)
+        .add("enabled", user.enabled)
+        .build()
   }
 }
