@@ -19,6 +19,35 @@ import javax.json.{ JsonArrayBuilder, JsonObjectBuilder, JsonValue }
 import javax.json.stream.JsonGenerator
 
 /**
+ * Reads value of type T from JsonValue.
+ *
+ * {{{
+ * import javax.json.JsonObject
+ * import little.json.{ Json, JsonInput }
+ * import little.json.Implicits.JsonValueType
+ *
+ * case class User(id: Int, name: String)
+ *
+ * // Define how to read User from JsonValue
+ * implicit val userInput: JsonInput[User] = {
+ *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
+ *   case json => throw new IllegalArgumentException("JsonObject required")
+ * }
+ *
+ * // Parse String to JsonValue
+ * val json = Json.parse("""{ "id": 0, "name": "root" }""")
+ *
+ * // Read User from JsonValue
+ * val user = json.as[User]
+ * }}}
+ * @see [[JsonOutput]], [[JsonAdapter]]
+ */
+trait JsonInput[T] {
+  /** Converts JsonValue to T value. */
+  def reading(json: JsonValue): T
+}
+
+/**
  * Writes value of type T to JsonValue.
  *
  * {{{
@@ -28,7 +57,7 @@ import javax.json.stream.JsonGenerator
  * case class User(id: Int, name: String)
  *
  * // Define how to write User to JsonValue
- * implicit val userJsonOutput: JsonOutput[User] = { user =>
+ * implicit val userOutput: JsonOutput[User] = { user =>
  *   Json.obj("id" -> user.id, "name" -> user.name)
  * }
  *
@@ -36,7 +65,7 @@ import javax.json.stream.JsonGenerator
  * val json = Json.toJson(User(0, "root"))
  * }}}
  *
- * @see [[JsonInput]]
+ * @see [[JsonInput]], [[JsonAdapter]]
  */
 trait JsonOutput[T] extends BuilderCompanion[T] with ContextWriter[T] {
   /** Converts T value to JsonValue. */
@@ -58,3 +87,34 @@ trait JsonOutput[T] extends BuilderCompanion[T] with ContextWriter[T] {
   def write(name: String, value: T)(implicit generator: JsonGenerator): JsonGenerator =
     generator.write(name, writing(value))
 }
+
+/**
+ * Consolidates [[JsonInput]] and [[JsonOutput]].
+ *
+ * {{{
+ * import javax.json.{ JsonObject, JsonValue }
+ * import little.json.{ Json, JsonAdapter }
+ * import little.json.Implicits._
+ *
+ * case class User(id: Int, name: String)
+ *
+ * implicit object UserAdapter extends JsonAdapter[User] {
+ *   // Define how to read User from JsonValue
+ *   def reading(json: JsonValue): User =
+ *     json.asInstanceOf[JsonObject] match {
+ *       case obj => User(obj.getInt("id"), obj.getString("name"))
+ *     }
+ *
+ *   // Define how to write User to JsonValue
+ *   def writing(user: User): JsonValue =
+ *     Json.obj("id" -> user.id, "name" -> user.name)
+ * }
+ *
+ * // Write User to JsonValue
+ * val json = Json.toJson(User(0, "root"))
+ *
+ * // Read User from JsonValue
+ * val user = json.as[User]
+ * }}}
+ */
+trait JsonAdapter[T] extends JsonInput[T] with JsonOutput[T]
