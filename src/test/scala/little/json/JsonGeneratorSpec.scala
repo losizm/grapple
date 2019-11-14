@@ -30,7 +30,7 @@ class JsonGeneratorSpec extends FlatSpec {
   "JSON generator" should "generate array" in {
     val out = new StringWriter()
 
-    Json.createGenerator(out)
+    Json.createGenerator(out, true)
       .writeStartArray()
       .write(user)
       .writeNullable(user)

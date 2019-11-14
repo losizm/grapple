@@ -16,10 +16,11 @@
 package little.json
 
 import java.io.{ File, FileReader, InputStream, OutputStream, Reader, StringReader, Writer }
+import java.util.{ HashMap => JHashMap }
 
 import javax.json._
 import javax.json.{ Json => JavaxJson }
-import javax.json.stream.{ JsonGenerator, JsonParser }
+import javax.json.stream.{ JsonGenerator, JsonGeneratorFactory, JsonParser, JsonParserFactory }
 
 import scala.util.Try
 
@@ -55,6 +56,9 @@ import scala.util.Try
  * }}}
  */
 object Json {
+  private lazy val prettyPrintingGeneratorFactory = createGeneratorFactory(JsonGenerator.PRETTY_PRINTING -> true)
+  private lazy val prettyPrintingWriterFactory = createWriterFactory(JsonGenerator.PRETTY_PRINTING -> true)
+
   /** Converts T value to JsonValue. */
   def toJson[T](value: T)(implicit output: JsonOutput[T]): JsonValue =
     output.writing(value)
@@ -125,9 +129,33 @@ object Json {
   def createWriter(out: OutputStream): JsonWriter =
     JavaxJson.createWriter(out)
 
+  /**
+   * Creates JsonWriter with given output stream.
+   *
+   * @param out output stream to which JSON is written
+   * @param prettyPrinting specifies whether JSON output should be beautified
+   */
+  def createWriter(out: OutputStream, prettyPrinting: Boolean): JsonWriter =
+    prettyPrinting match {
+      case true  => prettyPrintingWriterFactory.createWriter(out)
+      case false => JavaxJson.createWriter(out)
+    }
+
   /** Creates JsonWriter with given writer. */
   def createWriter(writer: Writer): JsonWriter =
     JavaxJson.createWriter(writer)
+
+  /**
+   * Creates JsonWriter with given writer.
+   *
+   * @param writer writer to which JSON is written
+   * @param prettyPrinting specifies whether JSON output should be beautified
+   */
+  def createWriter(writer: Writer, prettyPrinting: Boolean): JsonWriter =
+    prettyPrinting match {
+      case true  => prettyPrintingWriterFactory.createWriter(writer)
+      case false => JavaxJson.createWriter(writer)
+    }
 
   /** Creates JsonParser with given input stream. */
   def createParser(in: InputStream): JsonParser =
@@ -141,7 +169,45 @@ object Json {
   def createGenerator(out: OutputStream): JsonGenerator =
     JavaxJson.createGenerator(out)
 
+  /**
+   * Creates JsonGenerator with given output stream.
+   *
+   * @param out output stream to which JSON is written
+   * @param prettyPrinting specifies whether JSON output should be beautified
+   */
+  def createGenerator(out: OutputStream, prettyPrinting: Boolean): JsonGenerator =
+    prettyPrinting match {
+      case true  => prettyPrintingGeneratorFactory.createGenerator(out)
+      case false => JavaxJson.createGenerator(out)
+    }
+
   /** Creates JsonGenerator with given writer. */
   def createGenerator(writer: Writer): JsonGenerator =
     JavaxJson.createGenerator(writer)
+
+  /**
+   * Creates JsonGenerator with given writer.
+   *
+   * @param writer writer to which JSON is written
+   * @param prettyPrinting specifies whether JSON output should be beautified
+   */
+  def createGenerator(writer: Writer, prettyPrinting: Boolean): JsonGenerator =
+    prettyPrinting match {
+      case true  => prettyPrintingGeneratorFactory.createGenerator(writer)
+      case false => JavaxJson.createGenerator(writer)
+    }
+
+  private def createWriterFactory(config: (String, Any)*): JsonWriterFactory =
+    JavaxJson.createWriterFactory(
+      config.foldLeft(new JHashMap[String, Any]) {
+        case (xs, (key, value)) => xs.put(key, value); xs
+      }
+    )
+
+  private def createGeneratorFactory(config: (String, Any)*): JsonGeneratorFactory =
+    JavaxJson.createGeneratorFactory(
+      config.foldLeft(new JHashMap[String, Any]) {
+        case (xs, (key, value)) => xs.put(key, value); xs
+      }
+    )
 }
