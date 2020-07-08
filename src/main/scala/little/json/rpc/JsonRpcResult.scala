@@ -17,6 +17,8 @@ package little.json.rpc
 
 import javax.json.{ JsonStructure, JsonValue }
 
+import little.json.{ Json, JsonOutput }
+
 /** Stores result of JSON-RPC response. */
 sealed trait JsonRpcResult {
   /** Tests for result. */
@@ -52,6 +54,15 @@ object JsonRpcResult {
       throw new NullPointerException()
     JsonRpcResultImpl(Left(error))
   }
+
+  /**
+   * Creates successful result.
+   *
+   * @param result successful result
+   * @param toJson converts result to JSON
+   */
+  def apply[T](result: T)(implicit toJson: JsonOutput[T]): JsonRpcResult =
+    apply(Json.toJson(result))
 
   /**
    * Creates successful result.

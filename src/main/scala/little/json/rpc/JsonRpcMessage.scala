@@ -17,6 +17,8 @@ package little.json.rpc
 
 import javax.json.{ JsonStructure, JsonValue }
 
+import little.json.{ Json, JsonOutput }
+
 /** Represents JSON-RPC message. */
 sealed trait JsonRpcMessage {
   /** Gets JSON-RPC version. */
@@ -37,6 +39,108 @@ sealed trait JsonRpcRequest extends JsonRpcMessage {
 
 /** Provides factory for `JsonRpcRequest`. */
 object JsonRpcRequest {
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   */
+  def apply(version: String, id: JsonRpcIdentifier, method: String): JsonRpcRequest =
+    apply(version, id, method, None)
+
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   */
+  def apply(version: String, id: String, method: String): JsonRpcRequest =
+    apply(version, id, method, None)
+
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   */
+  def apply(version: String, id: Long, method: String): JsonRpcRequest =
+    apply(version, id, method, None)
+
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   * @param params method params
+   */
+  def apply(version: String, id: JsonRpcIdentifier, method: String, params: JsonValue): JsonRpcRequest =
+    apply(version, id, method, Option(params))
+
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   * @param params method params
+   */
+  def apply(version: String, id: String, method: String, params: JsonValue): JsonRpcRequest =
+    apply(version, id, method, Option(params))
+
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   * @param params method params
+   */
+  def apply(version: String, id: Long, method: String, params: JsonValue): JsonRpcRequest =
+    apply(version, id, method, Option(params))
+
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   * @param params method params
+   * @param toJson converts params to JSON
+   */
+  def apply[T](version: String, id: JsonRpcIdentifier, method: String, params: T)
+      (implicit toJson: JsonOutput[T]): JsonRpcRequest =
+    apply(version, id, method, Option(Json.toJson(params)))
+
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   * @param params method params
+   * @param toJson converts params to JSON
+   */
+  def apply[T](version: String, id: String, method: String, params: T)
+      (implicit toJson: JsonOutput[T]): JsonRpcRequest =
+    apply(version, id, method, Option(Json.toJson(params)))
+
+  /**
+   * Creates `JsonRpcRequest`.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param method method name
+   * @param params method params
+   * @param toJson converts params to JSON
+   */
+  def apply[T](version: String, id: Long, method: String, params: T)
+      (implicit toJson: JsonOutput[T]): JsonRpcRequest =
+    apply(version, id, method, Option(Json.toJson(params)))
+
   /**
    * Creates `JsonRpcRequest`.
    *
@@ -189,6 +293,42 @@ object JsonRpcResponse {
 
     JsonRpcResponseImpl(version, JsonRpcIdentifier(id), JsonRpcResult(result))
   }
+
+  /**
+   * Creates `JsonRpcResponse` with result.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param result result
+   * @param toJson converts params to JSON
+   */
+  def apply[T](version: String, id: JsonRpcIdentifier, result: T)
+      (implicit toJson: JsonOutput[T]): JsonRpcResponse =
+    apply(version, id, Json.toJson(result))
+
+  /**
+   * Creates `JsonRpcResponse` with result.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param result result
+   * @param toJson converts params to JSON
+   */
+  def apply[T](version: String, id: String, result: T)
+      (implicit toJson: JsonOutput[T]): JsonRpcResponse =
+    apply(version, id, Json.toJson(result))
+
+  /**
+   * Creates `JsonRpcResponse` with result.
+   *
+   * @param version JSON-RPC version
+   * @param id message identifier
+   * @param result result
+   * @param toJson converts params to JSON
+   */
+  def apply[T](version: String, id: Long, result: T)
+      (implicit toJson: JsonOutput[T]): JsonRpcResponse =
+    apply(version, id, Json.toJson(result))
 
   /**
    * Creates `JsonRpcResponse` with error.
