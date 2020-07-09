@@ -15,5 +15,51 @@
  */
 package little.json
 
-/** Defines API for JSON-RPC 2.0. */
+/**
+ * Defines API for [[https://www.jsonrpc.org/specification JSON-RPC 2.0]].
+ *
+ * {{{
+ * import little.json.{ Json, JsonOutput }
+ * import little.json.Implicits._
+ * import little.json.rpc._
+ *
+ * case class Problem(values: Int*)
+ * case class Answer(value: Int)
+ *
+ * // Used when creating "params" in request
+ * implicit val problemOutput: JsonOutput[Problem] = {
+ *   problem => Json.toJson(problem.values)
+ * }
+ *
+ * // Used when creating "result" in response
+ * implicit val answerOutput: JsonOutput[Answer] = {
+ *   answer => Json.obj("answer" -> answer.value)
+ * }
+ *
+ * val request = JsonRpcRequest(
+ *   version = "2.0",
+ *   id = "590d24ae-500a-486c-8d73-8035e78529bd",
+ *   method = "sum",
+ *   params = Problem(1, 2, 3) // Uses problemOutput
+ * )
+ *
+ * val response = JsonRpcResponse(
+ *   version = request.version,
+ *   id = request.id,
+ *   result = request.method match {
+ *     case "sum" =>
+ *       // Sets result
+ *       request.params
+ *         .map(_.as[Array[Int]])
+ *         .map(_.sum)
+ *         .map(Answer(_))
+ *         .map(JsonRpcResult(_)) // Uses answerOutput
+ *         .get
+ *     case name =>
+ *       // Or sets error
+ *       JsonRpcResult(MethodNotFound(name))
+ *   }
+ * )
+ * }}}
+ */
 package object rpc

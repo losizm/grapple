@@ -8,7 +8,7 @@ The Scala library that provides extension methods to _javax.json_.
 To use **little-json**, start by adding it to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "3.2.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "3.3.0"
 ```
 
 ### Using Implementation of javax.json
@@ -188,6 +188,103 @@ val users = parser.nextArray().as[Seq[User]]
 
 assert(parser.next() == ParserEvent.END_OBJECT)
 parser.close()
+```
+
+## Working with JSON-RPC 2.0
+
+As a bonus, an API is defined for working with [JSON-RPC 2.0](https://www.jsonrpc.org/specification).
+
+You can build requests and response with Scala objects
+
+```scala
+import little.json.{ Json, JsonOutput }
+import little.json.Implicits._
+import little.json.rpc._
+
+case class Problem(values: Int*)
+case class Answer(value: Int)
+
+// Used when creating "params" in request
+implicit val problemOutput: JsonOutput[Problem] = {
+  problem => Json.toJson(problem.values)
+}
+
+// Used when creating "result" in response
+implicit val answerOutput: JsonOutput[Answer] = {
+  answer => Json.obj("answer" -> answer.value)
+}
+
+val request = JsonRpcRequest(
+  version = "2.0",
+  id = "590d24ae-500a-486c-8d73-8035e78529bd",
+  method = "sum",
+  params = Problem(1, 2, 3) // Uses problemOutput
+)
+
+val response = JsonRpcResponse(
+  version = request.version,
+  id = request.id,
+  result = request.method match {
+    case "sum" =>
+      // Sets result
+      request.params
+        .map(_.as[Array[Int]])
+        .map(_.sum)
+        .map(Answer(_))
+        .map(JsonRpcResult(_)) // Uses answerOutput
+        .get
+    case name =>
+      // Or sets error
+      JsonRpcResult(MethodNotFound(name))
+  }
+)
+```
+
+And you can parse them from JSON text.
+
+```scala
+import javax.json.{ JsonArray, JsonObject }
+
+import little.json.{ Json, JsonInput }
+import little.json.Implicits._
+import little.json.rpc._
+
+case class Problem(values: Int*)
+case class Answer(value: Int)
+
+implicit val problemInput: JsonInput[Problem] = {
+  case arr: JsonArray => Problem(arr.as[Array[Int]].toSeq : _*)
+}
+
+implicit val answerInput: JsonInput[Answer] = {
+  case obj: JsonObject => Answer(obj.getInt("answer"))
+}
+
+val request = JsonRpc.parseRequest("""
+  {
+    "jsonrpc": "2.0",
+    "id": "590d24ae-500a-486c-8d73-8035e78529bd",
+    "method": "sum",
+    "params": [1, 2, 3]
+  }
+""")
+
+assert(request.version == "2.0")
+assert(request.id.stringValue == "590d24ae-500a-486c-8d73-8035e78529bd")
+assert(request.method == "sum")
+assert(request.params.exists(_.as[Problem] == Problem(1, 2, 3)))
+
+val response = JsonRpc.parseResponse("""
+  {
+    "jsonrpc": "2.0",
+    "id": "590d24ae-500a-486c-8d73-8035e78529bd",
+    "result": { "answer": 6 }
+  }
+""")
+
+assert(response.version == "2.0")
+assert(response.id.stringValue == "590d24ae-500a-486c-8d73-8035e78529bd")
+assert(response.result.get.as[Answer] == Answer(6))
 ```
 
 ## API Documentation
