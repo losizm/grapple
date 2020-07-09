@@ -1,5 +1,5 @@
 name := "little-json"
-version := "3.2.0"
+version := "3.3.0"
 organization := "com.github.losizm"
 
 description := "The Scala library that provides extension methods to javax.json"
