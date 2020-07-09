@@ -21,18 +21,15 @@ import little.json.{ Json, JsonOutput }
 
 /** Stores result of JSON-RPC response. */
 sealed trait JsonRpcResult {
-  /** Tests for result. */
-  def isResult: Boolean
-
-  /** Tests for error. */
-  def isError: Boolean
-
   /**
    * Gets result.
    *
    * @throws NoSuchElementException if no result
    */
-  def result: JsonValue
+  def get: JsonValue
+
+  /** Tests for error. */
+  def isError: Boolean
 
   /**
    * Gets error.
@@ -81,9 +78,8 @@ object JsonRpcResult {
 }
 
 private case class JsonRpcResultImpl(either: Either[JsonRpcError, JsonValue]) extends JsonRpcResult {
-  val isResult = either.isRight
   val isError = either.isLeft
 
-  def result = either.getOrElse(throw new NoSuchElementException("no result"))
+  def get = either.getOrElse(throw new NoSuchElementException("no result"))
   def error = either.swap.getOrElse(throw new NoSuchElementException("no error"))
 }
