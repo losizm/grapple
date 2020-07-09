@@ -27,7 +27,7 @@ class JsonRpcParseRequestSpec extends FlatSpec {
       "method": "compute"
     }"""
 
-    val req = JsonRpc.toRequest(text)
+    val req = JsonRpc.parseRequest(text)
     assert(req.version == "2.0")
     assert(req.id.stringValue == "abc")
     assert(req.method == "compute")
@@ -42,7 +42,7 @@ class JsonRpcParseRequestSpec extends FlatSpec {
       "params": { "a": 1, "b": 2 }
     }"""
 
-    val req = JsonRpc.toRequest(text)
+    val req = JsonRpc.parseRequest(text)
     assert(req.version == "2.0")
     assert(req.id.numberValue == 123)
     assert(req.method == "compute")
@@ -55,7 +55,7 @@ class JsonRpcParseRequestSpec extends FlatSpec {
   }
 
   it should "not parse request as array" in {
-    assertThrows[InvalidRequest](JsonRpc.toRequest("[0, 1, 2]"))
+    assertThrows[InvalidRequest](JsonRpc.parseRequest("[0, 1, 2]"))
   }
 
   it should "not parse request with parse error" in {
@@ -65,7 +65,7 @@ class JsonRpcParseRequestSpec extends FlatSpec {
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[ParseError](JsonRpc.toRequest(text))
+    assertThrows[ParseError](JsonRpc.parseRequest(text))
   }
 
   it should "not parse request without jsonrpc" in {
@@ -74,7 +74,7 @@ class JsonRpcParseRequestSpec extends FlatSpec {
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](JsonRpc.toRequest(text))
+    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
   }
 
   it should "not parse request with number value for jsonrpc" in {
@@ -84,7 +84,7 @@ class JsonRpcParseRequestSpec extends FlatSpec {
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](JsonRpc.toRequest(text))
+    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
   }
 
   it should "not parse request without method" in {
@@ -93,7 +93,7 @@ class JsonRpcParseRequestSpec extends FlatSpec {
       "id": 123,
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](JsonRpc.toRequest(text))
+    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
   }
 
   it should "not parse request with array value for method" in {
@@ -103,7 +103,7 @@ class JsonRpcParseRequestSpec extends FlatSpec {
       "method": [],
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](JsonRpc.toRequest(text))
+    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
   }
 
   it should "not parse request with string value for params" in {
@@ -113,6 +113,6 @@ class JsonRpcParseRequestSpec extends FlatSpec {
       "method": "compute",
       "params": "a"
     }"""
-    assertThrows[InvalidRequest](JsonRpc.toRequest(text))
+    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
   }
 }

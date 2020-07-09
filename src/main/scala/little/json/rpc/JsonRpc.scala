@@ -30,7 +30,7 @@ object JsonRpc {
    *
    * @param text request
    */
-  def toRequest(text: String): JsonRpcRequest = {
+  def parseRequest(text: String): JsonRpcRequest = {
     val json = try parse(text) catch {
       case _: ClassCastException     => throw InvalidRequest("request must be object value")
       case err: JsonParsingException =>
@@ -83,7 +83,7 @@ object JsonRpc {
    *
    * @param text response
    */
-  def toResponse(text: String): JsonRpcResponse = {
+  def parseResponse(text: String): JsonRpcResponse = {
     val json = try parse(text) catch {
       case _: ClassCastException => throw new IllegalArgumentException("request must be object value")
     }

@@ -30,7 +30,7 @@ class JsonRpcParseResponseSpec extends FlatSpec {
       "result": [0, 1, 2]
     }"""
 
-    val res = JsonRpc.toResponse(text)
+    val res = JsonRpc.parseResponse(text)
     assert(res.version == "2.0")
     assert(res.id.stringValue == "abc")
     assert(res.result.get.as[Seq[Int]] == Seq(0, 1, 2))
@@ -43,7 +43,7 @@ class JsonRpcParseResponseSpec extends FlatSpec {
       "error": { "code": -32603, "message": "Internal Error" }
     }"""
 
-    val res = JsonRpc.toResponse(text)
+    val res = JsonRpc.parseResponse(text)
     assert(res.version == "2.0")
     assert(res.id.numberValue == 123)
     assert(res.result.error.isInternalError)
@@ -51,7 +51,7 @@ class JsonRpcParseResponseSpec extends FlatSpec {
   }
 
   it should "not parse response as array" in {
-    assertThrows[IllegalArgumentException](JsonRpc.toResponse("[0, 1, 2]"))
+    assertThrows[IllegalArgumentException](JsonRpc.parseResponse("[0, 1, 2]"))
   }
 
   it should "not parse response with invalid JSON" in {
@@ -60,7 +60,7 @@ class JsonRpcParseResponseSpec extends FlatSpec {
       "id": 123
       "result": [0, 1, 2]
     }"""
-    assertThrows[JsonParsingException](JsonRpc.toResponse(text))
+    assertThrows[JsonParsingException](JsonRpc.parseResponse(text))
   }
 
   it should "not parse response without jsonrpc" in {
@@ -68,7 +68,7 @@ class JsonRpcParseResponseSpec extends FlatSpec {
       "id": 123,
       "result": [0, 1, 2]
     }"""
-    assertThrows[IllegalArgumentException](JsonRpc.toResponse(text))
+    assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
   }
 
   it should "not parse response with number value for jsonrpc" in {
@@ -77,7 +77,7 @@ class JsonRpcParseResponseSpec extends FlatSpec {
       "id": 123,
       "result": [0, 1, 2]
     }"""
-    assertThrows[IllegalArgumentException](JsonRpc.toResponse(text))
+    assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
   }
 
   it should "not parse response without result" in {
@@ -85,7 +85,7 @@ class JsonRpcParseResponseSpec extends FlatSpec {
       "jsonrpc": "2.0",
       "id": 123
     }"""
-    assertThrows[IllegalArgumentException](JsonRpc.toResponse(text))
+    assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
   }
 
   it should "not parse response with string value for result" in {
@@ -94,6 +94,6 @@ class JsonRpcParseResponseSpec extends FlatSpec {
       "id": 123,
       "result": "xyz"
     }"""
-    assertThrows[IllegalArgumentException](JsonRpc.toResponse(text))
+    assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
   }
 }
