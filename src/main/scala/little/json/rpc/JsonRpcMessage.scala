@@ -35,6 +35,14 @@ sealed trait JsonRpcRequest extends JsonRpcMessage {
 
   /** Gets parameters. */
   def params: Option[JsonValue]
+
+  /**
+   * Tests for notification.
+   *
+   * @note A request is a notification if its identifier is undefined.
+   */
+  def isNotification: Boolean =
+    id.isUndefined
 }
 
 /** Provides factory for `JsonRpcRequest`. */
@@ -374,4 +382,7 @@ object JsonRpcResponse {
   }
 }
 
-private case class JsonRpcResponseImpl(version: String, id: JsonRpcIdentifier, result: JsonRpcResult) extends JsonRpcResponse
+private case class JsonRpcResponseImpl(
+  version: String,
+  id: JsonRpcIdentifier,
+  result: JsonRpcResult) extends JsonRpcResponse

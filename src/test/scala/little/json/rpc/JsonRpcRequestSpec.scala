@@ -41,6 +41,7 @@ class JsonRpcRequestSpec extends FlatSpec {
   it should "create JsonRpcRequest" in {
     val req1 = JsonRpcRequest("2.0", "abc", "compute")
     assert(req1.version == "2.0")
+    assert(!req1.isNotification)
     assert(req1.id == JsonRpcIdentifier("abc"))
     assert(req1.id.stringValue == "abc")
     assert(req1.method == "compute")
@@ -48,9 +49,18 @@ class JsonRpcRequestSpec extends FlatSpec {
 
     val req2 = JsonRpcRequest("2.0", 123, "compute", Param("x", 1))
     assert(req2.version == "2.0")
+    assert(!req2.isNotification)
     assert(req2.id == JsonRpcIdentifier(123))
     assert(req2.id.numberValue == 123)
     assert(req2.method == "compute")
     assert(req2.params.map(_.as[Param]).contains(Param("x", 1)))
+
+    val req3 = JsonRpcRequest("2.0", JsonRpcIdentifier.undefined, "compute", Param("x", 1))
+    assert(req3.version == "2.0")
+    assert(req3.isNotification)
+    assert(req3.id == JsonRpcIdentifier.undefined)
+    assert(req3.id.isUndefined)
+    assert(req3.method == "compute")
+    assert(req3.params.map(_.as[Param]).contains(Param("x", 1)))
   }
 }
