@@ -61,9 +61,9 @@ object JsonRpc {
       case JsonValue.NULL    => builder.idNull()
       case value: JsonString => builder.id(value.getString())
       case value: JsonNumber =>
-        try builder.id(value.longValueExact())
-        catch {
-          case _: Exception => throw InvalidRequest("id number must be integer value")
+        value.isIntegral match {
+          case true  => builder.id(value.longValueExact())
+          case false => throw InvalidRequest("id number must be integer value")
         }
       case _: JsonValue      => throw InvalidRequest("id must be string or number value")
     }
@@ -105,9 +105,9 @@ object JsonRpc {
       case JsonValue.NULL    => builder.idNull()
       case value: JsonString => builder.id(value.getString())
       case value: JsonNumber =>
-        try builder.id(value.longValueExact())
-        catch {
-          case _: Exception => throw new IllegalArgumentException("id number must be integer value")
+        value.isIntegral match {
+          case true  => builder.id(value.longValueExact())
+          case false => throw new IllegalArgumentException("id number must be integer value")
         }
       case _: JsonValue      => throw new IllegalArgumentException("id must be string or number value")
     }
@@ -117,14 +117,13 @@ object JsonRpc {
         json.get("error") match {
           case null  => throw new IllegalArgumentException("include must include either result or error")
           case value: JsonObject =>
-            val code = value.getInt("code")
+            val code    = value.getInt("code")
             val message = value.getString("message")
-            val data = Option(value.get("data"))
+            val data    = Option(value.get("data"))
             builder.error(code, message, data)
-          case _: JsonValue => throw new IllegalArgumentException("error must be array value")
+          case _: JsonValue => throw new IllegalArgumentException("error must be object value")
         }
-      case value: JsonStructure => builder.result(value)
-      case _: JsonValue => throw new IllegalArgumentException("result must be array or object value")
+      case value: JsonValue => builder.result(value)
     }
 
     builder.build()

@@ -38,18 +38,58 @@ class JsonRpcResponseSpec extends FlatSpec {
       "value" -> param.value
     )
 
-  it should "create JsonRpcResponse" in {
-    val res1 = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), Result("y", 2))
+  it should "create JsonRpcResponse with object result" in {
+    val res = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), Result("y", 2))
+    assert(res.version == "2.0")
+    assert(res.id == JsonRpcIdentifier("abc"))
+    assert(res.id.stringValue == "abc")
+    assert(res.result.as[Result] == Result("y", 2))
+  }
+
+  it should "create JsonRpcResponse with array result" in {
+    val res = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), Array(0, 1, 2))
+    assert(res.version == "2.0")
+    assert(res.id == JsonRpcIdentifier("abc"))
+    assert(res.id.stringValue == "abc")
+    assert(res.result.as[Seq[Int]] == Seq(0, 1, 2))
+  }
+
+  it should "create JsonRpcResponse with number result" in {
+    val res = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), 2)
+    assert(res.version == "2.0")
+    assert(res.id == JsonRpcIdentifier("abc"))
+    assert(res.id.stringValue == "abc")
+    assert(res.result.as[Int] == 2)
+  }
+
+  it should "create JsonRpcResponse with string result" in {
+    val res = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), "success")
+    assert(res.version == "2.0")
+    assert(res.id == JsonRpcIdentifier("abc"))
+    assert(res.id.stringValue == "abc")
+    assert(res.result.as[String] == "success")
+  }
+
+  it should "create JsonRpcResponse with boolean result" in {
+    val res1 = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), true)
     assert(res1.version == "2.0")
     assert(res1.id == JsonRpcIdentifier("abc"))
     assert(res1.id.stringValue == "abc")
-    assert(res1.result.as[Result] == Result("y", 2))
+    assert(res1.result.as[Boolean])
 
-    val res2 = JsonRpcResponse("2.0", JsonRpcIdentifier(123), InvalidRequest("Invalid request"))
+    val res2 = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), false)
     assert(res2.version == "2.0")
-    assert(res2.id == JsonRpcIdentifier(123))
-    assert(res2.id.numberValue == 123)
-    assert(res2.error.isInvalidRequest)
-    assert(res2.error.message == "Invalid request")
+    assert(res2.id == JsonRpcIdentifier("abc"))
+    assert(res2.id.stringValue == "abc")
+    assert(!res2.result.as[Boolean])
+  }
+
+  it should "create JsonRpcResponse with error" in {
+    val res = JsonRpcResponse("2.0", JsonRpcIdentifier(123), InvalidRequest("Invalid request"))
+    assert(res.version == "2.0")
+    assert(res.id == JsonRpcIdentifier(123))
+    assert(res.id.numberValue == 123)
+    assert(res.error.isInvalidRequest)
+    assert(res.error.message == "Invalid request")
   }
 }

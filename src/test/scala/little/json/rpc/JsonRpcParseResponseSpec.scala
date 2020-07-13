@@ -18,12 +18,32 @@ package little.json.rpc
 import javax.json.JsonObject
 import javax.json.stream.JsonParsingException
 
+import little.json.JsonInput
 import little.json.Implicits._
 
 import org.scalatest.FlatSpec
 
 class JsonRpcParseResponseSpec extends FlatSpec {
-  it should "parse response with result" in {
+  case class Answer(value: Int)
+
+  implicit val resultInput: JsonInput[Answer] = {
+    case result: JsonObject => Answer(result.getInt("answer"))
+  }
+
+  it should "parse response with object result" in {
+    val text = """{
+      "jsonrpc": "2.0",
+      "id": "abc",
+      "result": { "answer": 3 }
+    }"""
+
+    val res = JsonRpc.parseResponse(text)
+    assert(res.version == "2.0")
+    assert(res.id.stringValue == "abc")
+    assert(res.result.as[Answer] == Answer(3))
+  }
+
+  it should "parse response with array result" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": "abc",
@@ -34,6 +54,45 @@ class JsonRpcParseResponseSpec extends FlatSpec {
     assert(res.version == "2.0")
     assert(res.id.stringValue == "abc")
     assert(res.result.as[Seq[Int]] == Seq(0, 1, 2))
+  }
+
+  it should "parse response with number result" in {
+    val text = """{
+      "jsonrpc": "2.0",
+      "id": "abc",
+      "result": 3
+    }"""
+
+    val res = JsonRpc.parseResponse(text)
+    assert(res.version == "2.0")
+    assert(res.id.stringValue == "abc")
+    assert(res.result.as[Int] == 3)
+  }
+
+  it should "parse response with string result" in {
+    val text = """{
+      "jsonrpc": "2.0",
+      "id": 123,
+      "result": "success"
+    }"""
+
+    val res = JsonRpc.parseResponse(text)
+    assert(res.version == "2.0")
+    assert(res.id.numberValue == 123)
+    assert(res.result.as[String] == "success")
+  }
+
+  it should "parse response with boolean result" in {
+    val text = """{
+      "jsonrpc": "2.0",
+      "id": 123,
+      "result": true
+    }"""
+
+    val res = JsonRpc.parseResponse(text)
+    assert(res.version == "2.0")
+    assert(res.id.numberValue == 123)
+    assert(res.result.as[Boolean])
   }
 
   it should "parse response with error" in {
@@ -84,15 +143,6 @@ class JsonRpcParseResponseSpec extends FlatSpec {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123
-    }"""
-    assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
-  }
-
-  it should "not parse response with string value for result" in {
-    val text = """{
-      "jsonrpc": "2.0",
-      "id": 123,
-      "result": "xyz"
     }"""
     assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
   }

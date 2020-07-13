@@ -234,9 +234,6 @@ object JsonRpcResponse {
       if (value == null)
         throw new NullPointerException()
 
-      if (!value.isInstanceOf[JsonStructure])
-        throw new IllegalArgumentException("result must be either JSON array or object")
-
       _content = Right(value)
       this
     }
