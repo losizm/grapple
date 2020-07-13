@@ -1,5 +1,5 @@
 name := "little-json"
-version := "3.3.0"
+version := "4.0.0"
 organization := "com.github.losizm"
 
 description := "The Scala library that provides extension methods to javax.json"
@@ -46,4 +46,3 @@ publishTo := {
   if (isSnapshot.value) Some("snaphsots" at s"$nexus/content/repositories/snapshots")
   else Some("releases" at s"$nexus/service/local/staging/deploy/maven2")
 }
-
