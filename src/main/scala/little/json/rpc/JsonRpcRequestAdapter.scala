@@ -29,9 +29,9 @@ private object JsonRpcRequestAdapter extends JsonAdapter[JsonRpcRequest] {
     val builder = JsonRpcRequest.builder()
 
     obj.get("jsonrpc") match {
-      case null          => throw InvalidRequest("Invalid Request", "request must include jsonrpc")
+      case null          => throw InvalidRequest("request must include jsonrpc")
       case s: JsonString => builder.version(s.getString)
-      case _: JsonValue  => throw InvalidRequest("Invalid Request", "jsonrpc must be string value")
+      case _: JsonValue  => throw InvalidRequest("jsonrpc must be string value")
     }
 
     obj.get("id") match {
@@ -41,21 +41,21 @@ private object JsonRpcRequestAdapter extends JsonAdapter[JsonRpcRequest] {
       case n: JsonNumber  =>
         n.isIntegral match {
           case true  => builder.id(n.longValueExact)
-          case false => throw InvalidRequest("Invalid Request", "id number must be integer value")
+          case false => throw InvalidRequest("id number must be integer value")
         }
-      case _: JsonValue   => throw InvalidRequest("Invalid Request", "id must be string or number value")
+      case _: JsonValue   => throw InvalidRequest("id must be string or number value")
     }
 
     json.get("method") match {
-      case null          => throw InvalidRequest("Invalid Request", "request must include method")
+      case null          => throw InvalidRequest("request must include method")
       case s: JsonString => builder.method(s.getString)
-      case _: JsonValue  => throw InvalidRequest("Invalid Request", "method must be string value")
+      case _: JsonValue  => throw InvalidRequest("method must be string value")
     }
 
     obj.get("params") match {
       case null             => builder.params(None)
       case s: JsonStructure => builder.params(s)
-      case _: JsonValue     => throw InvalidRequest("Invalid Request", "params must be array or object value")
+      case _: JsonValue     => throw InvalidRequest("params must be array or object value")
     }
 
     builder.build()

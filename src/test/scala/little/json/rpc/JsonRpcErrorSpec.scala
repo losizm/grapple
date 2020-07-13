@@ -43,6 +43,11 @@ class JsonRpcErrorSpec extends FlatSpec {
     assert(err1.code == 100)
     assert(err1.message == "Error")
     assert(err1.data.isEmpty)
+    assert(!err1.isParseError)
+    assert(!err1.isInvalidRequest)
+    assert(!err1.isMethodNotFound)
+    assert(!err1.isInvalidParams)
+    assert(!err1.isInternalError)
 
     err1 match {
       case JsonRpcError(code, message, data) =>
@@ -74,13 +79,28 @@ class JsonRpcErrorSpec extends FlatSpec {
         assert(message == "Error")
         assert(data.as[Data] == Data("Severe", "Unknown"))
     }
+
+    val err4 = JsonRpcError(-32700, "Error")
+    assert(err4.code == -32700)
+    assert(err4.message == "Error")
+    assert(err4.data.isEmpty)
+    assert(err4.isParseError)
+    assert(!err4.isInvalidRequest)
+    assert(!err4.isMethodNotFound)
+    assert(!err4.isInvalidParams)
+    assert(!err4.isInternalError)
   }
 
   it should "create ParseError" in {
-    val err1 = ParseError("Parse error")
+    val err1 = ParseError()
     assert(err1.code == -32700)
     assert(err1.message == "Parse error")
     assert(err1.data.isEmpty)
+    assert(err1.isParseError)
+    assert(!err1.isInvalidRequest)
+    assert(!err1.isMethodNotFound)
+    assert(!err1.isInvalidParams)
+    assert(!err1.isInternalError)
 
     err1 match {
       case ParseError(code, message, data) =>
@@ -89,7 +109,7 @@ class JsonRpcErrorSpec extends FlatSpec {
         assert(data.isEmpty)
     }
 
-    val err2 = ParseError("Parse error", "More information")
+    val err2 = ParseError("More information")
     assert(err2.code == -32700)
     assert(err2.message == "Parse error")
     assert(err2.data.exists(_.as[String] == "More information"))
@@ -103,153 +123,173 @@ class JsonRpcErrorSpec extends FlatSpec {
   }
 
   it should "create InvalidRequest" in {
-    val err1 = InvalidRequest("InvalidRequest")
+    val err1 = InvalidRequest()
     assert(err1.code == -32600)
-    assert(err1.message == "InvalidRequest")
+    assert(err1.message == "Invalid request")
     assert(err1.data.isEmpty)
+    assert(!err1.isParseError)
+    assert(err1.isInvalidRequest)
+    assert(!err1.isMethodNotFound)
+    assert(!err1.isInvalidParams)
+    assert(!err1.isInternalError)
 
     err1 match {
       case InvalidRequest(code, message, data) =>
         assert(code == -32600)
-        assert(message == "InvalidRequest")
+        assert(message == "Invalid request")
         assert(data.isEmpty)
     }
 
-    val err2 = InvalidRequest("InvalidRequest", "More information")
+    val err2 = InvalidRequest("More information")
     assert(err2.code == -32600)
-    assert(err2.message == "InvalidRequest")
+    assert(err2.message == "Invalid request")
     assert(err2.data.exists(_.as[String] == "More information"))
 
     err2 match {
       case InvalidRequest(code, message, Some(data)) =>
         assert(code == -32600)
-        assert(message == "InvalidRequest")
+        assert(message == "Invalid request")
         assert(data.as[String] == "More information")
     }
 
-    val err3 = InvalidRequest("Error", Data("Severe", "Unknown"))
+    val err3 = InvalidRequest(Data("Severe", "Unknown"))
     assert(err3.code == -32600)
-    assert(err3.message == "Error")
+    assert(err3.message == "Invalid request")
     assert(err3.data.exists(_.as[Data] == Data("Severe", "Unknown")))
 
     err3 match {
       case InvalidRequest(code, message, Some(data)) =>
         assert(code == -32600)
-        assert(message == "Error")
+        assert(message == "Invalid request")
         assert(data.as[Data] == Data("Severe", "Unknown"))
     }
   }
 
   it should "create MethodNotFound" in {
-    val err1 = MethodNotFound("MethodNotFound")
+    val err1 = MethodNotFound()
     assert(err1.code == -32601)
-    assert(err1.message == "MethodNotFound")
+    assert(err1.message == "Method not found")
     assert(err1.data.isEmpty)
+    assert(!err1.isParseError)
+    assert(!err1.isInvalidRequest)
+    assert(err1.isMethodNotFound)
+    assert(!err1.isInvalidParams)
+    assert(!err1.isInternalError)
 
     err1 match {
       case MethodNotFound(code, message, data) =>
         assert(code == -32601)
-        assert(message == "MethodNotFound")
+        assert(message == "Method not found")
         assert(data.isEmpty)
     }
 
-    val err2 = MethodNotFound("MethodNotFound", "More information")
+    val err2 = MethodNotFound("More information")
     assert(err2.code == -32601)
-    assert(err2.message == "MethodNotFound")
+    assert(err2.message == "Method not found")
     assert(err2.data.exists(_.as[String] == "More information"))
 
     err2 match {
       case MethodNotFound(code, message, Some(data)) =>
         assert(code == -32601)
-        assert(message == "MethodNotFound")
+        assert(message == "Method not found")
         assert(data.as[String] == "More information")
     }
 
-    val err3 = MethodNotFound("Error", Data("Severe", "Unknown"))
+    val err3 = MethodNotFound(Data("Severe", "Unknown"))
     assert(err3.code == -32601)
-    assert(err3.message == "Error")
+    assert(err3.message == "Method not found")
     assert(err3.data.exists(_.as[Data] == Data("Severe", "Unknown")))
 
     err3 match {
       case MethodNotFound(code, message, Some(data)) =>
         assert(code == -32601)
-        assert(message == "Error")
+        assert(message == "Method not found")
         assert(data.as[Data] == Data("Severe", "Unknown"))
     }
   }
 
   it should "create InvalidParams" in {
-    val err1 = InvalidParams("InvalidParams")
+    val err1 = InvalidParams()
     assert(err1.code == -32602)
-    assert(err1.message == "InvalidParams")
+    assert(err1.message == "Invalid params")
     assert(err1.data.isEmpty)
+    assert(!err1.isParseError)
+    assert(!err1.isInvalidRequest)
+    assert(!err1.isMethodNotFound)
+    assert(err1.isInvalidParams)
+    assert(!err1.isInternalError)
 
     err1 match {
       case InvalidParams(code, message, data) =>
         assert(code == -32602)
-        assert(message == "InvalidParams")
+        assert(message == "Invalid params")
         assert(data.isEmpty)
     }
 
-    val err2 = InvalidParams("InvalidParams", "More information")
+    val err2 = InvalidParams("More information")
     assert(err2.code == -32602)
-    assert(err2.message == "InvalidParams")
+    assert(err2.message == "Invalid params")
     assert(err2.data.exists(_.as[String] == "More information"))
 
     err2 match {
       case InvalidParams(code, message, Some(data)) =>
         assert(code == -32602)
-        assert(message == "InvalidParams")
+        assert(message == "Invalid params")
         assert(data.as[String] == "More information")
     }
 
-    val err3 = InvalidParams("Error", Data("Severe", "Unknown"))
+    val err3 = InvalidParams(Data("Severe", "Unknown"))
     assert(err3.code == -32602)
-    assert(err3.message == "Error")
+    assert(err3.message == "Invalid params")
     assert(err3.data.exists(_.as[Data] == Data("Severe", "Unknown")))
 
     err3 match {
       case InvalidParams(code, message, Some(data)) =>
         assert(code == -32602)
-        assert(message == "Error")
+        assert(message == "Invalid params")
         assert(data.as[Data] == Data("Severe", "Unknown"))
     }
   }
 
   it should "create InternalError" in {
-    val err1 = InternalError("InternalError")
+    val err1 = InternalError()
     assert(err1.code == -32603)
-    assert(err1.message == "InternalError")
+    assert(err1.message == "Internal error")
     assert(err1.data.isEmpty)
+    assert(!err1.isParseError)
+    assert(!err1.isInvalidRequest)
+    assert(!err1.isMethodNotFound)
+    assert(!err1.isInvalidParams)
+    assert(err1.isInternalError)
 
     err1 match {
       case InternalError(code, message, data) =>
         assert(code == -32603)
-        assert(message == "InternalError")
+        assert(message == "Internal error")
         assert(data.isEmpty)
     }
 
-    val err2 = InternalError("InternalError", "More information")
+    val err2 = InternalError("More information")
     assert(err2.code == -32603)
-    assert(err2.message == "InternalError")
+    assert(err2.message == "Internal error")
     assert(err2.data.exists(_.as[String] == "More information"))
 
     err2 match {
       case InternalError(code, message, Some(data)) =>
         assert(code == -32603)
-        assert(message == "InternalError")
+        assert(message == "Internal error")
         assert(data.as[String] == "More information")
     }
 
-    val err3 = InternalError("Error", Data("Severe", "Unknown"))
+    val err3 = InternalError(Data("Severe", "Unknown"))
     assert(err3.code == -32603)
-    assert(err3.message == "Error")
+    assert(err3.message == "Internal error")
     assert(err3.data.exists(_.as[Data] == Data("Severe", "Unknown")))
 
     err3 match {
       case InternalError(code, message, Some(data)) =>
         assert(code == -32603)
-        assert(message == "Error")
+        assert(message == "Internal error")
         assert(data.as[Data] == Data("Severe", "Unknown"))
     }
   }

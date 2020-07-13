@@ -99,14 +99,7 @@ object JsonRpcError {
    * @param data additional information about error
    */
   def apply(code: Int, message: String, data: Option[JsonValue]): JsonRpcError =
-    code match {
-      case -32700 => ParseError(message, data)
-      case -32600 => InvalidRequest(message, data)
-      case -32601 => MethodNotFound(message, data)
-      case -32602 => InvalidParams(message, data)
-      case -32603 => InternalError(message, data)
-      case _      => new JsonRpcError(code, message, data)
-    }
+    new JsonRpcError(code, message, data)
 
   /**
    * Destructures `JsonRpcError` to its `code`, `message`, and `data`.
@@ -122,52 +115,40 @@ object JsonRpcError {
 
 /**
  * Represents JSON-RPC parse error (code = -32700).
- *
- * @constructor Creates JSON-RPC parse error.
- *
- * @param message error message
- * @param data additional information about error
  */
-final class ParseError private (message: String, data: Option[JsonValue])
-  extends JsonRpcError(-32700, message, data)
+final class ParseError private (data: Option[JsonValue])
+  extends JsonRpcError(-32700, "Parse error", data)
 
 /** Provides factory for `ParseError`. */
 object ParseError {
-  /**
-   * Creates `ParseError`.
-   *
-   * @param message error message
-   */
-  def apply(message: String): ParseError =
-    apply(message, None)
+  /** Creates `ParseError`. */
+  def apply(): ParseError =
+    apply(None)
 
   /**
    * Creates `ParseError`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: JsonValue): ParseError =
-    apply(message, Option(data))
+  def apply(data: JsonValue): ParseError =
+    apply(Option(data))
 
   /**
    * Creates `ParseError`.
    *
-   * @param message error message
    * @param data additional information about error
    * @param toJson converts data to JSON
    */
-  def apply[T](message: String, data: T)(implicit toJson: JsonOutput[T]): ParseError =
-    apply(message, Option(Json.toJson(data)))
+  def apply[T](data: T)(implicit toJson: JsonOutput[T]): ParseError =
+    apply(Option(Json.toJson(data)))
 
   /**
    * Creates `ParseError`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: Option[JsonValue]): ParseError =
-    new ParseError(message, data)
+  def apply(data: Option[JsonValue]): ParseError =
+    new ParseError(data)
 
   /**
    * Destructures `ParseError` to its `code`, `message`, and `data`.
@@ -183,52 +164,40 @@ object ParseError {
 
 /**
  * Represents JSON-RPC invalid request (code = -32600).
- *
- * @constructor Creates JSON-RPC invalid request.
- *
- * @param message error message
- * @param data additional information about error
  */
-final class InvalidRequest private (message: String, data: Option[JsonValue])
-  extends JsonRpcError(-32600, message, data)
+final class InvalidRequest private (data: Option[JsonValue])
+  extends JsonRpcError(-32600, "Invalid request", data)
 
 /** Provides factory for `InvalidRequest`. */
 object InvalidRequest {
-  /**
-   * Creates `InvalidRequest`.
-   *
-   * @param message error message
-   */
-  def apply(message: String): InvalidRequest =
-    apply(message, None)
+  /** Creates `InvalidRequest`. */
+  def apply(): InvalidRequest =
+    apply(None)
 
   /**
    * Creates `InvalidRequest`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: JsonValue): InvalidRequest =
-    apply(message, Option(data))
+  def apply(data: JsonValue): InvalidRequest =
+    apply(Option(data))
 
   /**
    * Creates `InvalidRequest`.
    *
-   * @param message error message
    * @param data additional information about error
    * @param toJson converts data to JSON
    */
-  def apply[T](message: String, data: T)(implicit toJson: JsonOutput[T]): InvalidRequest =
-    apply(message, Option(Json.toJson(data)))
+  def apply[T](data: T)(implicit toJson: JsonOutput[T]): InvalidRequest =
+    apply(Option(Json.toJson(data)))
 
   /**
    * Creates `InvalidRequest`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: Option[JsonValue]): InvalidRequest =
-    new InvalidRequest(message, data)
+  def apply(data: Option[JsonValue]): InvalidRequest =
+    new InvalidRequest(data)
 
   /**
    * Destructures `InvalidRequest` error to its `code`, `message`, and `data`.
@@ -244,52 +213,40 @@ object InvalidRequest {
 
 /**
  * Represents JSON-RPC method not found (code = -32601).
- *
- * @constructor Creates JSON-RPC method not found.
- *
- * @param message error message
- * @param data additional information about error
  */
-final class MethodNotFound private (message: String, data: Option[JsonValue])
-  extends JsonRpcError(-32601, message, data)
+final class MethodNotFound private (data: Option[JsonValue])
+  extends JsonRpcError(-32601, "Method not found", data)
 
 /** Provides factory for `MethodNotFound`. */
 object MethodNotFound {
-  /**
-   * Creates `MethodNotFound`.
-   *
-   * @param message error message
-   */
-  def apply(message: String): MethodNotFound =
-    apply(message, None)
+  /** Creates `MethodNotFound`.  */
+  def apply(): MethodNotFound =
+    apply(None)
 
   /**
    * Creates `MethodNotFound`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: JsonValue): MethodNotFound =
-    apply(message, Option(data))
+  def apply(data: JsonValue): MethodNotFound =
+    apply(Option(data))
 
   /**
    * Creates `MethodNotFound`.
    *
-   * @param message error message
    * @param data additional information about error
    * @param toJson converts data to JSON
    */
-  def apply[T](message: String, data: T)(implicit toJson: JsonOutput[T]): MethodNotFound =
-    apply(message, Option(Json.toJson(data)))
+  def apply[T](data: T)(implicit toJson: JsonOutput[T]): MethodNotFound =
+    apply(Option(Json.toJson(data)))
 
   /**
    * Creates `MethodNotFound`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: Option[JsonValue]): MethodNotFound =
-    new MethodNotFound(message, data)
+  def apply(data: Option[JsonValue]): MethodNotFound =
+    new MethodNotFound(data)
 
   /**
    * Destructures `MethodNotFound` error to its `code`, `message`, and `data`.
@@ -305,52 +262,40 @@ object MethodNotFound {
 
 /**
  * Represents JSON-RPC invalid params (code = -32602).
- *
- * @constructor Creates JSON-RPC invalid params.
- *
- * @param message error message
- * @param data additional information about error
  */
-final class InvalidParams private (message: String, data: Option[JsonValue])
-  extends JsonRpcError(-32602, message, data)
+final class InvalidParams private (data: Option[JsonValue])
+  extends JsonRpcError(-32602, "Invalid params", data)
 
 /** Provides factory for `InvalidParams`. */
 object InvalidParams {
-  /**
-   * Creates `InvalidParams`.
-   *
-   * @param message error message
-   */
-  def apply(message: String): InvalidParams =
-    apply(message, None)
+  /** Creates `InvalidParams`. */
+  def apply(): InvalidParams =
+    apply(None)
 
   /**
    * Creates `InvalidParams`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: JsonValue): InvalidParams =
-    apply(message, Option(data))
+  def apply(data: JsonValue): InvalidParams =
+    apply(Option(data))
 
   /**
    * Creates `InvalidParams`.
    *
-   * @param message error message
    * @param data additional information about error
    * @param toJson converts data to JSON
    */
-  def apply[T](message: String, data: T)(implicit toJson: JsonOutput[T]): InvalidParams =
-    apply(message, Option(Json.toJson(data)))
+  def apply[T](data: T)(implicit toJson: JsonOutput[T]): InvalidParams =
+    apply(Option(Json.toJson(data)))
 
   /**
    * Creates `InvalidParams`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: Option[JsonValue]): InvalidParams =
-    new InvalidParams(message, data)
+  def apply(data: Option[JsonValue]): InvalidParams =
+    new InvalidParams(data)
 
   /**
    * Destructures `InvalidParams` error to its `code`, `message`, and `data`.
@@ -366,52 +311,40 @@ object InvalidParams {
 
 /**
  * Represents JSON-RPC internal error (code = -32603).
- *
- * @constructor Creates JSON-RPC internal error.
- *
- * @param message error message
- * @param data additional information about error
  */
-final class InternalError private (message: String, data: Option[JsonValue])
-  extends JsonRpcError(-32603, message, data)
+final class InternalError private (data: Option[JsonValue])
+  extends JsonRpcError(-32603, "Internal error", data)
 
 /** Provides factory for `InternalError`. */
 object InternalError {
-  /**
-   * Creates `InternalError`.
-   *
-   * @param message error message
-   */
-  def apply(message: String): InternalError =
-    apply(message, None)
+  /** Creates `InternalError`. */
+  def apply(): InternalError =
+    apply(None)
 
   /**
    * Creates `InternalError`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: JsonValue): InternalError =
-    apply(message, Option(data))
+  def apply(data: JsonValue): InternalError =
+    apply(Option(data))
 
   /**
    * Creates `InternalError`.
    *
-   * @param message error message
    * @param data additional information about error
    * @param toJson converts data to JSON
    */
-  def apply[T](message: String, data: T)(implicit toJson: JsonOutput[T]): InternalError =
-    apply(message, Option(Json.toJson(data)))
+  def apply[T](data: T)(implicit toJson: JsonOutput[T]): InternalError =
+    apply(Option(Json.toJson(data)))
 
   /**
    * Creates `InternalError`.
    *
-   * @param message error message
    * @param data additional information about error
    */
-  def apply(message: String, data: Option[JsonValue]): InternalError =
-    new InternalError(message, data)
+  def apply(data: Option[JsonValue]): InternalError =
+    new InternalError(data)
 
   /**
    * Destructures `InternalError` error to its `code`, `message`, and `data`.

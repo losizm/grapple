@@ -42,7 +42,7 @@ object JsonRpc {
           .append(location.getColumnNumber)
           .append(")")
           .toString()
-        throw ParseError("Parse error", data)
+        throw ParseError(data)
     }
 
   /**
