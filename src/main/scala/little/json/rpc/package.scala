@@ -15,6 +15,10 @@
  */
 package little.json
 
+import javax.json.{ JsonNumber, JsonObject, JsonString, JsonValue }
+
+import Implicits._
+
 /**
  * Defines API for [[https://www.jsonrpc.org/specification JSON-RPC 2.0]].
  *
@@ -62,4 +66,47 @@ package little.json
  * )
  * }}}
  */
-package object rpc
+package object rpc {
+  /** Defines adapter for `JsonRpcIdentifier`. */
+  implicit val jsonRpcIdentifierAdapter = new JsonAdapter[JsonRpcIdentifier] {
+    def reading(json: JsonValue): JsonRpcIdentifier =
+      json match {
+        case id: JsonString => JsonRpcIdentifier(id.getString)
+        case id: JsonNumber => JsonRpcIdentifier(id.longValueExact)
+        case _ => throw new IllegalArgumentException("json is not string or number value")
+      }
+
+    def writing(id: JsonRpcIdentifier): JsonValue =
+      if      (id.isString) Json.toJson(id.stringValue)
+      else if (id.isNumber) Json.toJson(id.numberValue)
+      else                  JsonValue.NULL
+  }
+
+  /** Defines adapter for `JsonRpcError`. */
+  implicit val jsonRpcErrorAdapter = new JsonAdapter[JsonRpcError] {
+    def reading(json: JsonValue): JsonRpcError =
+      json match {
+        case error: JsonObject =>
+          JsonRpcError(
+            error.getInt("code"),
+            error.getString("message"),
+            Option(error.get("data"))
+          )
+        case _ => throw new IllegalArgumentException("json is not object value")
+      }
+
+    def writing(error: JsonRpcError): JsonValue = {
+      val objBuilder = Json.createObjectBuilder()
+      objBuilder.add("code", error.code)
+      objBuilder.add("message", error.message)
+      error.data.foreach(objBuilder.add("data", _))
+      objBuilder.build()
+    }
+  }
+
+  /** Defines adapter for `JsonRpcRequest`. */
+  implicit val jsonRpcRequestAdapter: JsonAdapter[JsonRpcRequest] = JsonRpcRequestAdapter
+
+  /** Defines adapter for `JsonRpcResponse`. */
+  implicit val jsonRpcResponseAdapter: JsonAdapter[JsonRpcResponse] = JsonRpcResponseAdapter
+}

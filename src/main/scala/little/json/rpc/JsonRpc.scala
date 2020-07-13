@@ -15,13 +15,10 @@
  */
 package little.json.rpc
 
-import javax.json.{ JsonNumber, JsonObject, JsonString, JsonStructure, JsonValue }
 import javax.json.stream.JsonParsingException
 
 import little.json.Json
 import little.json.Implicits._
-
-import scala.util.Try
 
 /** Provides utilities for parsing JSON-RPC messages. */
 object JsonRpc {
@@ -30,105 +27,29 @@ object JsonRpc {
    *
    * @param text request
    */
-  def parseRequest(text: String): JsonRpcRequest = {
-    val json = try parse(text) catch {
-      case _: ClassCastException     => throw InvalidRequest("request must be object value")
+  def parseRequest(text: String): JsonRpcRequest =
+    try
+      Json.parse(text).as[JsonRpcRequest]
+    catch {
       case err: JsonParsingException =>
-        val location = err.getLocation()
-        val message = new StringBuilder()
+        val location = err.getLocation
+        val data = new StringBuilder()
           .append("Invalid JSON at offset=")
-          .append(location.getStreamOffset())
+          .append(location.getStreamOffset)
           .append(" (line=")
-          .append(location.getLineNumber())
+          .append(location.getLineNumber)
           .append(", column=")
-          .append(location.getColumnNumber())
+          .append(location.getColumnNumber)
           .append(")")
           .toString()
-
-        throw ParseError(message)
+        throw ParseError("Parse error", data)
     }
-
-    val builder = JsonRpcRequest.builder()
-
-    json.get("jsonrpc") match {
-      case null              => throw InvalidRequest("request must include jsonrpc")
-      case value: JsonString => builder.version(value.getString())
-      case _: JsonValue      => throw InvalidRequest("jsonrpc must be string value")
-    }
-
-    json.get("id") match {
-      case null              => builder.idUndefined()
-      case JsonValue.NULL    => builder.idNull()
-      case value: JsonString => builder.id(value.getString())
-      case value: JsonNumber =>
-        value.isIntegral match {
-          case true  => builder.id(value.longValueExact())
-          case false => throw InvalidRequest("id number must be integer value")
-        }
-      case _: JsonValue      => throw InvalidRequest("id must be string or number value")
-    }
-
-    json.get("method") match {
-      case null              => throw InvalidRequest("request must include method")
-      case value: JsonString => builder.method(value.getString())
-      case _: JsonValue      => throw InvalidRequest("method must be string value")
-    }
-
-    json.get("params") match {
-      case null                 => builder.params(None)
-      case value: JsonStructure => builder.params(value)
-      case _: JsonValue         => throw InvalidRequest("params must be array or object value")
-    }
-
-    builder.build()
-  }
 
   /**
    * Parses JSON-RPC response.
    *
    * @param text response
    */
-  def parseResponse(text: String): JsonRpcResponse = {
-    val json = try parse(text) catch {
-      case _: ClassCastException => throw new IllegalArgumentException("request must be object value")
-    }
-
-    val builder = JsonRpcResponse.builder()
-
-    json.get("jsonrpc") match {
-      case null              => throw new IllegalArgumentException("response must include jsonrpc")
-      case value: JsonString => builder.version(value.getString())
-      case _: JsonValue      => throw new IllegalArgumentException("jsonrpc must be string value")
-    }
-
-    json.get("id") match {
-      case JsonValue.NULL    => builder.idNull()
-      case value: JsonString => builder.id(value.getString())
-      case value: JsonNumber =>
-        value.isIntegral match {
-          case true  => builder.id(value.longValueExact())
-          case false => throw new IllegalArgumentException("id number must be integer value")
-        }
-      case _: JsonValue      => throw new IllegalArgumentException("id must be string or number value")
-    }
-
-    json.get("result") match {
-      case null =>
-        json.get("error") match {
-          case null  => throw new IllegalArgumentException("include must include either result or error")
-          case value: JsonObject =>
-            val code    = value.getInt("code")
-            val message = value.getString("message")
-            val data    = Option(value.get("data"))
-            builder.error(code, message, data)
-          case _: JsonValue => throw new IllegalArgumentException("error must be object value")
-        }
-      case value: JsonValue => builder.result(value)
-    }
-
-    builder.build()
-  }
-
-  private def parse(message: String): JsonObject =
-    Json.parse(message).asObject
+  def parseResponse(text: String): JsonRpcResponse =
+    Json.parse(text).as[JsonRpcResponse]
 }
