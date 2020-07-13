@@ -17,21 +17,8 @@ package little.json.rpc
 
 /** Stores optional identifier. */
 sealed trait JsonRpcIdentifier {
-  /**
-   * Tests for undefined value.
-   *
-   * @note An identifier is undefined if it is not present. Not same as
-   * [[isNullified]].
-   */
-  def isUndefined: Boolean
-
-  /**
-   * Tests for nullified value.
-   *
-   * @note An identifier is nullified if it is defined with a null value. Not
-   * same as [[isUndefined]].
-   */
-  def isNullified: Boolean
+  /** Tests for null value. */
+  def isNull: Boolean
 
   /** Tests for string value. */
   def isString: Boolean
@@ -40,14 +27,14 @@ sealed trait JsonRpcIdentifier {
   def isNumber: Boolean
 
   /**
-   * Gets value as string.
+   * Gets string value.
    *
    * @throws NoSuchElementException if not string value
    */
   def stringValue: String
 
   /**
-   * Gets value as number.
+   * Gets number value.
    *
    * @throws NoSuchElementException if not number value
    */
@@ -56,11 +43,8 @@ sealed trait JsonRpcIdentifier {
 
 /** Provides factory for `JsonRpcIdentifier`. */
 object JsonRpcIdentifier {
-  /** Gets undefined identifier. */
-  def undefined: JsonRpcIdentifier = UndefinedIdentifier
-
-  /** Gets nullified identifier. */
-  def nullified: JsonRpcIdentifier = NullifiedIdentifier
+  /** Gets identifier with null value. */
+  def nullValue: JsonRpcIdentifier = NullIdentifier
 
   /**
    * Creates identifier with supplied string value.
@@ -79,42 +63,29 @@ object JsonRpcIdentifier {
     NumberIdentifier(id)
 }
 
-/** Represents undefined identifier. */
-private object UndefinedIdentifier extends JsonRpcIdentifier {
-  val isUndefined = true
-  val isNullified = false
+private object NullIdentifier extends JsonRpcIdentifier {
+  val isNull   = true
   val isString = false
   val isNumber = false
+
   def stringValue = throw new NoSuchElementException("no string value")
   def numberValue = throw new NoSuchElementException("no number value")
 }
 
-/** Defines identifier with null value. */
-private object NullifiedIdentifier extends JsonRpcIdentifier {
-  val isUndefined = false
-  val isNullified = true
-  val isString = false
-  val isNumber = false
-  def stringValue = throw new NoSuchElementException("no string value")
-  def numberValue = throw new NoSuchElementException("no number value")
-}
-
-/** Defines identifier with string value. */
 private case class StringIdentifier(stringValue: String) extends JsonRpcIdentifier {
   require(stringValue != null)
 
-  val isUndefined = false
-  val isNullified = false
+  val isNull   = false
   val isString = true
   val isNumber = false
+
   def numberValue = throw new NoSuchElementException("no number value")
 }
 
-/** Defines identifier with string value. */
 private case class NumberIdentifier(numberValue: Long) extends JsonRpcIdentifier {
-  val isUndefined = false
-  val isNullified = false
+  val isNull   = false
   val isString = false
   val isNumber = true
+
   def stringValue = throw new NoSuchElementException("no string value")
 }

@@ -39,17 +39,17 @@ class JsonRpcResponseSpec extends FlatSpec {
     )
 
   it should "create JsonRpcResponse" in {
-    val res1 = JsonRpcResponse("2.0", "abc", Result("y", 2))
+    val res1 = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), Result("y", 2))
     assert(res1.version == "2.0")
     assert(res1.id == JsonRpcIdentifier("abc"))
     assert(res1.id.stringValue == "abc")
-    assert(res1.result.get.as[Result] == Result("y", 2))
+    assert(res1.result.as[Result] == Result("y", 2))
 
-    val res2 = JsonRpcResponse("2.0", 123, InvalidRequest("Invalid request"))
+    val res2 = JsonRpcResponse("2.0", JsonRpcIdentifier(123), InvalidRequest("Invalid request"))
     assert(res2.version == "2.0")
     assert(res2.id == JsonRpcIdentifier(123))
     assert(res2.id.numberValue == 123)
-    assert(res2.result.error.isInvalidRequest)
-    assert(res2.result.error.message == "Invalid request")
+    assert(res2.error.isInvalidRequest)
+    assert(res2.error.message == "Invalid request")
   }
 }

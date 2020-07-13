@@ -20,8 +20,7 @@ import org.scalatest.FlatSpec
 class JsonRpcIdentifierSpec extends FlatSpec {
   it should "inspect JsonRpcIdentifier with string value" in {
     val id = JsonRpcIdentifier("abc")
-    assert(!id.isUndefined)
-    assert(!id.isNullified)
+    assert(!id.isNull)
     assert(id.isString)
     assert(!id.isNumber)
     assert(id.stringValue == "abc")
@@ -30,28 +29,16 @@ class JsonRpcIdentifierSpec extends FlatSpec {
 
   it should "inspect JsonRpcIdentifier with number value" in {
     val id = JsonRpcIdentifier(123)
-    assert(!id.isUndefined)
-    assert(!id.isNullified)
+    assert(!id.isNull)
     assert(!id.isString)
     assert(id.isNumber)
     assertThrows[NoSuchElementException](id.stringValue)
     assert(id.numberValue == 123)
   }
 
-  it should "inspect JsonRpcIdentifier with nullified value" in {
-    val id = JsonRpcIdentifier.nullified
-    assert(!id.isUndefined)
-    assert(id.isNullified)
-    assert(!id.isString)
-    assert(!id.isNumber)
-    assertThrows[NoSuchElementException](id.stringValue)
-    assertThrows[NoSuchElementException](id.numberValue)
-  }
-
-  it should "inspect JsonRpcIdentifier with undefined value" in {
-    val id = JsonRpcIdentifier.undefined
-    assert(id.isUndefined)
-    assert(!id.isNullified)
+  it should "inspect JsonRpcIdentifier with null value" in {
+    val id = JsonRpcIdentifier.nullValue
+    assert(id.isNull)
     assert(!id.isString)
     assert(!id.isNumber)
     assertThrows[NoSuchElementException](id.stringValue)

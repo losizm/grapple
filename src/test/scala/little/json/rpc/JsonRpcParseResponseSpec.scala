@@ -33,7 +33,7 @@ class JsonRpcParseResponseSpec extends FlatSpec {
     val res = JsonRpc.parseResponse(text)
     assert(res.version == "2.0")
     assert(res.id.stringValue == "abc")
-    assert(res.result.get.as[Seq[Int]] == Seq(0, 1, 2))
+    assert(res.result.as[Seq[Int]] == Seq(0, 1, 2))
   }
 
   it should "parse response with error" in {
@@ -46,8 +46,8 @@ class JsonRpcParseResponseSpec extends FlatSpec {
     val res = JsonRpc.parseResponse(text)
     assert(res.version == "2.0")
     assert(res.id.numberValue == 123)
-    assert(res.result.error.isInternalError)
-    assert(res.result.error.message == "Internal Error")
+    assert(res.error.isInternalError)
+    assert(res.error.message == "Internal Error")
   }
 
   it should "not parse response as array" in {

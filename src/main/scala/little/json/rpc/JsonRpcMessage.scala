@@ -24,8 +24,9 @@ sealed trait JsonRpcMessage {
   /** Gets JSON-RPC version. */
   def version: String
 
-  /** Gets message identifier. */
+  /** Gets identifier. */
   def id: JsonRpcIdentifier
+
 }
 
 /** Represents JSON-RPC request. */
@@ -41,220 +42,268 @@ sealed trait JsonRpcRequest extends JsonRpcMessage {
    *
    * @note A request is a notification if its identifier is undefined.
    */
-  def isNotification: Boolean =
-    id.isUndefined
+  def isNotification: Boolean
 }
 
 /** Provides factory for `JsonRpcRequest`. */
 object JsonRpcRequest {
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   */
-  def apply(version: String, id: JsonRpcIdentifier, method: String): JsonRpcRequest =
-    apply(version, id, method, None)
+  /** Provides builder for `JsonRpcRequest`. */
+  class Builder private[JsonRpcRequest] {
+    private var _version: String = "2.0"
+    private var _id: Option[JsonRpcIdentifier] = None
+    private var _method: String = null
+    private var _params: Option[JsonValue] = None
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   */
-  def apply(version: String, id: String, method: String): JsonRpcRequest =
-    apply(version, id, method, None)
+    /** Sets version. */
+    def version(value: String): this.type = {
+      if (value == null) throw new NullPointerException()
+      _version = value
+      this
+    }
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   */
-  def apply(version: String, id: Long, method: String): JsonRpcRequest =
-    apply(version, id, method, None)
+    /** Sets identifier. */
+    def id(value: JsonRpcIdentifier): this.type = {
+      if (value == null) throw new NullPointerException()
+      _id = Some(value)
+      this
+    }
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   * @param params method params
-   */
-  def apply(version: String, id: JsonRpcIdentifier, method: String, params: JsonValue): JsonRpcRequest =
-    apply(version, id, method, Option(params))
+    /** Sets identifier. */
+    def id(value: String): this.type =
+      id(JsonRpcIdentifier(value))
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   * @param params method params
-   */
-  def apply(version: String, id: String, method: String, params: JsonValue): JsonRpcRequest =
-    apply(version, id, method, Option(params))
+    /** Sets identifier. */
+    def id(value: Long): this.type =
+      id(JsonRpcIdentifier(value))
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   * @param params method params
-   */
-  def apply(version: String, id: Long, method: String, params: JsonValue): JsonRpcRequest =
-    apply(version, id, method, Option(params))
+    /** Sets identifier to null value. */
+    def idNull(): this.type =
+      id(JsonRpcIdentifier.nullValue)
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   * @param params method params
-   * @param toJson converts params to JSON
-   */
-  def apply[T](version: String, id: JsonRpcIdentifier, method: String, params: T)
-      (implicit toJson: JsonOutput[T]): JsonRpcRequest =
-    apply(version, id, method, Option(Json.toJson(params)))
+    /** Unsets identifier. */
+    def idUndefined(): this.type = {
+      _id = None
+      this
+    }
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   * @param params method params
-   * @param toJson converts params to JSON
-   */
-  def apply[T](version: String, id: String, method: String, params: T)
-      (implicit toJson: JsonOutput[T]): JsonRpcRequest =
-    apply(version, id, method, Option(Json.toJson(params)))
+    /** Sets method. */
+    def method(value: String): this.type = {
+      if (value == null) throw new NullPointerException()
+      _method = value
+      this
+    }
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   * @param params method params
-   * @param toJson converts params to JSON
-   */
-  def apply[T](version: String, id: Long, method: String, params: T)
-      (implicit toJson: JsonOutput[T]): JsonRpcRequest =
-    apply(version, id, method, Option(Json.toJson(params)))
+    /** Sets optional params. */
+    def params(value: Option[JsonValue]): this.type = {
+      if (value == null)
+        throw new NullPointerException()
 
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   * @param params method params
-   */
-  def apply(version: String, id: JsonRpcIdentifier, method: String, params: Option[JsonValue]): JsonRpcRequest = {
-    if (version == null) throw new NullPointerException()
-    if (id == null) throw new NullPointerException()
-    if (method == null) throw new NullPointerException()
-    if (params == null) throw new NullPointerException()
+      if (!value.forall(_.isInstanceOf[JsonStructure]))
+        throw new IllegalArgumentException("params must be either JSON array or object")
 
-    JsonRpcRequestImpl(version, id, method, params)
+      _params = value
+      this
+    }
+
+    /** Sets params. */
+    def params(value: JsonValue): this.type =
+      params(Some(value))
+
+    /**
+     * Sets params.
+     *
+     * @param value params
+     * @param toJson converts params to JSON value
+     */
+    def params[T](value: T)(implicit toJson: JsonOutput[T]): this.type =
+      params(Json.toJson(value))
+
+    /** Creates `JsonRpcRequest` with current settings. */
+    def build(): JsonRpcRequest = {
+      if (_method == null) throw new IllegalStateException("method is not set")
+
+      JsonRpcRequestImpl(_version, _id, _method, _params)
+    }
   }
 
+  /** Gets new request builder. */
+  def builder(): Builder = new Builder
+
+  /**
+   * Creates `JsonRpcRequest` as notification &ndash; that is, without
+   * identifier.
+   *
+   * @param version JSON-RPC version
+   * @param method method name
+   * @param params optional method params
+   */
+  def apply(version: String, method: String, params: Option[JsonValue]): JsonRpcRequest =
+    builder()
+      .version(version)
+      .method(method)
+      .params(params)
+      .build()
+
   /**
    * Creates `JsonRpcRequest`.
    *
    * @param version JSON-RPC version
    * @param id message identifier
    * @param method method name
-   * @param params method params
+   * @param params optional method params
    */
-  def apply(version: String, id: String, method: String, params: Option[JsonValue]): JsonRpcRequest = {
-    if (version == null) throw new NullPointerException()
-    if (method == null) throw new NullPointerException()
-    if (params == null) throw new NullPointerException()
-
-    JsonRpcRequestImpl(version, JsonRpcIdentifier(id), method, params)
-  }
-
-  /**
-   * Creates `JsonRpcRequest`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param method method name
-   * @param params method params
-   */
-  def apply(version: String, id: Long, method: String, params: Option[JsonValue]): JsonRpcRequest = {
-    if (version == null) throw new NullPointerException()
-    if (method == null) throw new NullPointerException()
-    if (params == null) throw new NullPointerException()
-
-    JsonRpcRequestImpl(version, JsonRpcIdentifier(id), method, params)
-  }
+  def apply(version: String, id: JsonRpcIdentifier, method: String, params: Option[JsonValue]): JsonRpcRequest =
+    builder()
+      .version(version)
+      .id(id)
+      .method(method)
+      .params(params)
+      .build()
 }
 
 private case class JsonRpcRequestImpl(
   version: String,
-  id: JsonRpcIdentifier,
+  idOption: Option[JsonRpcIdentifier],
   method: String,
-  params: Option[JsonValue]) extends JsonRpcRequest
+  params: Option[JsonValue]) extends JsonRpcRequest {
+
+  val isNotification = idOption.isEmpty
+
+  def id = idOption.getOrElse(throw new NoSuchElementException("id"))
+}
 
 /** Represents JSON-RPC request. */
 sealed trait JsonRpcResponse extends JsonRpcMessage {
-  /** Gets result. */
-  def result: JsonRpcResult
+  /** Tests for result. */
+  def isResult: Boolean
+
+  /** Tests for error. */
+  def isError: Boolean
+
+  /**
+   * Gets result.
+   *
+   * @throws NoSuchElementException if no result
+   */
+  def result: JsonValue
+
+  /**
+   * Gets error.
+   *
+   * @throws NoSuchElementException if no error
+   */
+  def error: JsonRpcError
 }
 
-/** Provides factor for `JsonRpcResponse`. */
+/** Provides factory for `JsonRpcResponse`. */
 object JsonRpcResponse {
-  /**
-   * Creates `JsonRpcResponse`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param result result
-   */
-  def apply(version: String, id: JsonRpcIdentifier, result: JsonRpcResult): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (id == null) throw new NullPointerException()
-    if (result == null) throw new NullPointerException()
+  /** Provides builder for `JsonRpcResponse`. */
+  final class Builder private[JsonRpcResponse] {
+    private var _version: String = "2.0"
+    private var _id: JsonRpcIdentifier = null
+    private var _content: Either[JsonRpcError, JsonValue] = null
 
-    JsonRpcResponseImpl(version, id, result)
+    /** Sets version. */
+    def version(value: String): this.type = {
+      if (value == null) throw new NullPointerException()
+      _version = value
+      this
+    }
+
+    /** Sets identifier. */
+    def id(value: JsonRpcIdentifier): this.type = {
+      if (value == null) throw new NullPointerException()
+      _id = value
+      this
+    }
+
+    /** Sets identifier. */
+    def id(value: String): this.type =
+      id(JsonRpcIdentifier(value))
+
+    /** Sets identifier. */
+    def id(value: Long): this.type =
+      id(JsonRpcIdentifier(value))
+
+    /** Sets identifier to null value. */
+    def idNull(): this.type =
+      id(JsonRpcIdentifier.nullValue)
+
+    /** Sets result. */
+    def result(value: JsonValue): this.type = {
+      if (value == null)
+        throw new NullPointerException()
+
+      if (!value.isInstanceOf[JsonStructure])
+        throw new IllegalArgumentException("result must be either JSON array or object")
+
+      _content = Right(value)
+      this
+    }
+
+    /**
+     * Sets result.
+     *
+     * @param result result
+     * @param toJson converts results to JSON value
+     */
+    def result[T](value: T)(implicit toJson: JsonOutput[T]): this.type =
+      result(Json.toJson(value))
+
+    /** Sets error. */
+    def error(value: JsonRpcError): this.type = {
+      if (value == null)
+        throw new NullPointerException()
+
+      _content = Left(value)
+      this
+    }
+
+    /**
+     * Sets error.
+     *
+     * @param code error code
+     * @param message error message
+     * @param data optional additional data
+     * @param toJson converts data to JSON value
+     */
+    def error(code: Int, message: String, data: Option[JsonValue]): this.type =
+      error(JsonRpcError(code, message, data))
+
+    /**
+     * Sets error.
+     *
+     * @param code error code
+     * @param message error message
+     * @param data additional data
+     * @param toJson converts data to JSON value
+     */
+    def error(code: Int, message: String, data: JsonValue): this.type =
+      error(JsonRpcError(code, message, data))
+
+    /**
+     * Sets error.
+     *
+     * @param code error code
+     * @param message error message
+     * @param data additional data
+     * @param toJson converts data to JSON value
+     */
+    def error[T](code: Int, message: String, data: T)
+        (implicit toJson: JsonOutput[T]): this.type =
+      error(JsonRpcError(code, message, data))
+
+    /** Creates `JsonRpcResponse` with current settings. */
+    def build(): JsonRpcResponse = {
+      if (_id == null) throw new IllegalStateException("id is not set")
+      if (_content == null) throw new IllegalStateException("neither result nor error is set")
+
+      new JsonRpcResponseImpl(_version, _id, _content)
+    }
   }
 
-  /**
-   * Creates `JsonRpcResponse`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param result result
-   */
-  def apply(version: String, id: String, result: JsonRpcResult): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (result == null) throw new NullPointerException()
-
-    JsonRpcResponseImpl(version, JsonRpcIdentifier(id), result)
-  }
-
-  /**
-   * Creates `JsonRpcResponse`.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param result result
-   */
-  def apply(version: String, id: Long, result: JsonRpcResult): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (result == null) throw new NullPointerException()
-
-    JsonRpcResponseImpl(version, JsonRpcIdentifier(id), result)
-  }
+  /** Gets new response builder. */
+  def builder(): Builder = new Builder
 
   /**
    * Creates `JsonRpcResponse` with result.
@@ -263,80 +312,12 @@ object JsonRpcResponse {
    * @param id message identifier
    * @param result result
    */
-  def apply(version: String, id: JsonRpcIdentifier, result: JsonValue): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (id == null) throw new NullPointerException()
-    if (result == null) throw new NullPointerException()
-
-    require(result.isInstanceOf[JsonStructure],
-      "result must be JSON array or object value")
-
-    JsonRpcResponseImpl(version, id, JsonRpcResult(result))
-  }
-
-  /**
-   * Creates `JsonRpcResponse` with result.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param result result
-   */
-  def apply(version: String, id: String, result: JsonValue): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (result == null) throw new NullPointerException()
-
-    JsonRpcResponseImpl(version, JsonRpcIdentifier(id), JsonRpcResult(result))
-  }
-
-  /**
-   * Creates `JsonRpcResponse` with result.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param result result
-   */
-  def apply(version: String, id: Long, result: JsonValue): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (result == null) throw new NullPointerException()
-
-    JsonRpcResponseImpl(version, JsonRpcIdentifier(id), JsonRpcResult(result))
-  }
-
-  /**
-   * Creates `JsonRpcResponse` with result.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param result result
-   * @param toJson converts params to JSON
-   */
-  def apply[T](version: String, id: JsonRpcIdentifier, result: T)
-      (implicit toJson: JsonOutput[T]): JsonRpcResponse =
-    apply(version, id, Json.toJson(result))
-
-  /**
-   * Creates `JsonRpcResponse` with result.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param result result
-   * @param toJson converts params to JSON
-   */
-  def apply[T](version: String, id: String, result: T)
-      (implicit toJson: JsonOutput[T]): JsonRpcResponse =
-    apply(version, id, Json.toJson(result))
-
-  /**
-   * Creates `JsonRpcResponse` with result.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param result result
-   * @param toJson converts params to JSON
-   */
-  def apply[T](version: String, id: Long, result: T)
-      (implicit toJson: JsonOutput[T]): JsonRpcResponse =
-    apply(version, id, Json.toJson(result))
+  def apply(version: String, id: JsonRpcIdentifier, result: JsonValue): JsonRpcResponse =
+    builder()
+      .version(version)
+      .id(id)
+      .result(result)
+      .build()
 
   /**
    * Creates `JsonRpcResponse` with error.
@@ -345,44 +326,22 @@ object JsonRpcResponse {
    * @param id message identifier
    * @param error error
    */
-  def apply(version: String, id: JsonRpcIdentifier, error: JsonRpcError): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (id == null) throw new NullPointerException()
-    if (error == null) throw new NullPointerException()
-
-    JsonRpcResponseImpl(version, id, JsonRpcResult(error))
-  }
-
-  /**
-   * Creates `JsonRpcResponse` with error.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param error error
-   */
-  def apply(version: String, id: String, error: JsonRpcError): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (error == null) throw new NullPointerException()
-
-    JsonRpcResponseImpl(version, JsonRpcIdentifier(id), JsonRpcResult(error))
-  }
-
-  /**
-   * Creates `JsonRpcResponse` with error.
-   *
-   * @param version JSON-RPC version
-   * @param id message identifier
-   * @param error error
-   */
-  def apply(version: String, id: Long, error: JsonRpcError): JsonRpcResponse = {
-    if (version == null) throw new NullPointerException()
-    if (error == null) throw new NullPointerException()
-
-    JsonRpcResponseImpl(version, JsonRpcIdentifier(id), JsonRpcResult(error))
-  }
+  def apply(version: String, id: JsonRpcIdentifier, error: JsonRpcError): JsonRpcResponse =
+    builder()
+      .version(version)
+      .id(id)
+      .error(error)
+      .build()
 }
 
 private case class JsonRpcResponseImpl(
   version: String,
   id: JsonRpcIdentifier,
-  result: JsonRpcResult) extends JsonRpcResponse
+  content: Either[JsonRpcError, JsonValue]) extends JsonRpcResponse {
+
+  def isResult = content.isRight
+  def isError  = content.isLeft
+
+  def result = content.getOrElse(throw new NoSuchElementException("result"))
+  def error  = content.swap.getOrElse(throw new NoSuchElementException("error"))
+}
