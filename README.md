@@ -194,7 +194,7 @@ parser.close()
 
 As a bonus, an API is defined for working with [JSON-RPC 2.0](https://www.jsonrpc.org/specification).
 
-You can build requests and response with Scala objects
+You can build requests and responses with Scala objects.
 
 ```scala
 import javax.json.JsonValue
