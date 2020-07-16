@@ -27,6 +27,31 @@ sealed trait JsonRpcMessage {
   /** Gets identifier. */
   def id: JsonRpcIdentifier
 
+  /**
+   * Gets attributes.
+   *
+   * @note Attributes are arbitrary values associated with message and are not
+   * included in transmission.
+   */
+  def attributes: Map[String, Any]
+
+  /**
+   * Gets attribute with given name.
+   *
+   * @param name attribute name
+   *
+   * @throws NoSuchElementException if attribute does not exist
+   */
+  def attribute[T](name: String): T =
+    getAttribute(name).get
+
+  /**
+   * Gets optional attribute with given name.
+   *
+   * @param name attribute name
+   */
+  def getAttribute[T](name: String): Option[T] =
+    attributes.get(name).map(_.asInstanceOf[T])
 }
 
 /** Represents JSON-RPC request. */
@@ -43,6 +68,35 @@ sealed trait JsonRpcRequest extends JsonRpcMessage {
    * @note A request is a notification if its identifier is undefined.
    */
   def isNotification: Boolean
+
+  /**
+   * Sets attributes.
+   *
+   * @return new instance of `JsonRpcRequest`
+   */
+  def setAttributes(attributes: Map[String, Any]): JsonRpcRequest
+
+  /**
+   * Puts attribute.
+   *
+   * @param name attribute name
+   * @param value attribute value
+   *
+   * @return new instance of `JsonRpcRequest`
+   *
+   * @note If attribute already exists with given name, then its value is
+   * replaced.
+   */
+  def putAttribute(name: String, value: Any): JsonRpcRequest
+
+  /**
+   * Removes attribute with given name.
+   *
+   * @param name attribute name
+   *
+   * @return new instance of `JsonRpcRequest`
+   */
+  def removeAttribute(name: String): JsonRpcRequest
 }
 
 /** Provides factory for `JsonRpcRequest`. */
@@ -53,6 +107,7 @@ object JsonRpcRequest {
     private var _id: Option[JsonRpcIdentifier] = None
     private var _method: String = null
     private var _params: Option[JsonValue] = None
+    private var _attributes: Map[String, Any] = Map.empty
 
     /** Sets version. */
     def version(value: String): this.type = {
@@ -118,11 +173,20 @@ object JsonRpcRequest {
     def params[T](value: T)(implicit toJson: JsonOutput[T]): this.type =
       params(Json.toJson(value))
 
+    /** Sets attributes. */
+    def attributes(value: Map[String, Any]): this.type = {
+      if (value == null)
+        throw new NullPointerException()
+
+      _attributes = value
+      this
+    }
+
     /** Creates `JsonRpcRequest` with current settings. */
     def build(): JsonRpcRequest = {
       if (_method == null) throw new IllegalStateException("method is not set")
 
-      JsonRpcRequestImpl(_version, _id, _method, _params)
+      JsonRpcRequestImpl(_version, _id, _method, _params, _attributes)
     }
   }
 
@@ -165,11 +229,21 @@ private case class JsonRpcRequestImpl(
   version: String,
   idOption: Option[JsonRpcIdentifier],
   method: String,
-  params: Option[JsonValue]) extends JsonRpcRequest {
+  params: Option[JsonValue],
+  attributes: Map[String, Any] = Map.empty) extends JsonRpcRequest {
 
   val isNotification = idOption.isEmpty
 
   def id = idOption.getOrElse(throw new NoSuchElementException("id"))
+
+  def setAttributes(attributes: Map[String, Any]) =
+    copy(attributes = attributes)
+
+  def putAttribute(name: String, value: Any) =
+    copy(attributes = attributes ++ Map(name -> value))
+
+  def removeAttribute(name: String) =
+    copy(attributes = attributes - name)
 }
 
 /** Represents JSON-RPC request. */
@@ -193,6 +267,35 @@ sealed trait JsonRpcResponse extends JsonRpcMessage {
    * @throws NoSuchElementException if no error
    */
   def error: JsonRpcError
+
+  /**
+   * Sets attributes.
+   *
+   * @return new instance of `JsonRpcResponse`
+   */
+  def setAttributes(attributes: Map[String, Any]): JsonRpcResponse
+
+  /**
+   * Puts attribute.
+   *
+   * @param name attribute name
+   * @param value attribute value
+   *
+   * @return new instance of `JsonRpcResponse`
+   *
+   * @note If attribute already exists with given name, then its value is
+   * replaced.
+   */
+  def putAttribute(name: String, value: Any): JsonRpcResponse
+
+  /**
+   * Removes attribute with given name.
+   *
+   * @param name attribute name
+   *
+   * @return new instance of `JsonRpcResponse`
+   */
+  def removeAttribute(name: String): JsonRpcResponse
 }
 
 /** Provides factory for `JsonRpcResponse`. */
@@ -202,6 +305,7 @@ object JsonRpcResponse {
     private var _version: String = "2.0"
     private var _id: JsonRpcIdentifier = null
     private var _content: Either[JsonRpcError, JsonValue] = null
+    private var _attributes: Map[String, Any] = Map.empty
 
     /** Sets version. */
     def version(value: String): this.type = {
@@ -290,12 +394,21 @@ object JsonRpcResponse {
         (implicit toJson: JsonOutput[T]): this.type =
       error(JsonRpcError(code, message, data))
 
+    /** Sets attributes. */
+    def attributes(value: Map[String, Any]): this.type = {
+      if (value == null)
+        throw new NullPointerException()
+
+      _attributes = value
+      this
+    }
+
     /** Creates `JsonRpcResponse` with current settings. */
     def build(): JsonRpcResponse = {
       if (_id == null) throw new IllegalStateException("id is not set")
       if (_content == null) throw new IllegalStateException("neither result nor error is set")
 
-      new JsonRpcResponseImpl(_version, _id, _content)
+      new JsonRpcResponseImpl(_version, _id, _content, _attributes)
     }
   }
 
@@ -334,11 +447,21 @@ object JsonRpcResponse {
 private case class JsonRpcResponseImpl(
   version: String,
   id: JsonRpcIdentifier,
-  content: Either[JsonRpcError, JsonValue]) extends JsonRpcResponse {
+  content: Either[JsonRpcError, JsonValue],
+  attributes: Map[String, Any] = Map.empty) extends JsonRpcResponse {
 
   def isResult = content.isRight
   def isError  = content.isLeft
 
   def result = content.getOrElse(throw new NoSuchElementException("result"))
   def error  = content.swap.getOrElse(throw new NoSuchElementException("error"))
+
+  def setAttributes(attributes: Map[String, Any]) =
+    copy(attributes = attributes)
+
+  def putAttribute(name: String, value: Any) =
+    copy(attributes = attributes ++ Map(name -> value))
+
+  def removeAttribute(name: String) =
+    copy(attributes = attributes - name)
 }

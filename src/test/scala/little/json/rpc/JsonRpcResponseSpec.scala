@@ -92,4 +92,44 @@ class JsonRpcResponseSpec extends FlatSpec {
     assert(res.error.isInvalidRequest)
     assert(res.error.message == "Invalid request")
   }
+
+  it should "create JsonRpcResponse with attributes" in {
+    val res1 = JsonRpcResponse.builder()
+      .id(123)
+      .result(6)
+      .attributes(Map("one" -> 1, "two" -> "2"))
+      .build()
+
+    assert(res1.id.numberValue == 123)
+    assert(res1.result.as[Int] == 6)
+    assert(res1.attributes.size == 2)
+    assert(res1.getAttribute("one").contains(1))
+    assert(res1.getAttribute("two").contains("2"))
+    assert(res1.attribute[Int]("one") == 1)
+    assert(res1.attribute[String]("two") == "2")
+
+    val res2 = res1.putAttribute("one", "x")
+      .putAttribute("three", "xxx")
+
+    assert(res2.id.numberValue == 123)
+    assert(res1.result.as[Int] == 6)
+    assert(res2.attributes.size == 3)
+    assert(res2.getAttribute("one").contains("x"))
+    assert(res2.getAttribute("two").contains("2"))
+    assert(res2.getAttribute("three").contains("xxx"))
+
+    val res3 = res2.removeAttribute("two")
+    assert(res3.id.numberValue == 123)
+    assert(res1.result.as[Int] == 6)
+    assert(res3.attributes.size == 2)
+    assert(res3.getAttribute("one").contains("x"))
+    assert(res3.getAttribute("three").contains("xxx"))
+
+    val res4 = res3.setAttributes(Map("1" -> 1, "2" -> 2))
+    assert(res4.id.numberValue == 123)
+    assert(res1.result.as[Int] == 6)
+    assert(res4.attributes.size == 2)
+    assert(res4.getAttribute("1").contains(1))
+    assert(res4.getAttribute("2").contains(2))
+  }
 }

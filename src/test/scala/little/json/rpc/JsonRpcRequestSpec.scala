@@ -62,4 +62,49 @@ class JsonRpcRequestSpec extends FlatSpec {
     assert(req3.method == "compute")
     assert(req3.params.map(_.as[Param]).contains(Param("x", 1)))
   }
+
+  it should "create JsonRpcRequest with attributes" in {
+    val req1 = JsonRpcRequest.builder()
+      .id(123)
+      .method("compute")
+      .params(Seq(1, 2, 3))
+      .attributes(Map("one" -> 1, "two" -> "2"))
+      .build()
+
+    assert(req1.id.numberValue == 123)
+    assert(req1.method == "compute")
+    assert(req1.params.get.as[Seq[Int]] == Seq(1, 2, 3))
+    assert(req1.attributes.size == 2)
+    assert(req1.getAttribute("one").contains(1))
+    assert(req1.getAttribute("two").contains("2"))
+    assert(req1.attribute[Int]("one") == 1)
+    assert(req1.attribute[String]("two") == "2")
+
+    val req2 = req1.putAttribute("one", "x")
+      .putAttribute("three", "xxx")
+
+    assert(req2.id.numberValue == 123)
+    assert(req2.method == "compute")
+    assert(req2.params.get.as[Seq[Int]] == Seq(1, 2, 3))
+    assert(req2.attributes.size == 3)
+    assert(req2.getAttribute("one").contains("x"))
+    assert(req2.getAttribute("two").contains("2"))
+    assert(req2.getAttribute("three").contains("xxx"))
+
+    val req3 = req2.removeAttribute("two")
+    assert(req3.id.numberValue == 123)
+    assert(req3.method == "compute")
+    assert(req3.params.get.as[Seq[Int]] == Seq(1, 2, 3))
+    assert(req3.attributes.size == 2)
+    assert(req3.getAttribute("one").contains("x"))
+    assert(req3.getAttribute("three").contains("xxx"))
+
+    val req4 = req3.setAttributes(Map("1" -> 1, "2" -> 2))
+    assert(req4.id.numberValue == 123)
+    assert(req4.method == "compute")
+    assert(req4.params.get.as[Seq[Int]] == Seq(1, 2, 3))
+    assert(req4.attributes.size == 2)
+    assert(req4.getAttribute("1").contains(1))
+    assert(req4.getAttribute("2").contains(2))
+  }
 }
