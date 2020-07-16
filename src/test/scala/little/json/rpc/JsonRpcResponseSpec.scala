@@ -105,8 +105,12 @@ class JsonRpcResponseSpec extends FlatSpec {
     assert(res1.attributes.size == 2)
     assert(res1.getAttribute("one").contains(1))
     assert(res1.getAttribute("two").contains("2"))
+    assert(res1.getAttributeOrElse("one", 0) == 1)
+    assert(res1.getAttributeOrElse("two", "0") == "2")
+    assert(res1.getAttributeOrElse("three", 0) == 0)
     assert(res1.attribute[Int]("one") == 1)
     assert(res1.attribute[String]("two") == "2")
+    assertThrows[NoSuchElementException](res1.attribute[Int]("three"))
 
     val res2 = res1.putAttribute("one", "x")
       .putAttribute("three", "xxx")

@@ -52,6 +52,16 @@ sealed trait JsonRpcMessage {
    */
   def getAttribute[T](name: String): Option[T] =
     attributes.get(name).map(_.asInstanceOf[T])
+
+  /**
+   * Gets attribute with given name or returns default if attribute does not
+   * exist.
+   *
+   * @param name attribute name
+   * @param default default value
+   */
+  def getAttributeOrElse[T](name: String, default: => T): T =
+    getAttribute(name).getOrElse(default)
 }
 
 /** Represents JSON-RPC request. */
