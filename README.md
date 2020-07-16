@@ -8,7 +8,7 @@ The Scala library that provides extension methods to _javax.json_.
 To use **little-json**, start by adding it to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "4.0.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "4.1.0"
 ```
 
 ### Using Implementation of javax.json
