@@ -15,6 +15,8 @@
  */
 package little.json.rpc
 
+import little.json.Json
+
 /** Stores optional identifier. */
 sealed trait JsonRpcIdentifier {
   /** Tests for null value. */
@@ -70,6 +72,8 @@ private object NullIdentifier extends JsonRpcIdentifier {
 
   def stringValue = throw new NoSuchElementException("no string value")
   def numberValue = throw new NoSuchElementException("no number value")
+
+  override val toString = "null"
 }
 
 private case class StringIdentifier(stringValue: String) extends JsonRpcIdentifier {
@@ -80,6 +84,8 @@ private case class StringIdentifier(stringValue: String) extends JsonRpcIdentifi
   val isNumber = false
 
   def numberValue = throw new NoSuchElementException("no number value")
+
+  override lazy val toString = Json.toJsonString(stringValue)
 }
 
 private case class NumberIdentifier(numberValue: Long) extends JsonRpcIdentifier {
@@ -88,4 +94,6 @@ private case class NumberIdentifier(numberValue: Long) extends JsonRpcIdentifier
   val isNumber = true
 
   def stringValue = throw new NoSuchElementException("no string value")
+
+  override val toString = s"$numberValue"
 }

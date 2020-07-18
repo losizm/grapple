@@ -57,6 +57,10 @@ sealed class JsonRpcError protected (_code: Int, _message: String, _data: Option
   /** Tests for internal error. */
   def isInternalError: Boolean =
     code == -32603
+
+  /** Returns string representation of error. */
+  override def toString: String =
+    s"$code ($message)"
 }
 
 /** Provides factory for `JsonRpcError`. */
@@ -113,9 +117,7 @@ object JsonRpcError {
     }
 }
 
-/**
- * Represents JSON-RPC parse error (code = -32700).
- */
+/** Represents JSON-RPC parse error (code = -32700). */
 final class ParseError private (data: Option[JsonValue])
   extends JsonRpcError(-32700, "Parse error", data)
 
@@ -162,9 +164,7 @@ object ParseError {
     }
 }
 
-/**
- * Represents JSON-RPC invalid request (code = -32600).
- */
+/** Represents JSON-RPC invalid request (code = -32600). */
 final class InvalidRequest private (data: Option[JsonValue])
   extends JsonRpcError(-32600, "Invalid request", data)
 
@@ -211,9 +211,7 @@ object InvalidRequest {
     }
 }
 
-/**
- * Represents JSON-RPC method not found (code = -32601).
- */
+/** Represents JSON-RPC method not found (code = -32601). */
 final class MethodNotFound private (data: Option[JsonValue])
   extends JsonRpcError(-32601, "Method not found", data)
 
@@ -260,9 +258,7 @@ object MethodNotFound {
     }
 }
 
-/**
- * Represents JSON-RPC invalid params (code = -32602).
- */
+/** Represents JSON-RPC invalid params (code = -32602). */
 final class InvalidParams private (data: Option[JsonValue])
   extends JsonRpcError(-32602, "Invalid params", data)
 
@@ -309,9 +305,7 @@ object InvalidParams {
     }
 }
 
-/**
- * Represents JSON-RPC internal error (code = -32603).
- */
+/** Represents JSON-RPC internal error (code = -32603). */
 final class InternalError private (data: Option[JsonValue])
   extends JsonRpcError(-32603, "Internal error", data)
 

@@ -22,29 +22,5 @@ private case class JsonStringImpl(value: String) extends JsonString {
   val getChars: CharSequence = value
   val getString: String = value
 
-  override lazy val toString: String = {
-    val buf = new StringBuilder(value.length + 16)
-    buf += '"'
-
-    value.foreach {
-      case c if c >= 0x20 && c <= 0x10ffff =>
-        if (c == '"' || c == '\\')
-          buf += '\\'
-        buf += c
-
-      case '\t' => buf += '\\' += 't'
-      case '\r' => buf += '\\' += 'r'
-      case '\n' => buf += '\\' += 'n'
-      case '\f' => buf += '\\' += 'f'
-      case '\b' => buf += '\\' += 'b'
-
-      case c =>
-        val hex = c.toHexString
-        val pad = "0" * (4 - hex.length)
-        buf ++= "\\u" ++= pad ++= hex
-    }
-
-    buf += '"'
-    buf.toString
-  }
+  override lazy val toString: String = Json.toJsonString(value)
 }

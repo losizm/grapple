@@ -197,6 +197,32 @@ object Json {
       case false => JavaxJson.createGenerator(writer)
     }
 
+  private[json] def toJsonString(string: String): String = {
+    val buf = new StringBuilder(string.length + 16)
+    buf += '"'
+
+    string.foreach {
+      case c if c >= 0x20 && c <= 0x10ffff =>
+        if (c == '"' || c == '\\')
+          buf += '\\'
+        buf += c
+
+      case '\t' => buf += '\\' += 't'
+      case '\r' => buf += '\\' += 'r'
+      case '\n' => buf += '\\' += 'n'
+      case '\f' => buf += '\\' += 'f'
+      case '\b' => buf += '\\' += 'b'
+
+      case c =>
+        val hex = c.toHexString
+        val pad = "0" * (4 - hex.length)
+        buf ++= "\\u" ++= pad ++= hex
+    }
+
+    buf += '"'
+    buf.toString
+  }
+
   private def createWriterFactory(config: (String, Any)*): JsonWriterFactory =
     JavaxJson.createWriterFactory(
       config.foldLeft(new JHashMap[String, Any]) {
