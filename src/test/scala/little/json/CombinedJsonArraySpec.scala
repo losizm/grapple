@@ -15,12 +15,10 @@
  */
 package little.json
 
-import org.scalatest.FlatSpec
-
 import Implicits._
 import Test._
 
-class CombinedJsonArraySpec extends FlatSpec {
+class CombinedJsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec {
   it should "append to JSON array" in {
     val arr = Json.arr("a", 2, 3.0, false) ++ Json.arr("x", User(0, "root")) :+ "guest"
 

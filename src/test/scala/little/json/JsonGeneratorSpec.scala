@@ -19,12 +19,10 @@ import java.io.StringWriter
 
 import scala.util.{ Failure, Success, Try }
 
-import org.scalatest.FlatSpec
-
 import Implicits._
 import Test._
 
-class JsonGeneratorSpec extends FlatSpec {
+class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec {
   val user = User(0, "root", true)
 
   "JSON generator" should "generate array" in {

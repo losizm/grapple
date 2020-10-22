@@ -17,9 +17,7 @@ package little.json.rpc
 
 import javax.json.JsonObject
 
-import org.scalatest.FlatSpec
-
-class JsonRpcParseRequestSpec extends FlatSpec {
+class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
   it should "parse request without params" in {
     val text = """{
       "jsonrpc": "2.0",

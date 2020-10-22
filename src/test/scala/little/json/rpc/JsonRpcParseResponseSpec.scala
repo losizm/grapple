@@ -21,9 +21,7 @@ import javax.json.stream.JsonParsingException
 import little.json.JsonInput
 import little.json.Implicits._
 
-import org.scalatest.FlatSpec
-
-class JsonRpcParseResponseSpec extends FlatSpec {
+class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
   case class Answer(value: Int)
 
   implicit val resultInput: JsonInput[Answer] = {

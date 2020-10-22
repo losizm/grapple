@@ -15,12 +15,10 @@
  */
 package little.json
 
-import org.scalatest.FlatSpec
-
 import Implicits._
 import Test._
 
-class MergedJsonObjectSpec extends FlatSpec {
+class MergedJsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec {
   it should "merge JSON objects" in {
     val obj = Json.obj("a" -> "a", "b" -> 2, "c" -> 3.0, "d" -> false) ++
       Json.obj("a" -> "x", "z" -> User(0, "root")) + ("groups" -> "admin,staff,cdrom")

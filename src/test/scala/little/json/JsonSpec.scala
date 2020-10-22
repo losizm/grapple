@@ -19,12 +19,10 @@ import javax.json.{ JsonArray, JsonObject }
 
 import scala.util.{ Failure, Success, Try }
 
-import org.scalatest.FlatSpec
-
 import Implicits._
 import Test._
 
-class JsonSpec extends FlatSpec {
+class JsonSpec extends org.scalatest.flatspec.AnyFlatSpec {
   val root = User(0, "root")
   val guest = User(500, "guest", false)
 

@@ -20,9 +20,7 @@ import javax.json.JsonObject
 import little.json.{ Json, JsonInput, JsonOutput }
 import little.json.Implicits._
 
-import org.scalatest.FlatSpec
-
-class JsonRpcRequestSpec extends FlatSpec {
+class JsonRpcRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
   case class Param(name: String, value: Int)
 
   implicit val paramInput: JsonInput[Param] = {

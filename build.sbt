@@ -18,7 +18,7 @@ unmanagedSourceDirectories in Compile += {
 libraryDependencies ++= Seq(
   "javax.json"    %  "javax.json-api" % "1.1.4" % "provided",
   "org.glassfish" %  "javax.json"     % "1.1.4" % "test",
-  "org.scalatest" %% "scalatest"      % "3.0.8" % "test"
+  "org.scalatest" %% "scalatest"      % "3.2.0" % "test"
 )
 
 developers := List(

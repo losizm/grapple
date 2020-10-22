@@ -17,12 +17,10 @@ package little.json
 
 import scala.util.{ Failure, Success, Try }
 
-import org.scalatest.FlatSpec
-
 import Implicits._
 import Test._
 
-class JsonBuilderSpec extends FlatSpec {
+class JsonBuilderSpec extends org.scalatest.flatspec.AnyFlatSpec {
   val user = User(0, "root", true)
 
   "JSON builder" should "build array" in {

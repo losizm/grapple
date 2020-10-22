@@ -18,12 +18,10 @@ package little.json
 import java.io.StringReader
 import javax.json.stream.JsonParser.Event._
 
-import org.scalatest.FlatSpec
-
 import Implicits._
 import Test._
 
-class JsonParserSpec extends FlatSpec {
+class JsonParserSpec extends org.scalatest.flatspec.AnyFlatSpec {
   val user = User(0, "root", true)
 
   "JSON parser" should "parse array" in {

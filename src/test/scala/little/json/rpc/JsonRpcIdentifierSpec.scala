@@ -15,9 +15,7 @@
  */
 package little.json.rpc
 
-import org.scalatest.FlatSpec
-
-class JsonRpcIdentifierSpec extends FlatSpec {
+class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec {
   it should "inspect JsonRpcIdentifier with string value" in {
     val id = JsonRpcIdentifier("abc")
     assert(!id.isNull)
