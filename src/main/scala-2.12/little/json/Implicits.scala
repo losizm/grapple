@@ -356,11 +356,15 @@ object Implicits {
     def isIntegral(index: Int): Boolean =
       Try(json.getJsonNumber(index).isIntegral).getOrElse(false)
 
-    /** Creates new JsonArray with additional value. */
-    def %%(value: JsonValue): JsonArray =
+    /** Creates new JSON array by appending supplied value. */
+    def :+(value: JsonValue): JsonArray =
       new CombinedJsonArray(json, Json.arr(value))
 
-    /** Creates new JsonArray by concatenating other array to this array. */
+    /** Creates new JSON array by prepending supplied value. */
+    def +:(value: JsonValue): JsonArray =
+      new CombinedJsonArray(Json.arr(value), json)
+
+    /** Creates new JSON array by concatenating supplied array. */
     def ++(other: JsonArray): JsonArray =
       new CombinedJsonArray(json, other)
   }
@@ -439,17 +443,17 @@ object Implicits {
       Try(json.getJsonNumber(name).isIntegral).getOrElse(false)
 
     /**
-     * Creates new JsonObject with additional field.
+     * Creates new JSON object by adding supplied field.
      *
-     * If the field already exists, its value is replaced.
+     * @note If field already exists, its value is replaced.
      */
-    def %%(field: (String, JsonValue)): JsonObject =
+    def +(field: (String, JsonValue)): JsonObject =
       new MergedJsonObject(json, Json.obj(field))
 
     /**
-     * Creates new JsonObject by merging other object with this one.
+     * Creates new JSON oject by concatening supplied object.
      *
-     * If a field exists in both objects, the value from `other` is used.
+     * @note If fields already exist, their values are replaced.
      */
     def ++(other: JsonObject): JsonObject =
       new MergedJsonObject(json, other)

@@ -21,9 +21,9 @@ import Implicits._
 import Test._
 
 class MergedJsonObjectSpec extends FlatSpec {
-  "JSON objects" should "be merged" in {
+  it should "merge JSON objects" in {
     val obj = Json.obj("a" -> "a", "b" -> 2, "c" -> 3.0, "d" -> false) ++
-      Json.obj("a" -> "x", "z" -> User(0, "root")) %% ("groups" -> "admin,staff,cdrom")
+      Json.obj("a" -> "x", "z" -> User(0, "root")) + ("groups" -> "admin,staff,cdrom")
 
     assert(!obj.isEmpty)
     assert(obj.size == 6)

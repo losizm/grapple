@@ -21,8 +21,8 @@ import Implicits._
 import Test._
 
 class CombinedJsonArraySpec extends FlatSpec {
-  "JSON arrays" should "be combined" in {
-    val arr = Json.arr("a", 2, 3.0, false) ++ Json.arr("x", User(0, "root")) %% "guest"
+  it should "append to JSON array" in {
+    val arr = Json.arr("a", 2, 3.0, false) ++ Json.arr("x", User(0, "root")) :+ "guest"
 
     assert(!arr.isEmpty)
     assert(arr.size == 7)
@@ -33,5 +33,19 @@ class CombinedJsonArraySpec extends FlatSpec {
     assert(arr.getString(4) == "x")
     assert(arr.get(5).as[User] == User(0, "root"))
     assert(arr.getString(6) == "guest")
+  }
+
+  it should "prepend to JSON array" in {
+    val arr = ("guest" +: Json.arr("a", 2, 3.0, false)) ++ Json.arr("x", User(0, "root"))
+
+    assert(!arr.isEmpty)
+    assert(arr.size == 7)
+    assert(arr.getString(0) == "guest")
+    assert(arr.getString(1) == "a")
+    assert(arr.getInt(2) == 2)
+    assert(arr.getJsonNumber(3).doubleValue == 3.0)
+    assert(!arr.getBoolean(4))
+    assert(arr.getString(5) == "x")
+    assert(arr.get(6).as[User] == User(0, "root"))
   }
 }
