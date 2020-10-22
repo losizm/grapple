@@ -2,13 +2,13 @@
 
 The Scala library that provides extension methods to _javax.json_.
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_2.12.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_2.12%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_2.13%22)
 
 ## Getting Started
 To use **little-json**, start by adding it to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "4.2.1"
+libraryDependencies += "com.github.losizm" %% "little-json" % "5.0.0"
 ```
 
 ### Using Implementation of javax.json

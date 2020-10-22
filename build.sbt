@@ -1,10 +1,9 @@
 organization := "com.github.losizm"
 name         := "little-json"
-version      := "5.0.0-SNAPSHOT"
-
-description := "The Scala library that provides extension methods to javax.json"
-homepage := Some(url("https://github.com/losizm/little-json"))
-licenses := List("Apache License, Version 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+version      := "5.0.0"
+description  := "The Scala library that provides extension methods to javax.json"
+homepage     := Some(url("https://github.com/losizm/little-json"))
+licenses     := List("Apache License, Version 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
 scalaVersion       := "2.13.3"
 crossScalaVersions := Seq("2.12.12")
@@ -48,6 +47,9 @@ pomIncludeRepository := { _ => false }
 
 publishTo := {
   val nexus = "https://oss.sonatype.org"
-  if (isSnapshot.value) Some("snaphsots" at s"$nexus/content/repositories/snapshots")
-  else Some("releases" at s"$nexus/service/local/staging/deploy/maven2")
+
+  isSnapshot.value match {
+    case true  => Some("snaphsots" at s"$nexus/content/repositories/snapshots")
+    case false => Some("releases" at s"$nexus/service/local/staging/deploy/maven2")
+  }
 }
