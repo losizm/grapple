@@ -69,14 +69,14 @@ object Json {
 
   /** Creates JsonArray from list of values. */
   def arr(values: JsonValue*): JsonArray =
-    values.foldLeft(createArrayBuilder) { (builder, value) =>
+    values.foldLeft(createArrayBuilder()) { (builder, value) =>
       if (value == null) builder.addNull()
       else builder.add(value)
     }.build()
 
   /** Creates JsonObject from list of fields. */
   def obj(fields: (String, JsonValue)*): JsonObject =
-    fields.foldLeft(createObjectBuilder) { (builder, field) =>
+    fields.foldLeft(createObjectBuilder()) { (builder, field) =>
       if (field._2 == null) builder.addNull(field._1)
       else builder.add(field._1, field._2)
     }.build()
