@@ -11,6 +11,11 @@ crossScalaVersions := Seq("2.12.12")
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-Xcheckinit")
 
+Compile / doc / scalacOptions ++= Seq(
+  "-doc-title"  , "little-time",
+  "-doc-version", version.value
+)
+
 unmanagedSourceDirectories in Compile += {
   (sourceDirectory in Compile).value / s"scala-${scalaBinaryVersion.value}"
 }
