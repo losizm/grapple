@@ -46,59 +46,43 @@ object Implicits {
     value.fold(left.writing, right.writing)
 
   /** Converts JsonValue to String. */
-  implicit val stringJsonInput: JsonInput[String] = {
-    case json: JsonString => json.getString
-    case json => throw new IllegalArgumentException(s"STRING required but found ${json.getValueType}")
-  }
+  implicit val stringJsonInput: JsonInput[String] =
+    _.asInstanceOf[JsonString].getString
 
   /** Converts JsonValue to Boolean. */
   implicit val booleanJsonInput: JsonInput[Boolean] = {
-    case JsonValue.TRUE => true
+    case JsonValue.TRUE  => true
     case JsonValue.FALSE => false
-    case json => throw new IllegalArgumentException(s"TRUE or FALSE required but found ${json.getValueType}")
+    case _               => throw new ClassCastException
   }
 
   /** Converts JsonValue to Short (exact). */
-  implicit val shortJsonInput: JsonInput[Short] = {
-    case json: JsonNumber => json.bigDecimalValue.shortValueExact
-    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
-  }
+  implicit val shortJsonInput: JsonInput[Short] =
+    _.asInstanceOf[JsonNumber].bigDecimalValue.shortValue
 
   /** Converts JsonValue to Int (exact). */
-  implicit val intJsonInput: JsonInput[Int] = {
-    case json: JsonNumber => json.intValueExact
-    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
-  }
+  implicit val intJsonInput: JsonInput[Int] =
+    _.asInstanceOf[JsonNumber].intValueExact
 
   /** Converts JsonValue to Long (exact). */
-  implicit val longJsonInput: JsonInput[Long] = {
-    case json: JsonNumber => json.longValueExact
-    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
-  }
+  implicit val longJsonInput: JsonInput[Long] =
+    _.asInstanceOf[JsonNumber].longValueExact
 
   /** Converts JsonValue to Float. */
-  implicit val floatJsonInput: JsonInput[Float] = {
-    case json: JsonNumber => json.bigDecimalValue.floatValue
-    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
-  }
+  implicit val floatJsonInput: JsonInput[Float] =
+    _.asInstanceOf[JsonNumber].bigDecimalValue.shortValueExact
 
   /** Converts JsonValue to Double. */
-  implicit val doubleJsonInput: JsonInput[Double] = {
-    case json: JsonNumber => json.doubleValue
-    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
-  }
+  implicit val doubleJsonInput: JsonInput[Double] =
+    _.asInstanceOf[JsonNumber].doubleValue
 
   /** Converts JsonValue to BigInt (exact). */
-  implicit val bigIntJsonInput: JsonInput[BigInt] = {
-    case json: JsonNumber => json.bigIntegerValueExact
-    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
-  }
+  implicit val bigIntJsonInput: JsonInput[BigInt] =
+    _.asInstanceOf[JsonNumber].bigIntegerValueExact
 
   /** Converts JsonValue to BigDecimal. */
-  implicit val bigDecimalJsonInput: JsonInput[BigDecimal] = {
-    case json: JsonNumber => json.bigDecimalValue
-    case json => throw new IllegalArgumentException(s"NUMBER required but found ${json.getValueType}")
-  }
+  implicit val bigDecimalJsonInput: JsonInput[BigDecimal] =
+    _.asInstanceOf[JsonNumber].bigDecimalValue
 
   /**
    * Creates JsonInput for converting JsonValue to Option.
@@ -107,10 +91,9 @@ object Implicits {
    * converted, and `None` if the value is JSON null (i.e., `JsonValue.NULL`);
    * otherwise it throws the exception thrown by the implicit `input`.
    *
-   * '''Note:''' This behavior is different from [[JsonValueType.asOption]],
-   * which returns `Some` if the value is successfully converted and returns
-   * `None` if the value is JSON null or if an exception was thrown during
-   * conversion.
+   * @note This behavior is different from [[JsonValueType.asOption]], which
+   * returns `Some` if the value is successfully converted and returns `None` if
+   * the value is JSON null or if an exception was thrown during conversion.
    */
   implicit def optionJsonInput[T](implicit input: JsonInput[T]) =
     new JsonInput[Option[T]] {
@@ -144,8 +127,7 @@ object Implicits {
   implicit def collectionJsonInput[A, M[A]](implicit input: JsonInput[A], build: CanBuildFrom[Nothing, A, M[A]]) =
     new JsonInput[M[A]] {
       def reading(json: JsonValue): M[A] =
-        if (json.isInstanceOf[JsonArray]) json.asArray.map(input.reading).to[M]
-        else throw new IllegalArgumentException(s"ARRAY required but found ${json.getValueType}")
+        json.asInstanceOf[JsonArray].map(input.reading).to[M]
     }
 
   /** Converts String to JsonValue. */
