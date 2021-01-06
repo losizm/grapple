@@ -29,9 +29,10 @@ import javax.json.stream.JsonGenerator
  * case class User(id: Int, name: String)
  *
  * // Define how to read User from JsonValue
- * implicit val userInput: JsonInput[User] = {
- *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
- *   case json => throw new IllegalArgumentException("JsonObject required")
+ * implicit val userInput: JsonInput[User] = { json =>
+ *   json.asInstanceOf[JsonObject] match {
+ *     case obj => User(obj.getInt("id"), obj.getString("name"))
+ *   }
  * }
  *
  * // Parse String to JsonValue

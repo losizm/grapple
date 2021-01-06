@@ -27,8 +27,8 @@ private class CombinedJsonArray(left: JsonArray, right: JsonArray) extends JsonA
   private lazy val arr = asScalaBuffer(left) ++ asScalaBuffer(right)
 
   val getValueType = JsonValue.ValueType.ARRAY
-  val isEmpty: Boolean = left.isEmpty && right.isEmpty
-  val size: Int = left.size + right.size
+  val isEmpty      = left.isEmpty && right.isEmpty
+  val size         = left.size + right.size
 
   override lazy val toString: String =
     arr.mkString("[", ",", "]")
@@ -90,12 +90,9 @@ private class CombinedJsonArray(left: JsonArray, right: JsonArray) extends JsonA
     asJavaList(arr.map(_.asInstanceOf[T]))
 
   def get(index: Int): JsonValue =
-    if (index < 0 || index >= size)
-      throw new IndexOutOfBoundsException
-    else if (index < left.size)
-      left.get(index)
-    else
-      right.get(index - left.size)
+    if      (index < 0 || index >= size) throw new IndexOutOfBoundsException
+    else if (index < left.size)          left.get(index)
+    else                                 right.get(index - left.size)
 
   def contains(value: Any): Boolean =
     left.contains(value) || right.contains(value)
@@ -103,7 +100,7 @@ private class CombinedJsonArray(left: JsonArray, right: JsonArray) extends JsonA
   def containsAll(values: jutil.Collection[_]): Boolean =
     values.stream.allMatch {
       case value: JsonValue => contains(value)
-      case _ => false
+      case _                => false
     }
 
   def indexOf(value: Any): Int =

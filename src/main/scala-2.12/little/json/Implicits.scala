@@ -98,9 +98,10 @@ object Implicits {
   implicit def optionJsonInput[T](implicit input: JsonInput[T]) =
     new JsonInput[Option[T]] {
       def reading(json: JsonValue): Option[T] =
-        if (json == JsonValue.NULL)
-          None
-        else Some(input.reading(json))
+        json == JsonValue.NULL match {
+          case true  => None
+          case false => Some(input.reading(json))
+        }
     }
 
   /**
@@ -120,7 +121,8 @@ object Implicits {
   /** Creates JsonInput for converting JsonValue to Try. */
   implicit def tryJsonInput[T](implicit input: JsonInput[T]) =
     new JsonInput[Try[T]] {
-      def reading(json: JsonValue): Try[T] = Try(input.reading(json))
+      def reading(json: JsonValue): Try[T] =
+        Try(input.reading(json))
     }
 
   /** Creates JsonInput for converting JsonArray to collection. */
@@ -167,7 +169,8 @@ object Implicits {
   /** Creates JsonOutput for converting Either to JsonValue. */
   implicit def eitherJsonOutput[A, B, M[A, B] <: Either[A, B]](implicit left: JsonOutput[A], right: JsonOutput[B]) =
     new JsonOutput[M[A, B]] {
-      def writing(value: M[A, B]): JsonValue = value.fold(left.writing, right.writing)
+      def writing(value: M[A, B]): JsonValue =
+        value.fold(left.writing, right.writing)
     }
 
   /** Creates JsonOutput for converting Try to JsonValue. */
@@ -202,14 +205,16 @@ object Implicits {
      *
      * Alias to `get(index)`.
      */
-    def \(index: Int): JsonValue = get(index)
+    def \(index: Int): JsonValue =
+      get(index)
 
     /**
      * Gets value in JsonObject.
      *
      * Alias to `get(name)`.
      */
-    def \(name: String): JsonValue = get(name)
+    def \(name: String): JsonValue =
+      get(name)
 
     /**
      * Gets value of all fields with specified name.
@@ -218,19 +223,18 @@ object Implicits {
      */
     def \\(name: String): Seq[JsonValue] =
       json match {
-        case arr: JsonArray => arr.flatMap(_ \\ name).toSeq
-
-        case obj: JsonObject =>
-          Option(obj.get(name)).toSeq ++: obj.values.flatMap(_ \\ name).toSeq
-
-        case _ => Nil
+        case arr: JsonArray  => arr.flatMap(_ \\ name).toSeq
+        case obj: JsonObject => Option(obj.get(name)).toSeq ++: obj.values.flatMap(_ \\ name).toSeq
+        case _               => Nil
       }
 
     /** Gets value in JsonArray. */
-    def get(index: Int): JsonValue = asArray.get(index)
+    def get(index: Int): JsonValue =
+      asArray.get(index)
 
     /** Gets value in JsonObject. */
-    def get(name: String): JsonValue = asObject.get(name)
+    def get(name: String): JsonValue =
+      asObject.get(name)
 
     /** Converts json to requested type. */
     def as[T](implicit input: JsonInput[T]): T =
@@ -449,7 +453,7 @@ object Implicits {
   implicit class JsonArrayBuilderType(private val builder: JsonArrayBuilder) extends AnyVal {
     /** Adds value to array builder if `Some`; otherwise, adds null if `None`. */
     def add(value: Option[JsonValue]): JsonArrayBuilder =
-      value.fold(builder.addNull()) { builder.add(_) }
+      value.fold(builder.addNull())(builder.add(_))
 
     /** Adds value to array builder if `Success`; otherwise, adds null if `Failure`. */
     def add(value: Try[JsonValue]): JsonArrayBuilder =
@@ -461,8 +465,10 @@ object Implicits {
 
     /** Adds value to array builder or adds null if value is null. */
     def addNullable[T](value: T)(implicit companion: ArrayBuilderCompanion[T]): JsonArrayBuilder =
-      if (value == null) builder.addNull()
-      else companion.add(value)(builder)
+      value == null match {
+        case true  => builder.addNull()
+        case false => companion.add(value)(builder)
+      }
   }
 
   /**
@@ -473,7 +479,7 @@ object Implicits {
   implicit class JsonObjectBuilderType(private val builder: JsonObjectBuilder) extends AnyVal {
     /** Adds value to object builder if `Some`; otherwise, adds null if `None`. */
     def add(name: String, value: Option[JsonValue]): JsonObjectBuilder =
-      value.fold(builder.addNull(name)) { builder.add(name, _) }
+      value.fold(builder.addNull(name))(builder.add(name, _))
 
     /** Adds value to object builder if `Success`; otherwise, adds null if `Failure`. */
     def add(name: String, value: Try[JsonValue]): JsonObjectBuilder =
@@ -485,8 +491,10 @@ object Implicits {
 
     /** Adds value to object builder or adds null if value is null. */
     def addNullable[T](name: String, value: T)(implicit companion: ObjectBuilderCompanion[T]): JsonObjectBuilder =
-      if (value == null) builder.addNull(name)
-      else companion.add(name, value)(builder)
+      value == null match {
+        case true  => builder.addNull(name)
+        case false => companion.add(name, value)(builder)
+      }
   }
 
   /**
@@ -497,7 +505,7 @@ object Implicits {
   implicit class JsonGeneratorType(private val generator: JsonGenerator) extends AnyVal {
     /** Writes value to array context if `Some`; otherwise, writes null if `None`. */
     def write(value: Option[JsonValue]): JsonGenerator =
-      value.fold(generator.writeNull()) { generator.write(_) }
+      value.fold(generator.writeNull())(generator.write(_))
 
     /** Writes value to array context if `Success`; otherwise, writes null if `Failure`. */
     def write(value: Try[JsonValue]): JsonGenerator =
@@ -509,12 +517,14 @@ object Implicits {
 
     /** Writes value in array context or writes null if value is null. */
     def writeNullable[T](value: T)(implicit writer: ArrayContextWriter[T]): JsonGenerator =
-      if (value == null) generator.writeNull()
-      else writer.write(value)(generator)
+      value == null match {
+        case true  => generator.writeNull()
+        case false => writer.write(value)(generator)
+      }
 
     /** Writes value to object context if `Some`; otherwise, writes null if `None`. */
     def write(name: String, value: Option[JsonValue]): JsonGenerator =
-      value.fold(generator.writeNull(name)) { generator.write(name, _) }
+      value.fold(generator.writeNull(name))(generator.write(name, _))
 
     /** Writes value to object context if `Success`; otherwise, writes null if `Failure`. */
     def write(name: String, value: Try[JsonValue]): JsonGenerator =
@@ -526,8 +536,10 @@ object Implicits {
 
     /** Writes value in object context or writes null if value is null. */
     def writeNullable[T](name: String, value: T)(implicit writer: ObjectContextWriter[T]): JsonGenerator =
-      if (value == null) generator.writeNull(name)
-      else writer.write(name, value)(generator)
+      value == null match {
+        case true  => generator.writeNull(name)
+        case false => writer.write(name, value)(generator)
+      }
   }
 
   /**
@@ -546,7 +558,7 @@ object Implicits {
     def nextArray(): JsonArray =
       parser.next() match {
         case START_ARRAY => getArray()
-        case event => throw new JsonException(s"START_ARRAY expected but found $event")
+        case event       => throw new JsonException(s"Expected START_ARRAY and found $event")
       }
 
     /**
@@ -557,7 +569,7 @@ object Implicits {
     def nextObject(): JsonObject =
       parser.next() match {
         case START_OBJECT => getObject()
-        case event => throw new JsonException(s"START_OBJECT expected but found $event")
+        case event        => throw new JsonException(s"Expected START_OBJECT and found $event")
       }
 
     /**
@@ -576,7 +588,7 @@ object Implicits {
         case VALUE_NULL   => builder.addNull()
         case START_ARRAY  => builder.add(getArray())
         case START_OBJECT => builder.add(getObject())
-        case event        => throw new JsonException(s"unexpected parser event: $event")
+        case event        => throw new JsonException(s"Unexpected parser event: $event")
       }
 
       builder.build()
@@ -602,10 +614,11 @@ object Implicits {
             case VALUE_NULL   => builder.addNull(key)
             case START_ARRAY  => builder.add(key, getArray())
             case START_OBJECT => builder.add(key, getObject())
-            case event        => throw new JsonException(s"unexpected parser event: $event")
+            case event        => throw new JsonException(s"Unexpected parser event: $event")
           }
 
-        case event => throw new JsonException(s"KEY_NAME expected but found $event")
+        case event =>
+          throw new JsonException(s"Expected KEY_NAME and found $event")
       }
 
       builder.build()
