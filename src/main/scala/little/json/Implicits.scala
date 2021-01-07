@@ -15,14 +15,14 @@
  */
 package little.json
 
-import javax.json._
+import javax.json.{ Json => _, _ }
 import javax.json.stream.{ JsonGenerator, JsonParser }
 
-import scala.collection.GenTraversableOnce
-import scala.collection.convert.ImplicitConversionsToScala.`iterable AsScalaIterable`
-import scala.collection.generic.CanBuildFrom
+import scala.collection.Iterable
 import scala.language.{ higherKinds, implicitConversions }
 import scala.util.Try
+
+import CollectionConverters._
 
 /**
  * Provides type classes for `javax.json` and implicit implementations of
@@ -37,8 +37,8 @@ object Implicits {
   implicit def stringArrayAsJson(values: Array[String])(implicit output: JsonOutput[Array[String]]): JsonValue =
     output.writing(values)
 
-  /** Converts M[A] to JsonValue. */
-  implicit def containerAsJson[A, M[A]](value: M[A])(implicit output: JsonOutput[M[A]]): JsonValue =
+  /** Converts M[T] to JsonValue. */
+  implicit def containerAsJson[T, M[T]](value: M[T])(implicit output: JsonOutput[M[T]]): JsonValue =
     output.writing(value)
 
   /** Converts Either[A, B] to JsonValue. */
@@ -112,10 +112,10 @@ object Implicits {
    */
   implicit def eitherJsonInput[A, B](implicit left: JsonInput[A], right: JsonInput[B]) =
     new JsonInput[Either[A, B]] {
-      def reading(json: JsonValue): Either[A, B] = {
-        val result = Try(right.reading(json))
-        Either.cond(result.isSuccess, result.get, left.reading(json))
-      }
+      def reading(json: JsonValue): Either[A, B] =
+        Try(right.reading(json))
+          .map(Right(_))
+          .getOrElse(Left(left.reading(json)))
     }
 
   /** Creates JsonInput for converting JsonValue to Try. */
@@ -126,10 +126,13 @@ object Implicits {
     }
 
   /** Creates JsonInput for converting JsonArray to collection. */
-  implicit def collectionJsonInput[A, M[A]](implicit input: JsonInput[A], build: CanBuildFrom[Nothing, A, M[A]]) =
-    new JsonInput[M[A]] {
-      def reading(json: JsonValue): M[A] =
-        json.asInstanceOf[JsonArray].map(input.reading).to[M]
+  implicit def collectionJsonInput[T, M[T]](implicit input: JsonInput[T], factory: Factory[T, M[T]]) =
+    new JsonInput[M[T]] {
+      def reading(json: JsonValue): M[T] =
+        CollectionConverters
+          .asScala(json.asInstanceOf[JsonArray])
+          .map(input.reading)
+          .to(factory)
     }
 
   /** Converts String to JsonValue. */
@@ -160,9 +163,9 @@ object Implicits {
   implicit val bigDecimalJsonOutput: JsonOutput[BigDecimal] = (value) => JsonNumberImpl(value.bigDecimal)
 
   /** Creates JsonOutput for converting Option to JsonValue. */
-  implicit def optionJsonOutput[A, M[A] <: Option[A]](implicit output: JsonOutput[A]) =
-    new JsonOutput[M[A]] {
-      def writing(value: M[A]): JsonValue =
+  implicit def optionJsonOutput[T, M[T] <: Option[T]](implicit output: JsonOutput[T]) =
+    new JsonOutput[M[T]] {
+      def writing(value: M[T]): JsonValue =
         value.fold(JsonValue.NULL)(output.writing)
     }
 
@@ -174,16 +177,16 @@ object Implicits {
     }
 
   /** Creates JsonOutput for converting Try to JsonValue. */
-  implicit def tryJsonOutput[A, M[A] <: Try[A]](implicit output: JsonOutput[A]) =
-    new JsonOutput[M[A]] {
-      def writing(value: M[A]): JsonValue =
+  implicit def tryJsonOutput[T, M[T] <: Try[T]](implicit output: JsonOutput[T]) =
+    new JsonOutput[M[T]] {
+      def writing(value: M[T]): JsonValue =
         value.fold(_ => JsonValue.NULL, output.writing)
     }
 
-  /** Creates JsonOutput for converting GenTraversableOnce to JsonArray. */
-  implicit def genTraversableOnceJsonOutput[A, M[A] <: GenTraversableOnce[A]](implicit output: JsonOutput[A]) =
-    new JsonOutput[M[A]] {
-      def writing(values: M[A]): JsonValue =
+  /** Creates JsonOutput for converting Iterable to JsonArray. */
+  implicit def iterableJsonOutput[T, M[T] <: Iterable[T]](implicit output: JsonOutput[T]) =
+    new JsonOutput[M[T]] {
+      def writing(values: M[T]): JsonValue =
         values.foldLeft(Json.createArrayBuilder())(_.add(_)).build()
     }
 
@@ -223,8 +226,8 @@ object Implicits {
      */
     def \\(name: String): Seq[JsonValue] =
       json match {
-        case arr: JsonArray  => arr.flatMap(_ \\ name).toSeq
-        case obj: JsonObject => Option(obj.get(name)).toSeq ++: obj.values.flatMap(_ \\ name).toSeq
+        case arr: JsonArray  => asScala(arr).flatMap(_ \\ name).toSeq
+        case obj: JsonObject => Option(obj.get(name)).toSeq ++: asScala(obj.values).flatMap(_ \\ name).toSeq
         case _               => Nil
       }
 

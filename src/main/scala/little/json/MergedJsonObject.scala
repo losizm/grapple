@@ -20,8 +20,9 @@ import java.util.AbstractMap.SimpleImmutableEntry
 
 import javax.json.{ JsonArray, JsonNumber, JsonObject, JsonString, JsonValue }
 
-import scala.jdk.CollectionConverters.SetHasAsScala
 import scala.util.Try
+
+import CollectionConverters.asScala
 
 private class MergedJsonObject(left: JsonObject, right: JsonObject) extends JsonObject {
   val getValueType = JsonValue.ValueType.OBJECT
@@ -52,7 +53,7 @@ private class MergedJsonObject(left: JsonObject, right: JsonObject) extends Json
   lazy val size: Int = keySet.size
 
   override lazy val toString: String =
-    entrySet.asScala.mkString("{", ",", "}")
+    asScala(entrySet).mkString("{", ",", "}")
 
   def getString(name: String): String =
     getJsonString(name).getString

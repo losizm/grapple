@@ -112,7 +112,7 @@ class JsonSpec extends org.scalatest.flatspec.AnyFlatSpec {
     assert(json.as[Set[User]] == users.toSet)
     assert(json.as[Stream[User]].sameElements(users))
     assert(json.as[Vector[User]].sameElements(users))
-    assert(json.as[Traversable[User]] == users)
+    assert(json.as[Iterable[User]] == users)
   }
 
   it should "be created from list of values" in {

@@ -19,12 +19,12 @@ import java.{ util => jutil }
 
 import javax.json.{ JsonArray, JsonNumber, JsonObject, JsonString, JsonValue }
 
-import scala.collection.JavaConverters.{ asJavaCollection, asJavaIterator, asScalaBuffer, seqAsJavaList => asJavaList }
-
 import scala.util.Try
 
+import CollectionConverters._
+
 private class CombinedJsonArray(left: JsonArray, right: JsonArray) extends JsonArray {
-  private lazy val arr = asScalaBuffer(left) ++ asScalaBuffer(right)
+  private lazy val arr = asScala(left) ++ asScala(right)
 
   val getValueType = JsonValue.ValueType.ARRAY
   val isEmpty      = left.isEmpty && right.isEmpty
@@ -87,7 +87,7 @@ private class CombinedJsonArray(left: JsonArray, right: JsonArray) extends JsonA
     }
 
   def getValuesAs[T <: JsonValue](c: Class[T]): jutil.List[T] =
-    asJavaList(arr.map(_.asInstanceOf[T]))
+    asJava(arr.map(_.asInstanceOf[T]))
 
   def get(index: Int): JsonValue =
     if      (index < 0 || index >= size) throw new IndexOutOfBoundsException
@@ -119,12 +119,12 @@ private class CombinedJsonArray(left: JsonArray, right: JsonArray) extends JsonA
       case index => left.size + index
     }
 
-  def iterator(): jutil.Iterator[JsonValue] = asJavaIterator(arr.iterator)
-  def listIterator(): jutil.ListIterator[JsonValue] = asJavaList(arr).listIterator
-  def listIterator(index: Int): jutil.ListIterator[JsonValue] = asJavaList(arr).listIterator(index)
-  def subList(fromIndex: Int, toIndex: Int): jutil.List[JsonValue] = asJavaList(arr.slice(fromIndex, toIndex))
+  def iterator(): jutil.Iterator[JsonValue] = asJava(arr.iterator)
+  def listIterator(): jutil.ListIterator[JsonValue] = asJava(arr).listIterator
+  def listIterator(index: Int): jutil.ListIterator[JsonValue] = asJava(arr).listIterator(index)
+  def subList(fromIndex: Int, toIndex: Int): jutil.List[JsonValue] = asJava(arr.slice(fromIndex, toIndex))
   def toArray(): Array[AnyRef] = arr.toArray[AnyRef]
-  def toArray[T](buf: Array[T with AnyRef]): Array[T with AnyRef] = asJavaList(arr).toArray[T](buf)
+  def toArray[T](buf: Array[T with AnyRef]): Array[T with AnyRef] = asJava(arr).toArray[T](buf)
 
   def clear(): Unit = throw new UnsupportedOperationException
   def set(index: Int, value: JsonValue): JsonValue = throw new UnsupportedOperationException

@@ -52,6 +52,7 @@ class JsonRpcErrorSpec extends org.scalatest.flatspec.AnyFlatSpec {
         assert(code == 100)
         assert(message == "Error")
         assert(data.isEmpty)
+      case _ => throw new MatchError(err1)
     }
 
     val err2 = JsonRpcError(200, "Error", "More information")
@@ -64,6 +65,7 @@ class JsonRpcErrorSpec extends org.scalatest.flatspec.AnyFlatSpec {
         assert(code == 200)
         assert(message == "Error")
         assert(data.as[String] == "More information")
+      case _ => throw new MatchError(err2)
     }
 
     val err3 = JsonRpcError(300, "Error", Data("Severe", "Unknown"))
@@ -76,6 +78,7 @@ class JsonRpcErrorSpec extends org.scalatest.flatspec.AnyFlatSpec {
         assert(code == 300)
         assert(message == "Error")
         assert(data.as[Data] == Data("Severe", "Unknown"))
+      case _ => throw new MatchError(err3)
     }
 
     val err4 = JsonRpcError(-32700, "Error")
