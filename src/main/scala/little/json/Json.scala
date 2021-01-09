@@ -28,7 +28,7 @@ import scala.util.Try
  * Provides factory methods and other utilities.
  *
  * {{{
- * import javax.json.JsonObject
+ * import javax.json.{ JsonException, JsonObject, JsonValue }
  * import little.json.{ Json, JsonInput, JsonOutput }
  * import little.json.Implicits._
  *
@@ -37,7 +37,7 @@ import scala.util.Try
  * // Define how to read User from JsonValue
  * implicit val userJsonInput: JsonInput[User] = {
  *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
- *   case json => throw new IllegalArgumentException("JsonObject required")
+ *   case json: JsonValue  => throw new JsonException("Unexpected value type")
  * }
  *
  * // Define how to write User to JsonValue

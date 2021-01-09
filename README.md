@@ -8,7 +8,7 @@ The Scala library that provides extension methods to _javax.json_.
 To use **little-json**, start by adding it to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "5.0.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "6.0.0"
 ```
 
 ### Using Implementation of javax.json
@@ -31,16 +31,16 @@ Here's a taste of what **little-json** offers.
 provide implementations of these to read and write JSON values.
 
 ```scala
-import javax.json.{ JsonObject, JsonValue }
+import javax.json.{ JsonException, JsonObject, JsonValue }
 import little.json.{ Json, JsonInput, JsonOutput }
-import little.json.Implicits._ // Unleash the power
+import little.json.Implicits._ // Unleash magic
 
 case class User(id: Int, name: String)
 
 // Define how to read User from JsonValue
 implicit val userJsonInput: JsonInput[User] = {
   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
-  case json: JsonValue  => throw new IllegalArgumentException("JsonObject required")
+  case json: JsonValue  => throw new JsonException("Unexpected value type")
 }
 
 // Define how to write User to JsonValue
@@ -66,7 +66,8 @@ The same applies to `JsonInput[User]`. You get `JsonInput[Seq[User]]` for free.
 
 ```scala
 val json = Json.parse("""
-  [{ "id": 0, "name": "root" }, { "id": 500, "name": "guest" }]
+  [{ "id": 0,   "name": "root" },
+   { "id": 500, "name": "guest" }]
 """)
 
 // Read Seq[User] from JsonArray
@@ -95,7 +96,8 @@ val json = Json.parse("""
   "computer": {
     "name": "localhost",
     "users": [
-      { "id": 0, "name": "root" }, { "id": 500, "name": "guest" }
+      { "id": 0,   "name": "root" },
+      { "id": 500, "name": "guest" }
     ]
   }
 }
@@ -148,7 +150,7 @@ generator.writeStartObject()
 // Write array of users one user at a time
 // Implicitly convert each user to JsonObject before writing
 generator.writeStartArray("one-by-one")
-users.foreach { user => generator.write(user) }
+users.foreach(user => generator.write(user))
 generator.writeEnd()
 
 // Write array of users in one swoop
@@ -258,9 +260,9 @@ implicit val paramsInput: JsonInput[Params] = {
 val request = JsonRpc.parseRequest("""
   {
     "jsonrpc": "2.0",
-    "id": "590d24ae-500a-486c-8d73-8035e78529bd",
-    "method": "sum",
-    "params": [1, 2, 3]
+    "id":      "590d24ae-500a-486c-8d73-8035e78529bd",
+    "method":  "sum",
+    "params":  [1, 2, 3]
   }
 """)
 
@@ -272,8 +274,8 @@ assert(request.params.exists(_.as[Params] == Params(1, 2, 3)))
 val response = JsonRpc.parseResponse("""
   {
     "jsonrpc": "2.0",
-    "id": "590d24ae-500a-486c-8d73-8035e78529bd",
-    "result": 6
+    "id":      "590d24ae-500a-486c-8d73-8035e78529bd",
+    "result":  6
   }
 """)
 

@@ -90,7 +90,7 @@ trait JsonOutput[T] extends BuilderCompanion[T] with ContextWriter[T] {
 }
 
 /**
- * Consolidates [[JsonInput]] and [[JsonOutput]].
+ * Combines [[JsonInput]] and [[JsonOutput]].
  *
  * {{{
  * import javax.json.{ JsonObject, JsonValue }
