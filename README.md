@@ -290,5 +290,5 @@ See [scaladoc](https://losizm.github.io/little-json/latest/api/little/json/index
 for additional details.
 
 ## License
-**little-json** is licensed under the Apache License, Version 2. See LICENSE
-file for more information.
+**little-json** is licensed under the Apache License, Version 2. See [LICENSE](LICENSE)
+for more information.
