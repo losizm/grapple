@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Carlos Conyers
+ * Copyright 2021 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package little.json.rpc
+package little.json
+package rpc
 
-import javax.json.JsonObject
+import scala.language.implicitConversions
 
-import little.json.{ Json, JsonInput, JsonOutput }
-import little.json.Implicits._
+import little.json.Implicits.given
 
-class JsonRpcRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
+class JsonRpcRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Param(name: String, value: Int)
 
-  implicit val paramInput: JsonInput[Param] = {
-    case value: JsonObject => Param(
-      value.getString("name"),
-      value.getInt("value")
-    )
-  }
-
-  implicit val paramOutput: JsonOutput[Param] =
-    param => Json.obj(
-      "name"  -> param.name,
-      "value" -> param.value
-    )
+  given JsonInput[Param]  = json => Param(json("name"), json("value"))
+  given JsonOutput[Param] = param => Json.obj("name" -> param.name, "value" -> param.value)
 
   it should "create JsonRpcRequest" in {
     val req1 = JsonRpcRequest("2.0", JsonRpcIdentifier("abc"), "compute", None)
@@ -109,4 +99,3 @@ class JsonRpcRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
     assert(req4.getAttribute("1").contains(1))
     assert(req4.getAttribute("2").contains(2))
   }
-}

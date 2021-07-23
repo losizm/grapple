@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Carlos Conyers
+ * Copyright 2021 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package little.json.rpc
+package little.json
+package rpc
 
-class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec {
+class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "inspect JsonRpcIdentifier with string value" in {
     val id = JsonRpcIdentifier("abc")
     assert(!id.isNull)
@@ -42,4 +43,3 @@ class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec {
     assertThrows[NoSuchElementException](id.stringValue)
     assertThrows[NoSuchElementException](id.numberValue)
   }
-}

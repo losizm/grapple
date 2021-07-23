@@ -15,15 +15,11 @@
  */
 package little.json
 
-private case class JsonNumberImpl(bigDecimalValue: BigDecimal) extends JsonNumber:
-  if bigDecimalValue == null then
-    throw NullPointerException()
+import java.io.BufferedWriter
 
-  lazy val shortValue  = bigDecimalValue.toShortExact
-  lazy val intValue    = bigDecimalValue.toIntExact
-  lazy val longValue   = bigDecimalValue.toLongExact
-  lazy val floatValue  = bigDecimalValue.floatValue
-  lazy val doubleValue = bigDecimalValue.doubleValue
-  lazy val bigIntValue = bigDecimalValue.toBigIntExact.getOrElse(throw ArithmeticException())
-
-  override lazy val toString = bigDecimalValue.toString
+private trait JsonPrinter:
+  def writeStart(name: String, start: Char, depth: Int)(using writer: BufferedWriter): Unit
+  def write(name: String, value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit
+  def writeStart(start: Char, depth: Int)(using writer: BufferedWriter): Unit
+  def write(value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit
+  def writeEnd(end: Char, isEmpty: Boolean, depth: Int)(using writer: BufferedWriter): Unit

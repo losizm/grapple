@@ -1,0 +1,20 @@
+{
+  "root": {
+    "id": 0,
+    "name": "root",
+    "groups": ["root"],
+    "enabled": true
+  },
+  "guest": {
+    "id": 500,
+    "name": "guest",
+    "groups": ["guest"],
+    "enabled": false
+  },
+  "jza": {
+    "id": 1000,
+    "name": "jza",
+    "groups": ["jza", "adm", "sudo"],
+    "enabled": true
+  }
+}

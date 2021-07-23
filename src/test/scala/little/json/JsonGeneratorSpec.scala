@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Carlos Conyers
+ * Copyright 2021 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,107 +16,136 @@
 package little.json
 
 import java.io.StringWriter
+import scala.language.implicitConversions
+import Implicits.given
 
-import scala.util.{ Failure, Success, Try }
+class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
+  case class User(id: Int, name: String)
 
-import Implicits._
-import Test._
+  given userToJson: JsonOutput[User] with
+    def apply(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
 
-class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec {
-  val user = User(0, "root", true)
+  it should "write JSON object" in {
+    val json = Json.obj(
+      "id"     -> 1000,
+      "name"   -> "jza",
+      "groups" -> Seq("jza", "adm", "sudo"),
+      "info"   -> Json.obj("home" -> "/home/jza", "storage" -> 8L * 1024 * 1024 * 1024),
+      "root"   -> User(0, "root"),
+      "nobody" -> User(65534, "nobody")
+    )
 
-  "JSON generator" should "generate array" in {
-    val out = new StringWriter()
+    val buf = StringWriter()
+    val out = JsonGenerator(buf)
 
-    Json.createGenerator(out, true)
-      .writeStartArray()
-      .write(user)
-      .writeNullable(user)
-      .writeNullable(null.asInstanceOf[User])
-      .write(Some(user))
-      .write(None.asInstanceOf[Option[User]])
-      .write(Success(user))
-      .write(Failure[User](new Exception))
-      .write(1)
-      .write(1L)
-      .write(1.1)
-      .write(BigInt(1))
-      .writeNullable(BigInt(1))
-      .write(Option(BigInt(1)))
-      .write(BigDecimal(1.0))
-      .writeNullable(BigDecimal(1.0))
-      .write(Some(BigDecimal(1.0)))
-      .write(Some(BigDecimal(1.0)))
-      .write(Seq(user, user, user))
-      .write(Array(user, user, user))
-      .write(Seq("hello", "hello"))
-      .write(Array("hello", "hello"))
-      .write(Seq(0, 1, 2))
-      .write(Array(0, 1, 2))
-      .write(Seq[Short](0, 1, 2))
-      .write(Array[Short](0, 1, 2))
-      .write(Seq(0L, 1L, 2L))
-      .write(Array(0L, 1L, 2L))
-      .write(Seq(0.0, 1.0, 2.0))
-      .write(Array(0.0, 1.0, 2.0))
-      .write(Seq(0.0f, 1.0f, 2.0f))
-      .write(Array(0.0f, 1.0f, 2.0f))
-      .write(Seq(BigInt(0), BigInt(1), BigInt(2)))
-      .write(Array(BigInt(0), BigInt(1), BigInt(2)))
-      .write(Seq(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
-      .write(Array(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
-      .write(Seq(true, false, false))
-      .write(Array(true, false, true))
-      .write(Left[String, Int]("z"))
-      .write(Right[String, Int](26))
-      .writeEnd()
-      .close()
+    try
+      out.writeStartObject()
+      out.write("id", 1000)
+      out.write("name", "jza")
+      out.writeStartArray("groups")
+      out.write("jza")
+      out.write("adm")
+      out.write("sudo")
+      out.writeEnd()
+      out.writeStartObject("info")
+      out.write("home", "/home/jza")
+      out.write("storage", 8L * 1024 * 1024 * 1024)
+      out.writeEnd()
+      out.write("root", User(0, "root"))
+      out.write("nobody", User(65534, "nobody"))
+      out.writeEnd()
+      out.flush()
+
+      val copy = Json.parse(buf.toString)
+      assert(copy == json)
+    finally
+      out.close()
   }
 
-  it should "generate object" in {
-    val out = new StringWriter()
+  it should "write JSON array" in {
+    val json = Json.arr(
+      1000,
+      "jza",
+      Seq("jza", "adm", "sudo"),
+      Json.obj("home" -> "/home/jza", "storage" -> 8L * 1024 * 1024 * 1024),
+      User(0, "root"),
+      User(65534, "nobody")
+    )
 
-    Json.createGenerator(out)
-      .writeStartObject()
-      .write("a", user)
-      .writeNullable("b1", user)
-      .writeNullable("b2", null.asInstanceOf[User])
-      .write("c1", Some(user))
-      .write("c2", None.asInstanceOf[Option[User]])
-      .write("c3", Success(user))
-      .write("c4", Failure[User](new Exception))
-      .write("d", 1)
-      .write("e", 1L)
-      .write("f", 1.1)
-      .write("g", BigInt(1))
-      .writeNullable("h", BigInt(1))
-      .write("i", Option(BigInt(1)))
-      .write("j", BigDecimal(1.0))
-      .writeNullable("k", BigDecimal(1.0))
-      .write("l", Some(BigDecimal(1.0)))
-      .write("m1", Seq(user, user, user))
-      .write("m2", Array(user, user, user))
-      .write("n1", Seq("hello", "hello"))
-      .write("n2", Array("hello", "hello"))
-      .write("o1", Seq(0, 1, 2))
-      .write("o2", Array(0, 1, 2))
-      .write("o3", Seq[Short](0, 1, 2))
-      .write("o4", Array[Short](0, 1, 2))
-      .write("p1", Seq(0L, 1L, 2L))
-      .write("p2", Array(0L, 1L, 2L))
-      .write("q1", Seq(0.0, 1.0, 2.0))
-      .write("q2", Array(0.0, 1.0, 2.0))
-      .write("q3", Seq(0.0f, 1.0f, 2.0f))
-      .write("q4", Array(0.0f, 1.0f, 2.0f))
-      .write("r1", Seq(BigInt(0), BigInt(1), BigInt(2)))
-      .write("r2", Array(BigInt(0), BigInt(1), BigInt(2)))
-      .write("s1", Seq(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
-      .write("s2", Array(BigDecimal(0.0), BigDecimal(1.0), BigDecimal(2.0)))
-      .write("t1", Seq(true, false, false))
-      .write("t2", Array(true, false, true))
-      .write("u", Left[String, Int]("z"))
-      .write("v", Right[String, Int](26))
-      .writeEnd()
-      .close()
+    val buf = StringWriter()
+    val out = JsonGenerator(buf)
+
+    try
+      out.writeStartArray()
+      out.write(1000)
+      out.write("jza")
+      out.writeStartArray()
+      out.write("jza")
+      out.write("adm")
+      out.write("sudo")
+      out.writeEnd()
+      out.writeStartObject()
+      out.write("home", "/home/jza")
+      out.write("storage", 8L * 1024 * 1024 * 1024)
+      out.writeEnd()
+      out.write(User(0, "root"))
+      out.write(User(65534, "nobody"))
+      out.writeEnd()
+      out.flush()
+
+      val copy = Json.parse(buf.toString)
+      assert(copy == json)
+    finally
+      out.close()
   }
-}
+
+  it should "not write vale in empty context" in {
+    val out = JsonGenerator(StringWriter())
+    try
+      assertThrows[IllegalStateException](out.write(1))
+      assertThrows[IllegalStateException](out.write("a", 1))
+    finally
+      out.close()
+  }
+
+  it should "not write standalone value in object context" in {
+    val out = JsonGenerator(StringWriter())
+    try
+      out.writeStartObject()
+      assertThrows[IllegalStateException](out.write(1))
+      assertThrows[IllegalStateException](out.writeStartObject())
+      assertThrows[IllegalStateException](out.writeStartArray())
+
+      out.writeStartObject("test")
+      assertThrows[IllegalStateException](out.write(1))
+      assertThrows[IllegalStateException](out.writeStartObject())
+      assertThrows[IllegalStateException](out.writeStartArray())
+
+      out.write("test", 0)
+      assertThrows[IllegalStateException](out.write(1))
+      assertThrows[IllegalStateException](out.writeStartObject())
+      assertThrows[IllegalStateException](out.writeStartArray())
+    finally
+      out.close()
+  }
+
+  it should "not write field in array context" in {
+    val out = JsonGenerator(StringWriter())
+    try
+      out.writeStartArray()
+      assertThrows[IllegalStateException](out.write("a", 1))
+      assertThrows[IllegalStateException](out.writeStartObject("a"))
+      assertThrows[IllegalStateException](out.writeStartArray("a"))
+
+      out.writeStartArray()
+      assertThrows[IllegalStateException](out.write("a", 1))
+      assertThrows[IllegalStateException](out.writeStartObject("a"))
+      assertThrows[IllegalStateException](out.writeStartArray("a"))
+
+      out.write(0)
+      assertThrows[IllegalStateException](out.write("a", 1))
+      assertThrows[IllegalStateException](out.writeStartObject("a"))
+      assertThrows[IllegalStateException](out.writeStartArray("a"))
+    finally
+      out.close()
+  }

@@ -15,15 +15,15 @@
  */
 package little.json
 
-private case class JsonNumberImpl(bigDecimalValue: BigDecimal) extends JsonNumber:
-  if bigDecimalValue == null then
-    throw NullPointerException()
+import Implicits.given
 
-  lazy val shortValue  = bigDecimalValue.toShortExact
-  lazy val intValue    = bigDecimalValue.toIntExact
-  lazy val longValue   = bigDecimalValue.toLongExact
-  lazy val floatValue  = bigDecimalValue.floatValue
-  lazy val doubleValue = bigDecimalValue.doubleValue
-  lazy val bigIntValue = bigDecimalValue.toBigIntExact.getOrElse(throw ArithmeticException())
-
-  override lazy val toString = bigDecimalValue.toString
+class JsonNullSpec extends org.scalatest.flatspec.AnyFlatSpec:
+  it should "inspect JsonNull" in {
+    assert(JsonNull.toString == "null")
+    assertThrows[ClassCastException](JsonNull.as[String])
+    assertThrows[ClassCastException](JsonNull.as[Int])
+    assertThrows[ClassCastException](JsonNull.as[Long])
+    assertThrows[ClassCastException](JsonNull.as[Double])
+    assertThrows[ClassCastException](JsonNull.as[BigDecimal])
+    assertThrows[ClassCastException](JsonNull.as[Boolean])
+  }

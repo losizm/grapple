@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Carlos Conyers
+ * Copyright 2021 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package little.json.rpc
+package little.json
+package rpc
 
-import little.json.Json
-
-/** Stores optional identifier. */
-sealed trait JsonRpcIdentifier {
+/** Defines JSON-RPC identifier. */
+sealed trait JsonRpcIdentifier:
   /** Tests for null value. */
   def isNull: Boolean
 
@@ -41,31 +40,27 @@ sealed trait JsonRpcIdentifier {
    * @throws NoSuchElementException if not number value
    */
   def numberValue: Long
-}
 
-/** Provides factory for `JsonRpcIdentifier`. */
-object JsonRpcIdentifier {
+/** Provides JSON-RPC identifier factory. */
+object JsonRpcIdentifier:
   /** Gets identifier with null value. */
   def nullValue: JsonRpcIdentifier = NullIdentifier
 
   /**
-   * Creates identifier with supplied string value.
+   * Creates identifier with string value.
    *
-   * @param id string value of identifier
+   * @param id identifier
    */
-  def apply(id: String): JsonRpcIdentifier =
-    StringIdentifier(id)
+  def apply(id: String): JsonRpcIdentifier = StringIdentifier(id)
 
   /**
-   * Creates identifier with supplied number value.
+   * Creates identifier with number value.
    *
-   * @param id number value of identifier
+   * @param id identifier
    */
-  def apply(id: Long): JsonRpcIdentifier =
-    NumberIdentifier(id)
-}
+  def apply(id: Long): JsonRpcIdentifier = NumberIdentifier(id)
 
-private object NullIdentifier extends JsonRpcIdentifier {
+private object NullIdentifier extends JsonRpcIdentifier:
   val isNull   = true
   val isString = false
   val isNumber = false
@@ -74,9 +69,8 @@ private object NullIdentifier extends JsonRpcIdentifier {
   def numberValue = throw new NoSuchElementException("no number value")
 
   override val toString = "null"
-}
 
-private case class StringIdentifier(stringValue: String) extends JsonRpcIdentifier {
+private case class StringIdentifier(stringValue: String) extends JsonRpcIdentifier:
   require(stringValue != null)
 
   val isNull   = false
@@ -85,10 +79,9 @@ private case class StringIdentifier(stringValue: String) extends JsonRpcIdentifi
 
   def numberValue = throw new NoSuchElementException("no number value")
 
-  override lazy val toString = Json.toJsonString(stringValue)
-}
+  override lazy val toString = EncodedString(stringValue)
 
-private case class NumberIdentifier(numberValue: Long) extends JsonRpcIdentifier {
+private case class NumberIdentifier(numberValue: Long) extends JsonRpcIdentifier:
   val isNull   = false
   val isString = false
   val isNumber = true
@@ -96,4 +89,3 @@ private case class NumberIdentifier(numberValue: Long) extends JsonRpcIdentifier
   def stringValue = throw new NoSuchElementException("no string value")
 
   override val toString = s"$numberValue"
-}

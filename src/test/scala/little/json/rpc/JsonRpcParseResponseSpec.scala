@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Carlos Conyers
+ * Copyright 2021 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package little.json.rpc
+package little.json
+package rpc
 
-import javax.json.JsonObject
-import javax.json.stream.JsonParsingException
+import scala.language.implicitConversions
 
-import little.json.JsonInput
-import little.json.Implicits._
+import little.json.Implicits.given
+import little.json.rpc.Implicits.given
 
-class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
+class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Answer(value: Int)
 
-  implicit val resultInput: JsonInput[Answer] = {
-    case result: JsonObject => Answer(result.getInt("answer"))
-  }
+  given JsonInput[Answer] =
+    json => Answer(json("answer"))
 
   it should "parse response with object result" in {
     val text = """{
@@ -35,7 +34,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "result": { "answer": 3 }
     }"""
 
-    val res = JsonRpc.parseResponse(text)
+    val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
     assert(res.id.stringValue == "abc")
     assert(res.result.as[Answer] == Answer(3))
@@ -48,7 +47,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "result": [0, 1, 2]
     }"""
 
-    val res = JsonRpc.parseResponse(text)
+    val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
     assert(res.id.stringValue == "abc")
     assert(res.result.as[Seq[Int]] == Seq(0, 1, 2))
@@ -61,7 +60,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "result": 3
     }"""
 
-    val res = JsonRpc.parseResponse(text)
+    val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
     assert(res.id.stringValue == "abc")
     assert(res.result.as[Int] == 3)
@@ -74,7 +73,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "result": "success"
     }"""
 
-    val res = JsonRpc.parseResponse(text)
+    val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
     assert(res.id.numberValue == 123)
     assert(res.result.as[String] == "success")
@@ -87,7 +86,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "result": true
     }"""
 
-    val res = JsonRpc.parseResponse(text)
+    val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
     assert(res.id.numberValue == 123)
     assert(res.result.as[Boolean])
@@ -100,7 +99,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "error": { "code": -32603, "message": "Internal Error" }
     }"""
 
-    val res = JsonRpc.parseResponse(text)
+    val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
     assert(res.id.numberValue == 123)
     assert(res.error.isInternalError)
@@ -108,7 +107,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
   }
 
   it should "not parse response as array" in {
-    assertThrows[IllegalArgumentException](JsonRpc.parseResponse("[0, 1, 2]"))
+    assertThrows[JsonException](Json.parse("[0, 1, 2]").as[JsonRpcResponse])
   }
 
   it should "not parse response with invalid JSON" in {
@@ -117,7 +116,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "id": 123
       "result": [0, 1, 2]
     }"""
-    assertThrows[JsonParsingException](JsonRpc.parseResponse(text))
+    assertThrows[JsonException](Json.parse(text).as[JsonRpcResponse])
   }
 
   it should "not parse response without jsonrpc" in {
@@ -125,7 +124,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "id": 123,
       "result": [0, 1, 2]
     }"""
-    assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
+    assertThrows[JsonException](Json.parse(text).as[JsonRpcResponse])
   }
 
   it should "not parse response with number value for jsonrpc" in {
@@ -134,7 +133,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "id": 123,
       "result": [0, 1, 2]
     }"""
-    assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
+    assertThrows[JsonException](Json.parse(text).as[JsonRpcResponse])
   }
 
   it should "not parse response without result" in {
@@ -142,6 +141,5 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "jsonrpc": "2.0",
       "id": 123
     }"""
-    assertThrows[IllegalArgumentException](JsonRpc.parseResponse(text))
+    assertThrows[JsonException](Json.parse(text).as[JsonRpcResponse])
   }
-}

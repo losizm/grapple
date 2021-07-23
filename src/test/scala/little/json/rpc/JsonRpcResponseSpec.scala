@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Carlos Conyers
+ * Copyright 2021 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package little.json.rpc
+package little.json
+package rpc
 
-import javax.json.JsonObject
+import scala.language.implicitConversions
 
-import little.json.{ Json, JsonInput, JsonOutput }
-import little.json.Implicits._
+import little.json.Implicits.given
+import little.json.rpc.Implicits.given
 
-class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
+class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Result(name: String, value: Int)
 
-  implicit val resultInput: JsonInput[Result] = {
-    case value: JsonObject => Result(
-      value.getString("name"),
-      value.getInt("value")
-    )
-  }
+  given JsonInput[Result] =
+    json => Result(json("name"), json("value"))
 
-  implicit val resultOutput: JsonOutput[Result] =
-    param => Json.obj(
-      "name"  -> param.name,
-      "value" -> param.value
-    )
+  given JsonOutput[Result] =
+    param => Json.obj("name" -> param.name, "value" -> param.value)
 
   it should "create JsonRpcResponse with object result" in {
     val res = JsonRpcResponse("2.0", JsonRpcIdentifier("abc"), Result("y", 2))
@@ -88,7 +82,8 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
     assert(res.id == JsonRpcIdentifier(123))
     assert(res.id.numberValue == 123)
     assert(res.error.isInvalidRequest)
-    assert(res.error.message == "Invalid request")
+    assert(res.error.message == "Invalid Request")
+    assert(res.error.data.get.as[String] == "Invalid request")
   }
 
   it should "create JsonRpcResponse with attributes" in {
@@ -134,4 +129,123 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec {
     assert(res4.getAttribute("1").contains(1))
     assert(res4.getAttribute("2").contains(2))
   }
-}
+
+  it should "create JsonRpcResponse with either result or error" in {
+    val value = 6
+    val res1 = JsonRpcResponse.builder()
+      .id(123)
+      .resultOrError(if value < 10 then value else InvalidParams())
+      .build()
+    assert(res1.id.numberValue == 123)
+    assert(res1.isResult)
+    assert(!res1.isError)
+    assert(res1.result.as[Int] == 6)
+    assertThrows[NoSuchElementException](res1.error)
+
+    val res2 = JsonRpcResponse.builder()
+      .id(123)
+      .resultOrError(if value < 10 then InvalidParams() else value)
+      .build()
+    assert(res2.id.numberValue == 123)
+    assert(!res2.isResult)
+    assert(res2.isError)
+    assertThrows[NoSuchElementException](res2.result)
+    assert(res2.error.isInvalidParams)
+  }
+
+  it should "create JsonRpcResponse with default on failure" in {
+    val value = 6
+    val res1 = JsonRpcResponse.builder()
+      .id(123)
+      .tryResult(if value < 10 then value else throw InvalidParams())
+      .build()
+    assert(res1.id.numberValue == 123)
+    assert(res1.isResult)
+    assert(!res1.isError)
+    assert(res1.result.as[Int] == 6)
+    assertThrows[NoSuchElementException](res1.error)
+
+    val res2 = JsonRpcResponse.builder()
+      .id(123)
+      .tryResult(if value < 10 then throw InvalidParams() else value)
+      .build()
+    assert(res2.id.numberValue == 123)
+    assert(!res2.isResult)
+    assert(res2.isError)
+    assertThrows[NoSuchElementException](res2.result)
+    assert(res2.error.isInvalidParams)
+
+    val res3 = JsonRpcResponse.builder()
+      .id(123)
+      .tryResult(if value < 10 then value else throw IllegalArgumentException())
+      .build()
+    assert(res3.id.numberValue == 123)
+    assert(res3.isResult)
+    assert(!res3.isError)
+    assert(res3.result.as[Int] == 6)
+    assertThrows[NoSuchElementException](res3.error)
+
+    val res4 = JsonRpcResponse.builder()
+      .id(123)
+      .tryResult(if value < 10 then throw IllegalArgumentException() else value)
+      .build()
+    assert(res4.id.numberValue == 123)
+    assert(!res4.isResult)
+    assert(res4.isError)
+    assertThrows[NoSuchElementException](res4.result)
+    assert(res4.error.isInternalError)
+  }
+
+  it should "create JsonRpcResponse with custom on failure" in {
+    given onFailure: PartialFunction[Throwable, JsonRpcError] = {
+      case _: IllegalArgumentException => InvalidParams()
+    }
+
+    val value = 6
+    val res1 = JsonRpcResponse.builder()
+      .id(123)
+      .tryResult(if value < 10 then value else throw IllegalArgumentException())
+      .build()
+    assert(res1.id.numberValue == 123)
+    assert(res1.isResult)
+    assert(!res1.isError)
+    assert(res1.result.as[Int] == 6)
+    assertThrows[NoSuchElementException](res1.error)
+
+    val res2 = JsonRpcResponse.builder()
+      .id(123)
+      .tryResult(if value < 10 then throw IllegalArgumentException() else value)
+      .build()
+    assert(res2.id.numberValue == 123)
+    assert(!res2.isResult)
+    assert(res2.isError)
+    assertThrows[NoSuchElementException](res2.result)
+    assert(res2.error.isInvalidParams)
+
+    val res3 = JsonRpcResponse.builder()
+      .id(123)
+      .tryResult(if value < 10 then value else throw ArithmeticException())
+      .build()
+    assert(res3.id.numberValue == 123)
+    assert(res3.isResult)
+    assert(!res3.isError)
+    assert(res3.result.as[Int] == 6)
+    assertThrows[NoSuchElementException](res3.error)
+
+    assertThrows[ArithmeticException](
+      JsonRpcResponse.builder()
+        .id(123)
+        .tryResult(if value < 10 then throw ArithmeticException() else value)
+        .build()
+    )
+
+    val res4 = JsonRpcResponse.builder()
+      .id(123)
+      .tryResult(if value < 10 then throw ArithmeticException() else value)(using defaultOnFailure)
+      .build()
+    assert(res4.id.numberValue == 123)
+    assert(!res4.isResult)
+    assert(res4.isError)
+    assertThrows[NoSuchElementException](res4.result)
+    assert(res4.error.isInternalError)
+  }

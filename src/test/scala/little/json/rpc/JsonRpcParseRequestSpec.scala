@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Carlos Conyers
+ * Copyright 2021 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package little.json.rpc
+package little.json
+package rpc
 
-import javax.json.JsonObject
+import scala.language.implicitConversions
 
-class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
+import little.json.Implicits.given
+import little.json.rpc.Implicits.given
+
+class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "parse request without params" in {
     val text = """{
       "jsonrpc": "2.0",
@@ -25,7 +29,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "method": "compute"
     }"""
 
-    val req = JsonRpc.parseRequest(text)
+    val req = Json.parse(text).as[JsonRpcRequest]
     assert(req.version == "2.0")
     assert(req.id.stringValue == "abc")
     assert(req.method == "compute")
@@ -40,30 +44,29 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "params": { "a": 1, "b": 2 }
     }"""
 
-    val req = JsonRpc.parseRequest(text)
+    val req = Json.parse(text).as[JsonRpcRequest]
     assert(req.version == "2.0")
     assert(req.id.numberValue == 123)
     assert(req.method == "compute")
     assert(
       req.params.exists { 
-        case params: JsonObject =>
-          params.getInt("a") == 1 && params.getInt("b") == 2
+        case params => params("a").as[Int] == 1 && params("b").as[Int] == 2
       }
     )
   }
 
   it should "not parse request as array" in {
-    assertThrows[InvalidRequest](JsonRpc.parseRequest("[0, 1, 2]"))
+    assertThrows[InvalidRequest](Json.parse("[0, 1, 2]").as[JsonRpcRequest])
   }
 
-  it should "not parse request with parse error" in {
+  it should "not parse request with JSON exception" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[ParseError](JsonRpc.parseRequest(text))
+    assertThrows[JsonException](Json.parse(text).as[JsonRpcRequest])
   }
 
   it should "not parse request without jsonrpc" in {
@@ -72,7 +75,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
+    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
   }
 
   it should "not parse request with number value for jsonrpc" in {
@@ -82,7 +85,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
+    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
   }
 
   it should "not parse request without method" in {
@@ -91,7 +94,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "id": 123,
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
+    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
   }
 
   it should "not parse request with array value for method" in {
@@ -101,7 +104,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "method": [],
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
+    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
   }
 
   it should "not parse request with string value for params" in {
@@ -111,6 +114,5 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec {
       "method": "compute",
       "params": "a"
     }"""
-    assertThrows[InvalidRequest](JsonRpc.parseRequest(text))
+    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
   }
-}

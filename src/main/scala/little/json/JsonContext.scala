@@ -15,15 +15,9 @@
  */
 package little.json
 
-private case class JsonNumberImpl(bigDecimalValue: BigDecimal) extends JsonNumber:
-  if bigDecimalValue == null then
-    throw NullPointerException()
+private enum JsonContext:
+  var size: Long
+  def isEmpty: Boolean = size == 0
 
-  lazy val shortValue  = bigDecimalValue.toShortExact
-  lazy val intValue    = bigDecimalValue.toIntExact
-  lazy val longValue   = bigDecimalValue.toLongExact
-  lazy val floatValue  = bigDecimalValue.floatValue
-  lazy val doubleValue = bigDecimalValue.doubleValue
-  lazy val bigIntValue = bigDecimalValue.toBigIntExact.getOrElse(throw ArithmeticException())
-
-  override lazy val toString = bigDecimalValue.toString
+  case ObjectContext(var size: Long) extends JsonContext
+  case ArrayContext(var size: Long) extends JsonContext

@@ -15,15 +15,26 @@
  */
 package little.json
 
-private case class JsonNumberImpl(bigDecimalValue: BigDecimal) extends JsonNumber:
-  if bigDecimalValue == null then
-    throw NullPointerException()
-
-  lazy val shortValue  = bigDecimalValue.toShortExact
-  lazy val intValue    = bigDecimalValue.toIntExact
-  lazy val longValue   = bigDecimalValue.toLongExact
-  lazy val floatValue  = bigDecimalValue.floatValue
-  lazy val doubleValue = bigDecimalValue.doubleValue
-  lazy val bigIntValue = bigDecimalValue.toBigIntExact.getOrElse(throw ArithmeticException())
-
-  override lazy val toString = bigDecimalValue.toString
+/**
+ * Defines JSON input conversion.
+ *
+ * {{{
+ * import little.json.*
+ * import little.json.Implicits.given
+ * import scala.language.implicitConversions
+ *
+ * case class User(id: Int, name: String)
+ *
+ * // Define how to convert JsonValue to User
+ * given jsonToUser: JsonInput[User] with
+ *   def apply(json: JsonValue) = User(json("id"), json("name"))
+ *
+ * val json = Json.obj("id" -> 0, "name" -> "root")
+ * assert { json.as[User] == User(0, "root") }
+ * }}}
+ *
+ * @see [[JsonOutput]]
+ */
+trait JsonInput[T] extends Conversion[JsonValue, T]:
+  /** Converts JSON value. */
+  def apply(value: JsonValue): T

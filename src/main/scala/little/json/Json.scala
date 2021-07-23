@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Carlos Conyers
+ * Copyright 2021 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,229 +15,101 @@
  */
 package little.json
 
-import java.io.{ File, FileReader, InputStream, OutputStream, Reader, StringReader, Writer }
-import java.util.{ HashMap => JHashMap }
-
-import javax.json._
-import javax.json.{ Json => JavaxJson }
-import javax.json.stream.{ JsonGenerator, JsonGeneratorFactory, JsonParser, JsonParserFactory }
-
-import scala.util.Try
+import java.io.{ File, InputStream, Reader, StringWriter }
+import java.nio.file.Path
 
 /**
- * Provides factory methods and other utilities.
+ * Provides JSON utilities.
  *
  * {{{
- * import javax.json.{ JsonException, JsonObject, JsonValue }
- * import little.json.{ Json, JsonInput, JsonOutput }
- * import little.json.Implicits._
+ * import little.json.*
+ * import little.json.Implicits.given
+ * import scala.language.implicitConversions
+ *
+ * // Create JSON object
+ * val user = Json.obj("id" -> 1000, "name" -> "jza")
+ *
+ * // Create JSON array
+ * val info = Json.arr(user, "/home/jza", 8L * 1024 * 1024 * 1024)
+ *
+ * // Parse JSON text
+ * val root = Json.parse("""{ "id": 0, "name": "root" }""")
  *
  * case class User(id: Int, name: String)
  *
- * // Define how to read User from JsonValue
- * implicit val userJsonInput: JsonInput[User] = {
- *   case json: JsonObject => User(json.getInt("id"), json.getString("name"))
- *   case json: JsonValue  => throw new JsonException("Unexpected value type")
- * }
+ * given userToJson: JsonOutput[User] with
+ *   def apply(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
  *
- * // Define how to write User to JsonValue
- * implicit val userJsonOutput: JsonOutput[User] = { user =>
- *   Json.obj("id" -> user.id, "name" -> user.name)
- * }
- *
- * // Parse String to JsonValue
- * val json = Json.parse("""{ "id": 0, "name": "root" }""")
- *
- * // Read User from JsonValue
- * val user = json.as[User]
- *
- * // Write User to JsonValue
- * val jsonToo = Json.toJson(user)
+ * // Convert value to JSON object
+ * val nobody = Json.toJson(User(65534, "nobody"))
  * }}}
  */
-object Json {
-  private lazy val prettyPrintingGeneratorFactory = createGeneratorFactory(JsonGenerator.PRETTY_PRINTING -> true)
-  private lazy val prettyPrintingWriterFactory    = createWriterFactory(JsonGenerator.PRETTY_PRINTING -> true)
-
-  /** Converts T value to JsonValue. */
-  def toJson[T](value: T)(implicit output: JsonOutput[T]): JsonValue =
-    output.writing(value)
-
-  /** Converts JsonValue to T value. */
-  def fromJson[T](json: JsonValue)(implicit input: JsonInput[T]): T =
-    input.reading(json)
-
-  /** Creates JsonArray from list of values. */
-  def arr(values: JsonValue*): JsonArray =
-    values.foldLeft(createArrayBuilder()) { (builder, value) =>
-      value == null match {
-        case true  => builder.addNull()
-        case false => builder.add(value)
-      }
-    }.build()
-
-  /** Creates JsonObject from list of fields. */
+object Json:
+  /** Creates JSON object with supplied fields. */
   def obj(fields: (String, JsonValue)*): JsonObject =
-    fields.foldLeft(createObjectBuilder()) { (builder, field) =>
-      field._2 == null match {
-        case true  => builder.addNull(field._1)
-        case false => builder.add(field._1, field._2)
-      }
-    }.build()
+    JsonObject(fields)
 
-  /** Parses given text to JsonStructure. */
-  def parse(text: String): JsonStructure = {
-    val in = new StringReader(text)
-    try parse(in)
-    finally Try(in.close())
-  }
+  /** Creates JSON array with supplied values. */
+  def arr(values: JsonValue*): JsonArray =
+    JsonArray(values)
 
-  /** Parses text from given input stream to JsonStructure. */
-  def parse(in: InputStream): JsonStructure = {
-    val json = createReader(in)
-    try json.read()
-    finally Try(json.close())
-  }
+  /** Parses JSON structure from text. */
+  def parse(text: String): JsonStructure =
+    val reader = JsonReader(text)
+    try reader.read() finally reader.close()
 
-  /** Parses text from given reader to JsonStructure. */
-  def parse(reader: Reader): JsonStructure = {
-    val json = createReader(reader)
-    try json.read()
-    finally Try(json.close())
-  }
-
-  /** Parses text from given file to JsonStructure. */
-  def parse(file: File): JsonStructure = {
-    val in = new FileReader(file)
-    try parse(in)
-    finally Try(in.close())
-  }
-
-  /** Creates JsonArrayBuilder. */
-  def createArrayBuilder(): JsonArrayBuilder =
-    JavaxJson.createArrayBuilder()
-
-  /** Creates JsonObjectBuilder. */
-  def createObjectBuilder(): JsonObjectBuilder =
-    JavaxJson.createObjectBuilder()
-
-  /** Creates JsonReader with given input stream. */
-  def createReader(in: InputStream): JsonReader =
-    JavaxJson.createReader(in)
-
-  /** Creates JsonReader with given reader. */
-  def createReader(reader: Reader): JsonReader =
-    JavaxJson.createReader(reader)
-
-  /** Creates JsonWriter with given output stream. */
-  def createWriter(out: OutputStream): JsonWriter =
-    JavaxJson.createWriter(out)
+  /** Parses JSON structure from bytes. */
+  def parse(bytes: Array[Byte]): JsonStructure =
+    val reader = JsonReader(bytes)
+    try reader.read() finally reader.close()
 
   /**
-   * Creates JsonWriter with given output stream.
+   * Parses JSON structure from input.
    *
-   * @param out output stream to which JSON is written
-   * @param prettyPrinting specifies whether JSON output should be beautified
+   * @note Closes input on return.
    */
-  def createWriter(out: OutputStream, prettyPrinting: Boolean): JsonWriter =
-    prettyPrinting match {
-      case true  => prettyPrintingWriterFactory.createWriter(out)
-      case false => JavaxJson.createWriter(out)
-    }
-
-  /** Creates JsonWriter with given writer. */
-  def createWriter(writer: Writer): JsonWriter =
-    JavaxJson.createWriter(writer)
+  def parse(input: Reader): JsonStructure =
+    val reader = JsonReader(input)
+    try reader.read() finally reader.close()
 
   /**
-   * Creates JsonWriter with given writer.
+   * Parses JSON structure from input.
    *
-   * @param writer writer to which JSON is written
-   * @param prettyPrinting specifies whether JSON output should be beautified
+   * @note Closes input on return.
    */
-  def createWriter(writer: Writer, prettyPrinting: Boolean): JsonWriter =
-    prettyPrinting match {
-      case true  => prettyPrintingWriterFactory.createWriter(writer)
-      case false => JavaxJson.createWriter(writer)
-    }
+  def parse(input: InputStream): JsonStructure =
+    val reader = JsonReader(input)
+    try reader.read() finally reader.close()
 
-  /** Creates JsonParser with given input stream. */
-  def createParser(in: InputStream): JsonParser =
-    JavaxJson.createParser(in)
+  /** Parses JSON structure from input. */
+  def parse(input: File): JsonStructure =
+    val reader = JsonReader(input)
+    try reader.read() finally reader.close()
 
-  /** Creates JsonParser with given reader. */
-  def createParser(reader: Reader): JsonParser =
-    JavaxJson.createParser(reader)
+  /** Parses JSON structure from input. */
+  def parse(input: Path): JsonStructure =
+    val reader = JsonReader(input)
+    try reader.read() finally reader.close()
 
-  /** Creates JsonGenerator with given output stream. */
-  def createGenerator(out: OutputStream): JsonGenerator =
-    JavaxJson.createGenerator(out)
+  /** Creates "pretty" print of JSON using 2-space indent. */
+  def prettyPrint(json: JsonStructure): String =
+    prettyPrint(json, "  ")
+
+  /** Creates "pretty" print of JSON using supplied indent. */
+  def prettyPrint(json: JsonStructure, indent: String): String =
+    val output = StringWriter()
+    val writer = JsonWriter(output, indent)
+    try
+      writer.write(json)
+      output.toString
+    finally
+      writer.close()
 
   /**
-   * Creates JsonGenerator with given output stream.
+   * Converts value to JSON value.
    *
-   * @param out output stream to which JSON is written
-   * @param prettyPrinting specifies whether JSON output should be beautified
+   * @param value   value
+   * @param convert output converter
    */
-  def createGenerator(out: OutputStream, prettyPrinting: Boolean): JsonGenerator =
-    prettyPrinting match {
-      case true  => prettyPrintingGeneratorFactory.createGenerator(out)
-      case false => JavaxJson.createGenerator(out)
-    }
-
-  /** Creates JsonGenerator with given writer. */
-  def createGenerator(writer: Writer): JsonGenerator =
-    JavaxJson.createGenerator(writer)
-
-  /**
-   * Creates JsonGenerator with given writer.
-   *
-   * @param writer writer to which JSON is written
-   * @param prettyPrinting specifies whether JSON output should be beautified
-   */
-  def createGenerator(writer: Writer, prettyPrinting: Boolean): JsonGenerator =
-    prettyPrinting match {
-      case true  => prettyPrintingGeneratorFactory.createGenerator(writer)
-      case false => JavaxJson.createGenerator(writer)
-    }
-
-  private[json] def toJsonString(string: String): String = {
-    val buf = new StringBuilder(string.length + 16)
-    buf += '"'
-
-    string.foreach {
-      case c if c >= 0x20 && c <= 0x10ffff =>
-        if (c == '"' || c == '\\')
-          buf += '\\'
-        buf += c
-
-      case '\t' => buf += '\\' += 't'
-      case '\r' => buf += '\\' += 'r'
-      case '\n' => buf += '\\' += 'n'
-      case '\f' => buf += '\\' += 'f'
-      case '\b' => buf += '\\' += 'b'
-
-      case c =>
-        val hex = c.toHexString
-        val pad = "0" * (4 - hex.length)
-        buf ++= "\\u" ++= pad ++= hex
-    }
-
-    buf += '"'
-    buf.toString
-  }
-
-  private def createWriterFactory(config: (String, Any)*): JsonWriterFactory =
-    JavaxJson.createWriterFactory(
-      config.foldLeft(new JHashMap[String, Any]) {
-        case (xs, (key, value)) => xs.put(key, value); xs
-      }
-    )
-
-  private def createGeneratorFactory(config: (String, Any)*): JsonGeneratorFactory =
-    JavaxJson.createGeneratorFactory(
-      config.foldLeft(new JHashMap[String, Any]) {
-        case (xs, (key, value)) => xs.put(key, value); xs
-      }
-    )
-}
+  def toJson[T](value: T)(using convert: JsonOutput[T]): JsonValue =
+    convert(value)

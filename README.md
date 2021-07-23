@@ -1,220 +1,255 @@
 # little-json
 
-The Scala library that provides extension methods to _javax.json_.
+The JSON library for Scala.
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_2.13%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_2.13%22)
 
 ## Getting Started
-To use **little-json**, start by adding it to your project:
+**little-json** is a Scala library that is used for reading and writing JSON
+content. It provides a clean interface for working with JSON while mapping
+instances of your classes to JSON values.
+
+To get started, add **little-json** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "6.0.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "7.0.0"
 ```
 
-### Using Implementation of javax.json
-**little-json** has a runtime dependency to _javax.json 1.1.x_, and you must add
-an implementation to your project.
-
-So, for example, include the following in your build to add the
-Glassfish reference implementation as a dependency:
-
-```scala
-libraryDependencies += "org.glassfish" % "javax.json" % "1.1.4"
-```
+_**NOTE:** Starting with version 7, **little-json** is written for Scala 3
+exclusively. See previous releases for compatibility with Scala 2.12 and Scala
+2.13._
 
 ## A Taste of little-json
+
 Here's a taste of what **little-json** offers.
 
-### Reading and Writing JSON
+### Usual Suspects
 
-**little-json** is powered by a pair of traits, `JsonInput` and `JsonOutput`. You
-provide implementations of these to read and write JSON values.
+To model standard JSON values, the library includes a list of classes with
+familiar names: `JsonObject`, `JsonArray`, `JsonString`, `JsonNumber`,
+`JsonBoolean`, and `JsonNull`. However, when making use of contextual
+abstraction, you're not required to deal with these classes directly a whole
+lot, if at all.
+
+### Reading and Writing
+
+Reading and writing are powered by `JsonInput` and `JsonOutput`. They convert
+values to and from JSON, with library-provided implementations for working with
+standard types like `String`, `Int`, and `Boolean`. You must provide custom
+implementations for converting to and from instances of your classes.
 
 ```scala
-import javax.json.{ JsonException, JsonObject, JsonValue }
-import little.json.{ Json, JsonInput, JsonOutput }
-import little.json.Implicits._ // Unleash magic
+import little.json.*
+import little.json.Implicits.{ *, given }
+import scala.language.implicitConversions
 
 case class User(id: Int, name: String)
 
-// Define how to read User from JsonValue
-implicit val userJsonInput: JsonInput[User] = {
-  case json: JsonObject => User(json.getInt("id"), json.getString("name"))
-  case json: JsonValue  => throw new JsonException("Unexpected value type")
-}
+// Define how to convert JsonValue to User
+given jsonToUser: JsonInput[User] with
+  def apply(json: JsonValue) = User(json("id"), json("name"))
 
-// Define how to write User to JsonValue
-implicit val userJsonOutput: JsonOutput[User] = {
-  case User(id, name) => Json.obj("id" -> id, "name" -> name)
-}
+val json = Json.parse("""{ "id": 1000, "name": "jza" }""")
 
-// Parse String to JsonValue
-val json = Json.parse("""{ "id": 0, "name": "root" }""")
-
-// Read User from JsonValue
+// Read JsonValue as User
 val user = json.as[User]
+assert { user.id == 1000 }
+assert { user.name == "jza" }
+
+// Define how to convert User to JsonValue
+given userToJson: JsonOutput[User] with
+  def apply(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
 
 // Write User to JsonValue
-val jsonUser = Json.toJson(user)
+val dupe = Json.toJson(user)
+assert { dupe("id").as[Int] == 1000 }
+assert { dupe("name").as[String] == "jza" }
 ```
 
-A special implementation of `JsonOutput` is available for writing a collection of
-objects to a `JsonArray`. So, for example, if you define `JsonOutput[User]`, you
-automagically get `JsonOutput[Seq[User]]`.
-
-The same applies to `JsonInput[User]`. You get `JsonInput[Seq[User]]` for free.
+Special implementations are available for working with collections. So, for
+example, if you define `JsonInput[User]`, you automatically get
+`JsonInput[Seq[User]]`. The same applies to `JsonOutput[User]`: you get
+`JsonOutput[Seq[User]]` for free.
 
 ```scala
-val json = Json.parse("""
-  [{ "id": 0,   "name": "root" },
-   { "id": 500, "name": "guest" }]
-""")
+val json = Json.parse("""[
+  { "id": 0,    "name": "root" },
+  { "id": 1000, "name": "jza"  }
+]""")
 
-// Read Seq[User] from JsonArray
+// Read JsonArray as Seq[User]
 val users = json.as[Seq[User]]
+assert { users(0) == User(0, "root") }
+assert { users(1) == User(1000, "jza")  }
 
-// In fact, any Traversable will do
+// Or as other Iterable types
 val userList = json.as[List[User]]
 val userIter = json.as[Iterator[User]]
 val userSet  = json.as[Set[User]]
 
-// Or even Array
+// Or as an Array
 val userArray = json.as[Array[User]]
 
 // Write Seq[User] to JsonArray
 val jsonUsers = Json.toJson(users)
+assert { jsonUsers(0) == Json.obj("id" -> 0, "name" -> "root") }
+assert { jsonUsers(1) == Json.obj("id" -> 1000, "name" -> "jza") }
 ```
 
-### Extracting Values from JSON Structure
+### Extracting Values
 
-You can navigate your way through a `JsonArray` or `JsonObject` to extract
-values deep inside its structure.
+You can traverse `JsonObject` and `JsonArray` to extract nested values. An
+extension method with a symbolic name makes this clean and easy.
 
 ```scala
-val json = Json.parse("""
-{
-  "computer": {
+import little.json.*
+import little.json.Implicits.{ *, given }
+import scala.language.implicitConversions
+
+case class User(id: Int, name: String)
+
+// Define how to convert JsonValue to User
+given jsonToUser: JsonInput[User] with
+  def apply(json: JsonValue) = User(json("id"), json("name"))
+
+val json = Json.parse("""{
+  "node": {
     "name": "localhost",
     "users": [
-      { "id": 0,   "name": "root" },
-      { "id": 500, "name": "guest" }
+      { "id": 0,    "name": "root" },
+      { "id": 1000, "name": "jza"  }
     ]
   }
-}
-""")
+}""")
 
-// Get users array from computer object
-val users = (json \ "computer" \ "users").as[Seq[User]]
+// Get users array from node object
+val users = (json \ "node" \ "users").as[Seq[User]]
 
 // Get first user (at index 0) in users array
-val user = (json \ "computer" \ "users" \ 0).as[User]
+val user = (json \ "node" \ "users" \ 0).as[User]
 
 // Get name of second user (at index 1) in users array
-val name = (json \ "computer" \ "users" \ 1 \ "name").as[String]
-
-// Use long form
-val alias = json.get("computer").get("users").get(1).get("name").as[String]
+val name = (json \ "node" \ "users" \ 1 \ "name").as[String]
 ```
 
-You can also do a recursive lookup.
+And, just as easy, you can do a recursive lookup to collect field values by
+name.
 
 ```scala
 // Get all "name" values
-val names = (json \\ "name") // Seq[JsonValue]("localhost", "root", "guest")
+val names = (json \\ "name").map(_.as[String])
+assert { names == Seq("localhost", "root", "jza") }
 ```
 
-Note, in above example, computer name (_localhost_) and user names (_root_ and
-_guest_) are included in the result.
+### Generating and Parsing
 
-### Streaming JSON
+`JsonGenerator` and `JsonParser` are used for generating and parsing
+potentially large JSON structures.
 
-`JsonGenerator` and `JsonParser` are defined in `javax.json.stream` for
-generating and parsing potentially large JSON structures. JSON is written to and
-read from streams, instead of entire structure being managed in memory.
-
-**little-json** gives these classes a bit more power, making it easier for you
-to read and write your objects in JSON.
-
-Here's the enhanced generator in action.
+The generator incrementally writes JSON values to a stream instead of managing
+the entire structure in memory.
 
 ```scala
 import java.io.StringWriter
+import little.json.*
+import little.json.Implicits.{ *, given }
+import scala.language.implicitConversions
 
-val users = Seq(User(0, "root"), User(500, "guest"))
+val buf = StringWriter()
+val out = JsonGenerator(buf)
 
-val writer = new StringWriter()
-val generator = Json.createGenerator(writer)
+try
+  out.writeStartObject()          // start root object
+  out.write("id", 1000)
+  out.write("name", "jza")
+  out.writeStartArray("groups")   // start nested array
+  out.write("jza")
+  out.write("adm")
+  out.write("sudo")
+  out.writeEnd()                  // end nested array
+  out.writeStartObject("info")    // start nested object
+  out.write("home", "/home/jza")
+  out.write("storage", "8 GiB")
+  out.writeEnd()                  // end nested object
+  out.writeEnd()                  // end root object
+  out.flush()
 
-generator.writeStartObject()
-
-// Write array of users one user at a time
-// Implicitly convert each user to JsonObject before writing
-generator.writeStartArray("one-by-one")
-users.foreach(user => generator.write(user))
-generator.writeEnd()
-
-// Write array of users in one swoop
-// Implicitly convert users to JsonArray before writing
-generator.write("all-at-once", users)
-
-generator.writeEnd()
-generator.close()
+  val json = Json.parse(buf.toString)
+  assert { json("id") == JsonNumber(1000) }
+  assert { json("name") == JsonString("jza") }
+  assert { json("groups") == Json.arr("jza", "adm", "sudo") }
+  assert { json("info") == Json.obj("home" -> "/home/jza", "storage" -> "8 GiB") }
+finally
+  out.close()
 ```
 
-And the enhanced parser in action.
+And, the parser iterates events as it chews through data in the underlying
+stream.
 
 ```scala
-import java.io.StringReader
-import javax.json.stream.JsonParser.{ Event => ParserEvent }
+import little.json.*
+import little.json.Implicits.{ *, given }
+import scala.language.implicitConversions
 
-val reader = new StringReader(writer.toString)
-val parser = Json.createParser(reader)
+import JsonParser.Event
 
-// Pop events to get to first array
-assert(parser.next() == ParserEvent.START_OBJECT)
-assert(parser.next() == ParserEvent.KEY_NAME)
-assert(parser.getString() == "one-by-one")
-assert(parser.next() == ParserEvent.START_ARRAY)
+val parser = JsonParser("""{ "id": 1000, "name": "jza", "groups": ["jza", "adm"] }""")
 
-// Get both users one by one (little-json adds JsonParser.nextObject())
-val root = parser.nextObject().as[User]
-val guest = parser.nextObject().as[User]
+try
+  // Get first event (start root object)
+  assert { parser.next() == Event.StartObject }
 
-// Pop events to get to second array
-assert(parser.next() == ParserEvent.END_ARRAY)
-assert(parser.next() == ParserEvent.KEY_NAME)
-assert(parser.getString() == "all-at-once")
+  // Get field name and value
+  assert { parser.next() == Event.FieldName("id") }
+  assert { parser.next() == Event.Value(1000) }
 
-// Get both users all at once (little-json adds JsonParser.nextArray())
-val users = parser.nextArray().as[Seq[User]]
+  // Get field name and value
+  assert { parser.next() == Event.FieldName("name") }
+  assert { parser.next() == Event.Value("jza") }
 
-assert(parser.next() == ParserEvent.END_OBJECT)
-parser.close()
+  // Get field name and value
+  assert { parser.next() == Event.FieldName("groups") }
+  assert { parser.next() == Event.StartArray } // start nested array
+  assert { parser.next() == Event.Value("jza") }
+  assert { parser.next() == Event.Value("adm") }
+  assert { parser.next() == Event.EndArray }   // end nested array
+
+  // Get final event (end root object)
+  assert { parser.next() == Event.EndObject }
+
+  // No more events
+  assert { !parser.hasNext }
+finally
+  parser.close()
+
 ```
 
-## Working with JSON-RPC 2.0
+See also [JsonReader](https://losizm.github.io/little-json/latest/api/api/little/json/JsonReader.html)
+and [JsonWriter](https://losizm.github.io/little-json/latest/api/api/little/json/JsonWriter.html)
+for alternatives to reading and writing JSON data.
 
-As a bonus, an API is defined for working with [JSON-RPC 2.0](https://www.jsonrpc.org/specification).
+## JSON-RPC 2.0 Specification
 
-You can build requests and responses with Scala objects.
+The library provides an implementation of [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification),
+so you can easily work with requests and responses as either client or server.
+
+`JsonRpcRequest` and `JsonRpcResponse` model the RPC message types, and you can
+incrementally build them with message builders.
 
 ```scala
-import javax.json.JsonValue
+import java.io.StringWriter
+import little.json.*
+import little.json.Implicits.given
+import little.json.rpc.*
+import little.json.rpc.Implicits.given
+import scala.language.implicitConversions
 
-import little.json.{ Json, JsonAdapter }
-import little.json.Implicits._
-import little.json.rpc._
+case class Params(values: Int*):
+  def sum = values.sum
 
-case class Params(values: Int*)
-
-// Define adapter for converting params to and from JSON
-implicit object ParamsAdapter extends JsonAdapter[Params] {
-  def reading(json: JsonValue): Params =
-    Params(json.as[Seq[Int]] : _*)
-
-  def writing(params: Params): JsonValue =
-    Json.toJson(params.values)
-}
+// Define converters for params to and from JSON
+given JsonInput[Params]  = json   => Params(json.as[Seq[Int]]*)
+given JsonOutput[Params] = params => Json.toJson(params.values)
 
 // Create request with builder
 val request = JsonRpcRequest.builder()
@@ -224,69 +259,49 @@ val request = JsonRpcRequest.builder()
   .params(Params(1, 2, 3))
   .build()
 
-// Initialize response builder
-val responseBuilder = JsonRpcResponse.builder()
+// Create response with builder
+val response = JsonRpcResponse.builder()
   .version(request.version)
   .id(request.id)
+  .resultOrError {
+    request.method match
+      // Set result
+      case "sum" => request.params.get.as[Params].sum
 
-request.method match {
-  case "sum" =>
-    val params = request.params.get.as[Params]
-
-    // Set result
-    responseBuilder.result(params.values.sum)
-  case name =>
-    // Or set error
-    responseBuilder.error(MethodNotFound(name))
-}
-
-// Create response with builder
-val response = responseBuilder.build()
+      // Or set error if unknown method
+      case name  =>  MethodNotFound(name)
+  }.build()
 ```
 
-And you can parse them from JSON text.
+And, you can parse them from JSON using library-provided magic.
 
 ```scala
-import little.json.JsonInput
-import little.json.Implicits._
-import little.json.rpc._
+val request = Json.parse("""{
+  "jsonrpc": "2.0",
+  "id":      "590d24ae-500a-486c-8d73-8035e78529bd",
+  "method":  "sum",
+  "params":  [1, 2, 3]
+}""").as[JsonRpcRequest]
 
-case class Params(values: Int*)
+assert { request.version == "2.0" }
+assert { request.id.stringValue == "590d24ae-500a-486c-8d73-8035e78529bd" }
+assert { request.method == "sum" }
+assert { request.params.exists(_.as[Params] == Params(1, 2, 3)) }
 
-implicit val paramsInput: JsonInput[Params] = {
-  json => Params(json.as[Seq[Int]] : _*)
-}
+val response = Json.parse("""{
+  "jsonrpc": "2.0",
+  "id":      "590d24ae-500a-486c-8d73-8035e78529bd",
+  "result":  6
+}""").as[JsonRpcResponse]
 
-val request = JsonRpc.parseRequest("""
-  {
-    "jsonrpc": "2.0",
-    "id":      "590d24ae-500a-486c-8d73-8035e78529bd",
-    "method":  "sum",
-    "params":  [1, 2, 3]
-  }
-""")
-
-assert(request.version == "2.0")
-assert(request.id.stringValue == "590d24ae-500a-486c-8d73-8035e78529bd")
-assert(request.method == "sum")
-assert(request.params.exists(_.as[Params] == Params(1, 2, 3)))
-
-val response = JsonRpc.parseResponse("""
-  {
-    "jsonrpc": "2.0",
-    "id":      "590d24ae-500a-486c-8d73-8035e78529bd",
-    "result":  6
-  }
-""")
-
-assert(response.version == "2.0")
-assert(response.id.stringValue == "590d24ae-500a-486c-8d73-8035e78529bd")
-assert(response.result.as[Int] == 6)
+assert { response.version == "2.0" }
+assert { response.id.stringValue == "590d24ae-500a-486c-8d73-8035e78529bd" }
+assert { response.result.as[Int] == 6 }
 ```
 
 ## API Documentation
 
-See [scaladoc](https://losizm.github.io/little-json/latest/api/little/json/index.html)
+See [scaladoc](https://losizm.github.io/little-json/latest/api/index.html)
 for additional details.
 
 ## License
