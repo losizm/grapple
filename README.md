@@ -2,7 +2,7 @@
 
 The JSON library for Scala.
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_2.13%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_3%22)
 
 ## Getting Started
 **little-json** is a Scala library that is used for reading and writing JSON
@@ -28,7 +28,7 @@ Here's a taste of what **little-json** offers.
 To model standard JSON values, the library includes a list of classes with
 familiar names: `JsonObject`, `JsonArray`, `JsonString`, `JsonNumber`,
 `JsonBoolean`, and `JsonNull`. However, when making use of contextual
-abstraction, you're not required to deal with these classes directly a whole
+abstractions, you're not required to deal with these classes directly a whole
 lot, if at all.
 
 ### Reading and Writing
