@@ -46,7 +46,7 @@ class JsonArrayBuilder:
    *
    * @return this builder
    */
-  def add(value: JsonValue) =
+  def add(value: JsonValue): this.type =
     values += (if value == null then JsonNull else value)
     this
 
@@ -55,7 +55,7 @@ class JsonArrayBuilder:
    *
    * @return this builder
    */
-  def addNull() =
+  def addNull(): this.type =
     values += JsonNull
     this
 

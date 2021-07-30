@@ -47,7 +47,7 @@ class JsonObjectBuilder:
    *
    * @return this builder
    */
-  def add(name: String, value: JsonValue) =
+  def add(name: String, value: JsonValue): this.type =
     if name == null then
       throw NullPointerException()
     values += name -> (if value == null then JsonNull else value)
@@ -58,7 +58,7 @@ class JsonObjectBuilder:
    *
    * @return this builder
    */
-  def addNull(name: String) =
+  def addNull(name: String): this.type =
     if name == null then
       throw NullPointerException()
     values += name -> JsonNull

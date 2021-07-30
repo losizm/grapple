@@ -31,10 +31,10 @@ private case class JsonObjectImpl(fields: Map[String, JsonValue]) extends JsonOb
     fields.get(name)
 
   @targetName("concat")
-  def ++(suffix: JsonObject): JsonObject =
-    if suffix == null then
+  def ++(other: JsonObject): JsonObject =
+    if other == null then
       throw NullPointerException()
-    JsonObjectImpl(fields ++ suffix.fields)
+    JsonObjectImpl(fields ++ other.fields)
 
   @targetName("updated")
   def +(field: (String, JsonValue)): JsonObject =

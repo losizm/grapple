@@ -132,7 +132,7 @@ trait JsonObject extends JsonStructure:
    * @return new JSON object
    */
   @targetName("concat")
-  def ++(suffix: JsonObject): JsonObject
+  def ++(other: JsonObject): JsonObject
 
   /**
    * Adds or updates field.
@@ -154,28 +154,31 @@ trait JsonObject extends JsonStructure:
 
 /** Provides JSON object factory. */
 object JsonObject:
-  import scala.collection.immutable.SeqMap
-
-  private val emptyObject = JsonObjectImpl(Map.empty)
+  private val emptyObject = JsonObjectBuilder().build()
 
   /** Gets empty JSON object. */
   def empty: JsonObject = emptyObject
 
+  /** Creates empty JSON object. */
+  def apply(): JsonObject = emptyObject
+
   /** Creates JSON object with supplied fields. */
   def apply(fields: Map[String, JsonValue]): JsonObject =
-    JsonObjectImpl(fields.map {
-      case (null, _    ) => throw NullPointerException()
-      case (name, null ) => name -> JsonNull
-      case (name, value) => name -> value
-    })
+    fields.isEmpty match
+      case true  => emptyObject
+      case false =>
+        fields.foldLeft(JsonObjectBuilder()) { (builder, field) =>
+          builder.add(field._1, field._2)
+        }.build()
 
   /** Creates JSON object with supplied fields. */
   def apply(fields: Seq[(String, JsonValue)]): JsonObject =
-    JsonObjectImpl(fields.map {
-      case (null, _    ) => throw NullPointerException()
-      case (name, null ) => name -> JsonNull
-      case (name, value) => name -> value
-    }.to(SeqMap))
+    fields.isEmpty match
+      case true  => emptyObject
+      case false =>
+        fields.foldLeft(JsonObjectBuilder()) { (builder, field) =>
+          builder.add(field._1, field._2)
+        }.build()
 
 /**
  * Defines JSON array.
@@ -263,14 +266,19 @@ trait JsonArray extends JsonStructure:
 
 /** Provides JSON array factory. */
 object JsonArray:
-  private val emptyArray = JsonArrayImpl(Nil)
+  private val emptyArray = JsonArrayBuilder().build()
 
   /** Gets empty JSON array. */
   def empty: JsonArray = emptyArray
 
+  /** Creates empty JSON array. */
+  def apply(): JsonArray = emptyArray
+
   /** Creates JSON array with supplied values. */
   def apply(values: Seq[JsonValue]): JsonArray =
-    JsonArrayImpl(values.map(x => if x == null then JsonNull else x).toIndexedSeq)
+    values.isEmpty match
+      case true  => emptyArray
+      case false => values.foldLeft(JsonArrayBuilder())(_ add _).build()
 
 /** Defines JSON string. */
 trait JsonString extends JsonValue:

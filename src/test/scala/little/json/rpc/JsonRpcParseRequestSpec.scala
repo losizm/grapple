@@ -49,7 +49,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(req.id.numberValue == 123)
     assert(req.method == "compute")
     assert(
-      req.params.exists { 
+      req.params.exists {
         case params => params("a").as[Int] == 1 && params("b").as[Int] == 2
       }
     )
