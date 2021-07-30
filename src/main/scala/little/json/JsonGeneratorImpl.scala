@@ -28,18 +28,18 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
   private given BufferedWriter = writer
 
   def writeStartObject(name: String): this.type =
-    synchronized { writeStart(name, '{', ObjectContext(0)) }
+    writeStart(name, '{', ObjectContext(0))
 
   def writeStartArray(name: String): this.type =
-    synchronized { writeStart(name, '[', ArrayContext(0)) }
+    writeStart(name, '[', ArrayContext(0))
 
   def writeStartObject(): this.type =
-    synchronized { writeStart('{', ObjectContext(0)) }
+    writeStart('{', ObjectContext(0))
 
   def writeStartArray(): this.type =
-    synchronized { writeStart('[', ArrayContext(0)) }
+    writeStart('[', ArrayContext(0))
 
-  def writeEnd(): this.type = synchronized {
+  def writeEnd(): this.type =
     if tracker.isEmpty then
       throw IllegalStateException()
 
@@ -48,9 +48,8 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
       case context: ArrayContext  => printer.writeEnd(']', context.isEmpty, tracker.size)
 
     this
-  }
 
-  def write(name: String, value: JsonValue): this.type = synchronized {
+  def write(name: String, value: JsonValue): this.type =
     if name == null || value == null then
       throw NullPointerException()
 
@@ -65,9 +64,8 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
         this
 
       case _  => throw IllegalStateException()
-  }
 
-  def write(value: JsonValue): this.type = synchronized {
+  def write(value: JsonValue): this.type =
     if value == null then
       throw NullPointerException()
 
@@ -82,10 +80,9 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
         this
 
       case _  => throw IllegalStateException()
-  }
 
-  def flush(): Unit = synchronized(writer.flush())
-  def close(): Unit = synchronized(writer.close())
+  def flush(): Unit = writer.flush()
+  def close(): Unit = writer.close()
 
   private def writeStart(name: String, start: Char, newContext: JsonContext): this.type =
     if name == null then

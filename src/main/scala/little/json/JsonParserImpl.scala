@@ -38,15 +38,14 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
   private var tracker      = Stack[JsonContext]()
   private var fieldPending = false
 
-  def hasNext: Boolean = synchronized {
+  def hasNext: Boolean =
     state match
       case State.Init  => init(); hasNext
       case State.Reset => reset(); hasNext
       case State.Next  => true
       case State.Done  => false
-  }
 
-  def next(): JsonParser.Event = synchronized {
+  def next(): JsonParser.Event =
     if !hasNext then
       throw new NoSuchElementException()
 
@@ -54,12 +53,10 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
     val success = event.get
     fieldPending = success.isInstanceOf[Event.FieldName]
     success
-  }
 
-  def close(): Unit = synchronized {
+  def close(): Unit =
     state = State.Done
     reader.close()
-  }
 
   private def init(): Unit =
     event = Try(firstEvent())

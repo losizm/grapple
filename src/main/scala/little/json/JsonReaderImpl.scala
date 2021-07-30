@@ -31,7 +31,7 @@ private class JsonReaderImpl(input: Reader) extends JsonReader:
     catch
         case e: EOFException   => throw JsonException("Unexpected end of input", e)
 
-  def close(): Unit = synchronized(reader.close())
+  def close(): Unit = reader.close()
 
   private def readObject(): JsonObject =
     val builder = JsonObjectBuilder()

@@ -23,10 +23,8 @@ private class JsonWriterImpl(output: Writer, printer: JsonPrinter) extends JsonW
   def write(value: JsonStructure): this.type =
     if value == null then
       throw NullPointerException()
-    synchronized {
-      printer.write(value, 0)(using writer)
-      writer.flush()
-    }
+    printer.write(value, 0)(using writer)
+    writer.flush()
     this
 
-  def close(): Unit = synchronized(writer.close())
+  def close(): Unit = writer.close()
