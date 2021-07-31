@@ -31,7 +31,7 @@ class JsonInputSpec extends org.scalatest.flatspec.AnyFlatSpec:
       false,
       Json.arr(1, 2, 3),
       Json.arr("a", "b", "c"),
-      null
+      JsonNull
     )
 
     assert(test(0).as[String] == "hello")

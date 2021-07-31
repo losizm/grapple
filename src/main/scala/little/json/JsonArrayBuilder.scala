@@ -47,7 +47,9 @@ class JsonArrayBuilder:
    * @return this builder
    */
   def add(value: JsonValue): this.type =
-    values += (if value == null then JsonNull else value)
+    if value == null then
+      throw NullPointerException()
+    values += value
     this
 
   /**

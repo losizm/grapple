@@ -26,7 +26,7 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
       "groups"  -> Json.arr("jza", "admin", 1000),
       "enabled" -> true,
       "other"   -> Json.obj("name" -> "Jza", "email" -> "jza@localhost", "timeout" -> 10_000_000_000L),
-      "secret"  -> null
+      "secret"  -> JsonNull
     )
 
     assert(user.size == 6)

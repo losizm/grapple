@@ -48,9 +48,9 @@ class JsonObjectBuilder:
    * @return this builder
    */
   def add(name: String, value: JsonValue): this.type =
-    if name == null then
+    if name == null || value == null then
       throw NullPointerException()
-    values += name -> (if value == null then JsonNull else value)
+    values += name -> value
     this
 
   /**

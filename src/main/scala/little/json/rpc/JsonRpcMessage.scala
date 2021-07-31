@@ -159,16 +159,25 @@ object JsonRpcRequest:
 
     /** Sets optional params. */
     def params(value: Option[JsonValue]): this.type =
-      if value == null then
+      if value == null || value.contains(null) then
         throw NullPointerException()
+
       if !value.forall(_.isInstanceOf[JsonStructure]) then
-        throw IllegalArgumentException("params must be either JSON array or object")
+        throw IllegalArgumentException("params must be JSON structure")
+
       _params = value
       this
 
     /** Sets params. */
     def params(value: JsonValue): this.type =
-      params(Some(value))
+      if value == null then
+        throw NullPointerException()
+
+      if !value.isInstanceOf[JsonStructure] then
+        throw IllegalArgumentException("params must be JSON structure")
+
+      _params = Some(value)
+      this
 
     /** Sets attributes. */
     def attributes(value: Map[String, Any]): this.type =

@@ -34,10 +34,14 @@ private case class JsonArrayImpl(values: Seq[JsonValue]) extends JsonArray:
 
   @targetName("prepend")
   def +:(value: JsonValue): JsonArray =
-    JsonArrayImpl((if value == null then JsonNull else value) +: values)
+    if value == null then
+      throw NullPointerException()
+    JsonArrayImpl(value +: values)
 
   @targetName("append")
   def :+(value: JsonValue): JsonArray =
-    JsonArrayImpl(values :+ (if value == null then JsonNull else value))
+    if value == null then
+      throw NullPointerException()
+    JsonArrayImpl(values :+ value)
 
   override lazy val toString = values.mkString("[", ",", "]")

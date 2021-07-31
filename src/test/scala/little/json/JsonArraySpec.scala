@@ -26,7 +26,7 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
       Json.arr("jza", "admin", 1000),
       true,
       Json.obj("name" -> "Jza", "email" -> "jza@localhost", "timeout" -> 10_000_000_000L),
-      null
+      JsonNull
     )
 
     assert(!user.isEmpty)

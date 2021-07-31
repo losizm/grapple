@@ -18,6 +18,9 @@ package rpc
 
 /** Defines JSON-RPC error. */
 sealed class JsonRpcError protected (_code: Int, _message: String, _data: Option[JsonValue]) extends JsonException(_message):
+  if _message == null || _data == null || _data.contains(null) then
+    throw NullPointerException()
+
   /** Gets error code. */
   def code: Int = _code
 
@@ -67,7 +70,7 @@ object JsonRpcError:
    * @param data error data
    */
   def apply(code: Int, message: String, data: JsonValue): JsonRpcError =
-    apply(code, message, Option(data))
+    apply(code, message, Some(data))
 
   /**
    * Creates JSON-RPC error.
@@ -95,7 +98,7 @@ object JsonRpcError:
       case null => None
       case _    => Some(error.code, error.message, error.data)
 
-/** Defines JSON-RPC `ParseError (-32700)`. */
+/** Defines JSON-RPC ParseError (-32700). */
 final class ParseError private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32700, message, data):
   private[rpc] def this(data: Option[JsonValue]) = this("Parse error", data)
 
@@ -131,7 +134,7 @@ object ParseError:
       case null => None
       case _    => Some(error.code, error.message, error.data)
 
-/** Defines JSON-RPC `InvalidRequest (-32600)`. */
+/** Defines JSON-RPC InvalidRequest (-32600). */
 final class InvalidRequest private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32600, message, data):
   private[rpc] def this(data: Option[JsonValue]) = this("Invalid Request", data)
 
@@ -167,7 +170,7 @@ object InvalidRequest:
       case null => None
       case _    => Some(error.code, error.message, error.data)
 
-/** Defines JSON-RPC `MethodNotFound (-32601)`. */
+/** Defines JSON-RPC MethodNotFound (-32601). */
 final class MethodNotFound private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32601, message, data):
   private[rpc] def this(data: Option[JsonValue]) = this("Method not found", data)
 
@@ -203,7 +206,7 @@ object MethodNotFound:
       case null => None
       case _    => Some(error.code, error.message, error.data)
 
-/** Defines JSON-RPC `InvalidParams (-32602)`. */
+/** Defines JSON-RPC InvalidParams (-32602). */
 final class InvalidParams private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32602, message, data):
   private[rpc] def this(data: Option[JsonValue]) = this("Invalid params", data)
 
@@ -239,7 +242,7 @@ object InvalidParams:
       case null => None
       case _    => Some(error.code, error.message, error.data)
 
-/** Defines JSON-RPC `InternalError (-32603)`. */
+/** Defines JSON-RPC InternalError (-32603). */
 final class InternalError private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32603, message, data):
   private[rpc] def this(data: Option[JsonValue]) = this("Internal error", data)
 
