@@ -15,9 +15,10 @@
  */
 package little.json
 
-private enum JsonContext:
+private enum JsonContext(val isObject: Boolean):
   var size: Long
+  val isArray: Boolean = !isObject
   def isEmpty: Boolean = size == 0
 
-  case ObjectContext(var size: Long) extends JsonContext
-  case ArrayContext(var size: Long) extends JsonContext
+  case ObjectContext(var size: Long) extends JsonContext(true)
+  case ArrayContext(var size: Long) extends JsonContext(false)

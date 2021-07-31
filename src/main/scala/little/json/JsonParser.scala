@@ -67,6 +67,47 @@ trait JsonParser extends Iterator[JsonParser.Event], AutoCloseable:
   /** Gets next event. */
   def next(): JsonParser.Event
 
+  /**
+   * Parses and collects remainder of current JSON object.
+   *
+   * {{{
+   * import little.json.Implicits.{ *, given }
+   * import little.json.{ Json, JsonParser }
+   * import scala.language.implicitConversions
+   *
+   * import JsonParser.Event
+   *
+   * val parser = JsonParser("""{ "id": 1000, "name": "jza" }""")
+   *
+   * assert { parser.next() == Event.StartObject }
+   * assert { parser.getObject() == Json.obj("id" -> 1000, "name" -> "jza") }
+   * }}}
+   *
+   * @note Parser must be in object context, and previous event must not be
+   * field name.
+   */
+  def getObject(): JsonObject
+
+  /**
+   * Parses and collects remainder of current JSON array.
+   *
+   * {{{
+   * import little.json.Implicits.{ *, given }
+   * import little.json.{ Json, JsonParser }
+   * import scala.language.implicitConversions
+   *
+   * import JsonParser.Event
+   *
+   * val parser = JsonParser("""[1000, "jza"]""")
+   *
+   * assert { parser.next() == Event.StartArray }
+   * assert { parser.getArray() == Json.arr(1000, "jza") }
+   * }}}
+   *
+   * @note Parser must be in array context.
+   */
+  def getArray(): JsonArray
+
   /** Closes parser. */
   def close(): Unit
 

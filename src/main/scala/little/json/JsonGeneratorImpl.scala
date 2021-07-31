@@ -20,7 +20,7 @@ import java.io.{ BufferedWriter, Writer }
 import scala.collection.mutable.Stack
 
 private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends JsonGenerator:
-  import JsonContext._
+  import JsonContext.*
 
   private val writer  = BufferedWriter(output, 8192)
   private var tracker = Stack[JsonContext]()

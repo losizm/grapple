@@ -30,6 +30,36 @@ class JsonParserObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     finally parser.close()
   }
 
+  it should "get JSON object" in withResource("/JsonParserTestArray.json") { in =>
+    import scala.language.implicitConversions
+    import Implicits.{ *, given }
+
+    val parser = JsonParser("""{ "a": 0, "b": 1, "c": [2, 3], "d": {"x": 4, "y": 5}, "e": [],"f":  {} }""")
+    try
+      assert(parser.next() == JsonParser.Event.StartObject)
+      assert(parser.getObject() == Json.obj("a" -> 0, "b" -> 1, "c" -> Json.arr(2, 3), "d" -> Json.obj("x" -> 4, "y" -> 5), "e" -> Json.arr(), "f" -> Json.obj()))
+    finally
+      parser.close()
+  }
+
+  it should "not get JSON array" in withResource("/JsonParserTestArray.json") { in =>
+    val parser = JsonParser("""{ "a": 0, "b": 1, "c": [2, 3], "d": {"x": 4, "y": 5}, "e": [],"f":  {} }""")
+    try
+      assert(parser.next() == JsonParser.Event.StartObject)
+      assertThrows[IllegalStateException](parser.getArray())
+    finally
+      parser.close()
+  }
+
+  it should "get empty JSON object" in{
+    val parser = JsonParser("{}")
+    try
+      assert(parser.next() == JsonParser.Event.StartObject)
+      parser.getObject().isEmpty
+    finally
+      parser.close()
+  }
+
   private def withResource[T](name: String)(f: InputStream => T): Unit =
     val resource = getClass.getResourceAsStream(name)
     try f(resource)

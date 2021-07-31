@@ -23,7 +23,7 @@ import scala.util.Try
 
 private class JsonParserImpl(input: Reader) extends JsonParser:
   import JsonParser.Event
-  import JsonContext._
+  import JsonContext.*
 
   private enum State:
     case Init extends State
@@ -53,6 +53,41 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
     val success = event.get
     fieldPending = success.isInstanceOf[Event.FieldName]
     success
+
+  def getObject(): JsonObject =
+    if tracker.isEmpty || !tracker.top.isObject || fieldPending then
+      throw IllegalStateException()
+
+    val builder = JsonObjectBuilder()
+    var done    = false
+
+    while !done do
+      next() match
+        case Event.EndObject        => done = true
+        case Event.FieldName(name)  =>
+          next() match
+            case Event.StartObject  => builder.add(name, getObject())
+            case Event.StartArray   => builder.add(name, getArray())
+            case Event.Value(value) => builder.add(name, value)
+            case _                  => throw JsonException("Unexpected event")
+        case _                      => throw JsonException("Unexpected event")
+    builder.build()
+
+  def getArray(): JsonArray =
+    if tracker.isEmpty || !tracker.top.isArray then
+      throw IllegalStateException()
+
+    val builder = JsonArrayBuilder()
+    var done    = false
+
+    while !done do
+      next() match
+        case Event.EndArray     => done = true
+        case Event.StartObject  => builder.add(getObject())
+        case Event.StartArray   => builder.add(getArray())
+        case Event.Value(value) => builder.add(value)
+        case _                  => throw JsonException("Unexpected event")
+    builder.build()
 
   def close(): Unit =
     state = State.Done
@@ -89,13 +124,13 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
     else
       reader.getSkipWhitespace() match
         case '}' =>
-          if !tracker.top.isInstanceOf[ObjectContext] then
+          if !tracker.top.isObject then
             unexpectedCharacter()
           tracker.pop()
           Event.EndObject
 
         case ']' =>
-          if !tracker.top.isInstanceOf[ArrayContext] then
+          if !tracker.top.isArray then
             unexpectedCharacter()
           tracker.pop()
           Event.EndArray
@@ -104,7 +139,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
           if tracker.top.isEmpty then
             unexpectedCharacter()
 
-          tracker.top.isInstanceOf[ObjectContext] match
+          tracker.top.isObject match
             case true  => getFieldNameEvent(reader.getSkipWhitespace())
             case false => getValueEvent(reader.getSkipWhitespace())
 
@@ -112,7 +147,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
           if !tracker.top.isEmpty then
             unexpectedCharacter()
 
-          tracker.top.isInstanceOf[ObjectContext] match
+          tracker.top.isObject match
             case true  => getFieldNameEvent(c)
             case false => getValueEvent(c)
 
