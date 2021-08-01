@@ -16,6 +16,8 @@
 package little.json
 package rpc
 
+import Implicits.given
+
 class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "inspect JsonRpcIdentifier with string value" in {
     val id = JsonRpcIdentifier("abc")
@@ -24,6 +26,8 @@ class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(!id.isNumber)
     assert(id.stringValue == "abc")
     assertThrows[NoSuchElementException](id.numberValue)
+    assert(Json.toJson(id) == JsonString("abc"))
+    assert(id == JsonString("abc").as[JsonRpcIdentifier])
   }
 
   it should "inspect JsonRpcIdentifier with number value" in {
@@ -33,6 +37,8 @@ class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(id.isNumber)
     assertThrows[NoSuchElementException](id.stringValue)
     assert(id.numberValue == 123)
+    assert(Json.toJson(id) == JsonNumber(123))
+    assert(id == JsonNumber(123).as[JsonRpcIdentifier])
   }
 
   it should "inspect JsonRpcIdentifier with null value" in {
@@ -42,4 +48,6 @@ class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(!id.isNumber)
     assertThrows[NoSuchElementException](id.stringValue)
     assertThrows[NoSuchElementException](id.numberValue)
+    assert(Json.toJson(id) == JsonNull)
+    assert(id == JsonNull.as[JsonRpcIdentifier])
   }
