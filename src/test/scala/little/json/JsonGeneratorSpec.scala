@@ -32,7 +32,8 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
       "groups" -> Seq("jza", "adm", "sudo"),
       "info"   -> Json.obj("home" -> "/home/jza", "storage" -> 8L * 1024 * 1024 * 1024),
       "root"   -> User(0, "root"),
-      "nobody" -> User(65534, "nobody")
+      "nobody" -> User(65534, "nobody"),
+      "photo"  -> JsonNull
     )
 
     val buf = StringWriter()
@@ -53,6 +54,7 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
       out.writeEnd()
       out.write("root", User(0, "root"))
       out.write("nobody", User(65534, "nobody"))
+      out.writeNull("photo")
       out.writeEnd()
       out.flush()
 
@@ -69,7 +71,8 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
       Seq("jza", "adm", "sudo"),
       Json.obj("home" -> "/home/jza", "storage" -> 8L * 1024 * 1024 * 1024),
       User(0, "root"),
-      User(65534, "nobody")
+      User(65534, "nobody"),
+      JsonNull
     )
 
     val buf = StringWriter()
@@ -90,6 +93,7 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
       out.writeEnd()
       out.write(User(0, "root"))
       out.write(User(65534, "nobody"))
+      out.writeNull()
       out.writeEnd()
       out.flush()
 

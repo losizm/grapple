@@ -75,7 +75,7 @@ trait JsonGenerator extends AutoCloseable:
   /** Writes opening brace to start object context. */
   def writeStartObject(): this.type
 
-  /** Writes opening brace to start array context. */
+  /** Writes opening bracket to start array context. */
   def writeStartArray(): this.type
 
   /** Writes closing brace or bracket based on current context. */
@@ -90,11 +90,23 @@ trait JsonGenerator extends AutoCloseable:
   def write(name: String, value: JsonValue): this.type
 
   /**
+   * Writes field with null value to output.
+   *
+   * @param name field name
+   */
+  def writeNull(name: String): this.type =
+    write(name, JsonNull)
+
+  /**
    * Writes value to output.
    *
    * @param value JSON value
    */
   def write(value: JsonValue): this.type
+
+  /** Writes null value to output.  */
+  def writeNull(): this.type =
+    write(JsonNull)
 
   /** Flushes writer. */
   def flush(): Unit
@@ -106,7 +118,7 @@ trait JsonGenerator extends AutoCloseable:
 object JsonGenerator:
   /**
    * Creates JSON generator to output using pretty printing with specified
-   * indentation.
+   * indent.
    */
   def apply(output: Writer, indent: String): JsonGenerator =
     JsonGeneratorImpl(output, PrettyPrinter(indent))
