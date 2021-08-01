@@ -5,19 +5,17 @@ The JSON library for Scala.
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_3%22)
 
 ## Getting Started
-**little-json** is a Scala library that is used for reading and writing JSON
-content. It provides a clean interface for working with JSON while mapping
-instances of your classes to JSON values.
+**little-json** is a Scala library for reading and writing JSON content. It
+provides utilities for mapping instances of your classes to JSON values.
 
 To get started, add **little-json** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "7.0.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "7.1.0"
 ```
 
-_**NOTE:** Starting with version 7, **little-json** is written for Scala 3
-exclusively. See previous releases for compatibility with Scala 2.12 and Scala
-2.13._
+_**NOTE:** Starting with version 7, **little-json** is written for Scala 3. See
+previous releases for compatibility with Scala 2.12 and Scala 2.13._
 
 ## A Taste of little-json
 
@@ -224,14 +222,13 @@ finally
 
 ```
 
-See also [JsonReader](https://losizm.github.io/little-json/latest/api/api/little/json/JsonReader.html)
-and [JsonWriter](https://losizm.github.io/little-json/latest/api/api/little/json/JsonWriter.html)
-for alternatives to reading and writing JSON data.
+See also [JsonReader](https://losizm.github.io/little-json/latest/api/little/json/JsonReader.html)
+and [JsonWriter](https://losizm.github.io/little-json/latest/api/little/json/JsonWriter.html).
 
 ## JSON-RPC 2.0 Specification
 
-The library provides an implementation of [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification),
-so you can easily work with requests and responses as either client or server.
+The library provides an API for [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification),
+which is a protocol for JSON-based remote procedure calls.
 
 `JsonRpcRequest` and `JsonRpcResponse` model the RPC message types, and you can
 incrementally build them with message builders.
@@ -273,7 +270,7 @@ val response = JsonRpcResponse.builder()
   }.build()
 ```
 
-And, you can parse them from JSON using library-provided magic.
+And, you can parse them using library-provided magic.
 
 ```scala
 val request = Json.parse("""{

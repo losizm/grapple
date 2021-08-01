@@ -115,22 +115,30 @@ trait JsonParser extends Iterator[JsonParser.Event], AutoCloseable:
 object JsonParser:
   /** Defines enumeration of parser events. */
   enum Event:
-    /** Indicates start of object is parsed. */
+    /** Indicates start of object. */
     case StartObject extends Event
 
-    /** Indicates start of array is parsed. */
+    /** Indicates start of array. */
     case StartArray extends Event
 
-    /** Indicates field name is parsed. */
+    /**
+     * Indicates field name.
+     *
+     * @param get parsed field name
+     */
     case FieldName(get: String) extends Event
 
-    /** Indicates value is parsed. */
+    /**
+     * Indicates value.
+     *
+     * @param get parsed value
+     */
     case Value(get: JsonValue) extends Event
 
-    /** Indicates end of object is parsed. */
+    /** Indicates end of object. */
     case EndObject extends Event
 
-    /** Indicates end of array is parsed. */
+    /** Indicates end of array. */
     case EndArray extends Event
 
   /** Creates JSON parser from input. */
@@ -145,6 +153,7 @@ object JsonParser:
   def apply(bytes: Array[Byte]): JsonParser =
     JsonParserImpl(StringReader(String(bytes)))
 
+  /** Creates JSON parser from input. */
   def apply(input: InputStream): JsonParser =
     JsonParserImpl(InputStreamReader(input))
 

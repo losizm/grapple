@@ -57,7 +57,7 @@ trait JsonWriter extends AutoCloseable:
 object JsonWriter:
   /**
    * Creates JSON writer to output using pretty printing with specified
-   * indentation.
+   * indent.
    */
   def apply(output: Writer, indent: String): JsonWriter =
     JsonWriterImpl(output, PrettyPrinter(indent))

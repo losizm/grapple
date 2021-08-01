@@ -293,13 +293,25 @@ object JsonString:
 
 /** Defines JSON number. */
 trait JsonNumber extends JsonValue:
-  /** Gets value as `Short`. */
+  /**
+   * Gets value as `Short`.
+   *
+   * @throws ArithmeticException if value cannot be represented exactly
+   */
   def shortValue: Short
 
-  /** Gets value as `Int`. */
+  /**
+   * Gets value as `Int`.
+   *
+   * @throws ArithmeticException if value cannot be represented exactly
+   */
   def intValue: Int
 
-  /** Gets value as `Long`. */
+  /**
+   * Gets value as `Long`.
+   *
+   * @throws ArithmeticException if value cannot be represented exactly
+   */
   def longValue: Long
 
   /** Gets value as `Float`. */
@@ -308,7 +320,11 @@ trait JsonNumber extends JsonValue:
   /** Gets value as `Double`. */
   def doubleValue: Double
 
-  /** Gets value as `BigInt`. */
+  /**
+   * Gets value as `BigInt`.
+   *
+   * @throws ArithmeticException if value cannot be represented exactly
+   */
   def bigIntValue: BigInt
 
   /** Gets value as `BigDecimal`. */
@@ -316,7 +332,11 @@ trait JsonNumber extends JsonValue:
 
 /** Provides JSON number factory. */
 object JsonNumber:
-  /** Creates JSON number with value. */
+  /**
+   * Creates JSON number with value.
+   *
+   * @throws NumberFormatException if value is invalid numeric representation
+   */
   def apply(value: String): JsonNumber =
     JsonNumberImpl(BigDecimal(value))
 

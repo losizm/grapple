@@ -101,7 +101,7 @@ object Implicits:
         case _               => Nil
 
   /**
-   * Returns `JsonValue`.
+   * Returns `JsonValue` as is.
    *
    * @group json-input
    */
@@ -110,7 +110,7 @@ object Implicits:
     def apply(value: JsonValue) = value
 
   /**
-   * Casts value to `JsonObject`.
+   * Casts `JsonValue` to `JsonObject`.
    *
    * @group json-input
    */
@@ -119,7 +119,7 @@ object Implicits:
     def apply(value: JsonValue) = value.asInstanceOf[JsonObject]
 
   /**
-   * Casts value to `JsonArray`.
+   * Casts `JsonValue` to `JsonArray`.
    *
    * @group json-input
    */
@@ -128,7 +128,7 @@ object Implicits:
     def apply(value: JsonValue) = value.asInstanceOf[JsonArray]
 
   /**
-   * Casts value to `JsonString`.
+   * Casts `JsonValue` to `JsonString`.
    *
    * @group json-input
    */
@@ -137,7 +137,7 @@ object Implicits:
     def apply(value: JsonValue) = value.asInstanceOf[JsonString]
 
   /**
-   * Casts value to `JsonNumber`.
+   * Casts `JsonValue` to `JsonNumber`.
    *
    * @group json-input
    */
@@ -146,7 +146,7 @@ object Implicits:
     def apply(value: JsonValue) = value.asInstanceOf[JsonNumber]
 
   /**
-   * Casts value to `JsonBoolean`.
+   * Casts `JsonValue` to `JsonBoolean`.
    *
    * @group json-input
    */
@@ -155,7 +155,7 @@ object Implicits:
     def apply(value: JsonValue) = value.asInstanceOf[JsonBoolean]
 
   /**
-   * Casts value to `JsonNull`.
+   * Casts `JsonValue` to `JsonNull`.
    *
    * @group json-input
    */
