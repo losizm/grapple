@@ -11,26 +11,23 @@ provides utilities for mapping instances of your classes to JSON values.
 To get started, add **little-json** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "7.1.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "7.2.0"
 ```
 
 _**NOTE:** Starting with version 7, **little-json** is written for Scala 3. See
 previous releases for compatibility with Scala 2.12 and Scala 2.13._
 
 ## A Taste of little-json
-
 Here's a taste of what **little-json** offers.
 
 ### Usual Suspects
-
 To model standard JSON values, the library includes a list of classes with
 familiar names: `JsonObject`, `JsonArray`, `JsonString`, `JsonNumber`,
 `JsonBoolean`, and `JsonNull`. However, when making use of contextual
-abstractions, you're not required to deal with these classes directly a whole
+abstraction, you're not required to deal with these classes directly a whole
 lot, if at all.
 
 ### Reading and Writing
-
 Reading and writing are powered by `JsonInput` and `JsonOutput`. They convert
 values to and from JSON, with library-provided implementations for working with
 standard types like `String`, `Int`, and `Boolean`. You must provide custom
@@ -95,7 +92,6 @@ assert { jsonUsers(1) == Json.obj("id" -> 1000, "name" -> "jza") }
 ```
 
 ### Extracting Values
-
 You can traverse `JsonObject` and `JsonArray` to extract nested values. An
 extension method with a symbolic name makes this clean and easy.
 
@@ -140,7 +136,6 @@ assert { names == Seq("localhost", "root", "jza") }
 ```
 
 ### Generating and Parsing
-
 `JsonGenerator` and `JsonParser` are used for generating and parsing
 potentially large JSON structures.
 
@@ -226,7 +221,6 @@ See also [JsonReader](https://losizm.github.io/little-json/latest/api/little/jso
 and [JsonWriter](https://losizm.github.io/little-json/latest/api/little/json/JsonWriter.html).
 
 ## JSON-RPC 2.0 Specification
-
 The library provides an API for [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification),
 which is a protocol for JSON-based remote procedure calls.
 
@@ -297,7 +291,6 @@ assert { response.result.as[Int] == 6 }
 ```
 
 ## API Documentation
-
 See [scaladoc](https://losizm.github.io/little-json/latest/api/index.html)
 for additional details.
 
