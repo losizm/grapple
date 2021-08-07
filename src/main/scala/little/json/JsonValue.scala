@@ -127,6 +127,14 @@ trait JsonObject extends JsonStructure:
     apply(name).asInstanceOf[JsonNull]
 
   /**
+   * Maps optional value excluding null.
+   *
+   * @param name field name
+   */
+  def map[T](name: String)(using JsonInput[T]): Option[T] =
+    get(name).filter(JsonNull.!=).map(_.as[T])
+
+  /**
    * Concatenates JSON object.
    *
    * @return new JSON object

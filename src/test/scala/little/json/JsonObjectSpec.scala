@@ -95,6 +95,11 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert((user \ "other" \ "email").as[String] == "jza@localhost")
     assert((user \ "other" \ "timeout").as[Long] == 10_000_000_000L)
 
+    assert(user("secret").as[Option[String]] == None)
+    assert(user("secret").as[Option[Int]] == None)
+    assert(user("secret").as[Option[Boolean]] == None)
+    assert(user("secret") == JsonNull)
+
     assert(user.getOrElse("_id", 0) == 0)
     assert(user.getOrElse("id", 0) == 1000)
     assert(user.getOrElse("id", 0L) == 1000L)
@@ -112,6 +117,19 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user.get("name").contains(JsonString("jza")))
     assert(user.get("_enabled").isEmpty)
     assert(user.get("enabled").contains(JsonTrue))
+    assert(user.get("_secret").isEmpty)
+    assert(user.get("secret").contains(JsonNull))
+
+    assert(user.map[Int]("_id").isEmpty)
+    assert(user.map[Int]("id").contains(1000))
+    assert(user.map[String]("_name").isEmpty)
+    assert(user.map[String]("name").contains("jza"))
+    assert(user.map[Boolean]("_enabled").isEmpty)
+    assert(user.map[Boolean]("enabled").contains(true))
+    assert(user.map[String]("secret").isEmpty)
+    assert(user.map[Int]("secret").isEmpty)
+    assert(user.map[Boolean]("secret").isEmpty)
+    assert(user.map[JsonNull]("secret").isEmpty)
   }
 
   it should "inspect empty JsonObject" in {
