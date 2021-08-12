@@ -127,13 +127,34 @@ object JsonGenerator:
   def apply(output: Writer): JsonGenerator =
     JsonGeneratorImpl(output, DefaultPrinter)
 
+  /**
+   * Creates JSON generator to output using pretty printing with specified
+   * indent.
+   */
+  def apply(output: OutputStream, indent: String): JsonGenerator =
+    JsonGeneratorImpl(OutputStreamWriter(output), PrettyPrinter(indent))
+
   /** Creates JSON generator to output. */
   def apply(output: OutputStream): JsonGenerator =
     JsonGeneratorImpl(OutputStreamWriter(output), DefaultPrinter)
 
+  /**
+   * Creates JSON generator to output using pretty printing with specified
+   * indent.
+   */
+  def apply(output: File, indent: String): JsonGenerator =
+    JsonGeneratorImpl(FileWriter(output), PrettyPrinter(indent))
+
   /** Creates JSON generator to output. */
   def apply(output: File): JsonGenerator =
     JsonGeneratorImpl(FileWriter(output), DefaultPrinter)
+
+  /**
+   * Creates JSON generator to output using pretty printing with specified
+   * indent.
+   */
+  def apply(output: Path, indent: String): JsonGenerator =
+    JsonGeneratorImpl(FileWriter(output.toFile), PrettyPrinter(indent))
 
   /** Creates JSON generator to output. */
   def apply(output: Path): JsonGenerator =

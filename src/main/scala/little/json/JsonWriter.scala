@@ -66,13 +66,34 @@ object JsonWriter:
   def apply(output: Writer): JsonWriter =
     JsonWriterImpl(output, DefaultPrinter)
 
+  /**
+   * Creates JSON writer to output using pretty printing with specified
+   * indent.
+   */
+  def apply(output: OutputStream, indent: String): JsonWriter =
+    JsonWriterImpl(OutputStreamWriter(output), PrettyPrinter(indent))
+
   /** Creates JSON writer to output. */
   def apply(output: OutputStream): JsonWriter =
     JsonWriterImpl(OutputStreamWriter(output), DefaultPrinter)
 
+  /**
+   * Creates JSON writer to output using pretty printing with specified
+   * indent.
+   */
+  def apply(output: File, indent: String): JsonWriter =
+    JsonWriterImpl(FileWriter(output), PrettyPrinter(indent))
+
   /** Creates JSON writer to output. */
   def apply(output: File): JsonWriter =
     JsonWriterImpl(FileWriter(output), DefaultPrinter)
+
+  /**
+   * Creates JSON writer to output using pretty printing with specified
+   * indent.
+   */
+  def apply(output: Path, indent: String): JsonWriter =
+    JsonWriterImpl(FileWriter(output.toFile), PrettyPrinter(indent))
 
   /** Creates JSON writer to output. */
   def apply(output: Path): JsonWriter =
