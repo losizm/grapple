@@ -114,30 +114,30 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
         tracker.push(ArrayContext(0))
         Event.StartArray
 
-      case _ => unexpectedCharacter()
+      case c   => unexpectedChar(c)
 
   private def nextEvent(): Event =
     if fieldPending then
       reader.getSkipWhitespace() match
         case ':' => getValueEvent(reader.getSkipWhitespace())
-        case _   => unexpectedCharacter()
+        case c   => unexpectedChar(c)
     else
       reader.getSkipWhitespace() match
         case '}' =>
           if !tracker.top.isObject then
-            unexpectedCharacter()
+            unexpectedChar('}')
           tracker.pop()
           Event.EndObject
 
         case ']' =>
           if !tracker.top.isArray then
-            unexpectedCharacter()
+            unexpectedChar(']')
           tracker.pop()
           Event.EndArray
 
         case ',' =>
           if tracker.top.isEmpty then
-            unexpectedCharacter()
+            unexpectedChar(',')
 
           tracker.top.isObject match
             case true  => getFieldNameEvent(reader.getSkipWhitespace())
@@ -145,7 +145,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
 
         case c =>
           if !tracker.top.isEmpty then
-            unexpectedCharacter()
+            unexpectedChar(c)
 
           tracker.top.isObject match
             case true  => getFieldNameEvent(c)
@@ -154,7 +154,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
   private def getFieldNameEvent(first: Char): Event =
     first match
       case '"' => Event.FieldName(finishString())
-      case _   => unexpectedCharacter()
+      case _   => unexpectedChar(first)
 
   private def getValueEvent(first: Char): Event =
     first match
@@ -198,7 +198,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
         tracker.top.size += 1
         Event.Value(value)
 
-      case _ => unexpectedCharacter()
+      case _ => unexpectedChar(first)
 
   private def finishString(): String =
     val word = StringBuilder()
@@ -217,26 +217,30 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
             case 'n'  => word += '\n'
             case 'r'  => word += '\r'
             case 't'  => word += '\t'
-            case 'u'  => word += getUnicodeCharacter()
-            case _    => unexpectedCharacter()
+            case 'u'  => word += getUnicodeChar()
+            case c    => unexpectedChar(c)
 
         case char => word += char
 
     word.toString
 
   private def finishTrue(): JsonBoolean =
-    if reader.get() != 'r' || reader.get() != 'u' || reader.get() != 'e' then
-      unexpectedCharacter()
+    getExpectedChar('r')
+    getExpectedChar('u')
+    getExpectedChar('e')
     JsonTrue
 
   private def finishFalse(): JsonBoolean =
-    if reader.get() != 'a' || reader.get() != 'l' || reader.get() != 's' || reader.get() != 'e' then
-      unexpectedCharacter()
+    getExpectedChar('a')
+    getExpectedChar('l')
+    getExpectedChar('s')
+    getExpectedChar('e')
     JsonFalse
 
   private def finishNull(): JsonNull =
-    if reader.get() != 'u' || reader.get() != 'l' || reader.get() != 'l' then
-      unexpectedCharacter()
+    getExpectedChar('u')
+    getExpectedChar('l')
+    getExpectedChar('l')
     JsonNull
 
   private def finishNumber(first: Char): JsonNumber =
@@ -249,23 +253,23 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
     if first == '-' then
       reader.get() match
         case c if isDigit(c) => number += c
-        case _               => unexpectedCharacter()
+        case c               => unexpectedChar(c)
 
     while !done do
       { reader.mark(8); reader.read() } match
         case c if isDigit(c) => number += c.toChar
         case '.'             =>
-          if dot || e then unexpectedCharacter()
+          if dot || e then unexpectedChar('.')
           number += '.'
           dot = true
 
-        case 'E' | 'e'       =>
-          if e then unexpectedCharacter()
+        case c @ ('E' | 'e') =>
+          if e then unexpectedChar(c)
           number += 'E'
           e = true
 
         case c @ ('-' | '+') =>
-          if eSign || !e then unexpectedCharacter()
+          if eSign || !e then unexpectedChar(c)
           number += c.toChar
           eSign = true
 
@@ -274,7 +278,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
 
     JsonNumber(number.toString)
 
-  private def getUnicodeCharacter(): Char =
+  private def getUnicodeChar(): Char =
     val digits = new Array[Char](4)
     for i <- 0 to 3 do
       digits(i) = checkHexDigit(reader.get())
@@ -283,7 +287,15 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
   private def checkHexDigit(c: Char): Char =
     hexDigits.contains(c) match
       case true  => c
-      case false => unexpectedCharacter()
+      case false => unexpectedChar(c)
 
-  private def unexpectedCharacter(): Nothing =
-    throw JsonException(s"Unexpected char at offset=${reader.getPosition() - 1}")
+  private def getExpectedChar(c: Char): Char =
+    reader.get() match
+      case `c` => c
+      case c   => unexpectedChar(c)
+
+  private def unexpectedChar(c: Char): Nothing =
+    throw JsonParserError(
+      s"Unexpected character ${EncodedString(c)} at offset ${reader.getPosition() - 1}",
+      reader.getPosition() - 1
+    )

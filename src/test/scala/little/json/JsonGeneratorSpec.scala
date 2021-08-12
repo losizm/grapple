@@ -106,8 +106,8 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "not write vale in empty context" in {
     val out = JsonGenerator(StringWriter())
     try
-      assertThrows[IllegalStateException](out.write(1))
-      assertThrows[IllegalStateException](out.write("a", 1))
+      assertThrows[JsonGeneratorError](out.write(1))
+      assertThrows[JsonGeneratorError](out.write("a", 1))
     finally
       out.close()
   }
@@ -116,19 +116,19 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val out = JsonGenerator(StringWriter())
     try
       out.writeStartObject()
-      assertThrows[IllegalStateException](out.write(1))
-      assertThrows[IllegalStateException](out.writeStartObject())
-      assertThrows[IllegalStateException](out.writeStartArray())
+      assertThrows[JsonGeneratorError](out.write(1))
+      assertThrows[JsonGeneratorError](out.writeStartObject())
+      assertThrows[JsonGeneratorError](out.writeStartArray())
 
       out.writeStartObject("test")
-      assertThrows[IllegalStateException](out.write(1))
-      assertThrows[IllegalStateException](out.writeStartObject())
-      assertThrows[IllegalStateException](out.writeStartArray())
+      assertThrows[JsonGeneratorError](out.write(1))
+      assertThrows[JsonGeneratorError](out.writeStartObject())
+      assertThrows[JsonGeneratorError](out.writeStartArray())
 
       out.write("test", 0)
-      assertThrows[IllegalStateException](out.write(1))
-      assertThrows[IllegalStateException](out.writeStartObject())
-      assertThrows[IllegalStateException](out.writeStartArray())
+      assertThrows[JsonGeneratorError](out.write(1))
+      assertThrows[JsonGeneratorError](out.writeStartObject())
+      assertThrows[JsonGeneratorError](out.writeStartArray())
     finally
       out.close()
   }
@@ -137,19 +137,19 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val out = JsonGenerator(StringWriter())
     try
       out.writeStartArray()
-      assertThrows[IllegalStateException](out.write("a", 1))
-      assertThrows[IllegalStateException](out.writeStartObject("a"))
-      assertThrows[IllegalStateException](out.writeStartArray("a"))
+      assertThrows[JsonGeneratorError](out.write("a", 1))
+      assertThrows[JsonGeneratorError](out.writeStartObject("a"))
+      assertThrows[JsonGeneratorError](out.writeStartArray("a"))
 
       out.writeStartArray()
-      assertThrows[IllegalStateException](out.write("a", 1))
-      assertThrows[IllegalStateException](out.writeStartObject("a"))
-      assertThrows[IllegalStateException](out.writeStartArray("a"))
+      assertThrows[JsonGeneratorError](out.write("a", 1))
+      assertThrows[JsonGeneratorError](out.writeStartObject("a"))
+      assertThrows[JsonGeneratorError](out.writeStartArray("a"))
 
       out.write(0)
-      assertThrows[IllegalStateException](out.write("a", 1))
-      assertThrows[IllegalStateException](out.writeStartObject("a"))
-      assertThrows[IllegalStateException](out.writeStartArray("a"))
+      assertThrows[JsonGeneratorError](out.write("a", 1))
+      assertThrows[JsonGeneratorError](out.writeStartObject("a"))
+      assertThrows[JsonGeneratorError](out.writeStartArray("a"))
     finally
       out.close()
   }

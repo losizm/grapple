@@ -40,3 +40,18 @@ class JsonException(message: String, cause: Throwable) extends RuntimeException(
    * @param cause underlying cause
    */
   def this(cause: Throwable) = this(null, cause)
+
+/**
+ * Defines JSON parser error.
+ *
+ * @param message detail message
+ * @param offset  character offset of parser error
+ */
+case class JsonParserError(message: String, offset: Long) extends JsonException(message)
+
+/**
+ * Defines JSON generator error.
+ *
+ * @param message detail message
+ */
+case class JsonGeneratorError(message: String) extends JsonException(message)

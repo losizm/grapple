@@ -125,15 +125,27 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "not parse invalid JSON input" in {
     assertThrows[JsonException](Json.parse("""{"""))
     assertThrows[JsonException](Json.parse("""}"""))
-    assertThrows[JsonException](Json.parse("""{,}"""))
-    assertThrows[JsonException](Json.parse("""{"id"}"""))
-    assertThrows[JsonException](Json.parse("""{"id",}"""))
-    assertThrows[JsonException](Json.parse("""{"id":}"""))
-    assertThrows[JsonException](Json.parse("""{"id":,}"""))
+    assertThrows[JsonParserError](Json.parse("""{,}"""))
+    assertThrows[JsonParserError](Json.parse("""{"id"}"""))
+    assertThrows[JsonParserError](Json.parse("""{"id",}"""))
+    assertThrows[JsonParserError](Json.parse("""{"id":}"""))
+    assertThrows[JsonParserError](Json.parse("""{"id":,}"""))
     assertThrows[JsonException](Json.parse("["))
-    assertThrows[JsonException](Json.parse("]"))
-    assertThrows[JsonException](Json.parse("[,]"))
-    assertThrows[JsonException](Json.parse("""["id":]"""))
+    assertThrows[JsonParserError](Json.parse("]"))
+    assertThrows[JsonParserError](Json.parse("[,]"))
+    assertThrows[JsonParserError](Json.parse("""["id":]"""))
+
+    val err1 = intercept[JsonParserError](Json.parse("""{ "a: 1, "b": 2, "c": 3 }"""))
+    assert(err1.offset == 10)
+
+    val err2 = intercept[JsonParserError](Json.parse("""[1, "b": 2, 3]"""))
+    assert(err2.offset == 7)
+
+    val err3 = intercept[JsonParserError](Json.parse("""{ "a": 1, "b": 2, "c": trxe }"""))
+    assert(err3.offset == 25)
+
+    val err4 = intercept[JsonParserError](Json.parse("""[1, falsey, 3]"""))
+    assert(err4.offset == 9)
   }
 
   private def withResource[R <: AutoCloseable, T](res: R)(op: R => T): T =

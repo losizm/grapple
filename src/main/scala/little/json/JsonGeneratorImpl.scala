@@ -41,7 +41,7 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
 
   def writeEnd(): this.type =
     if tracker.isEmpty then
-      throw IllegalStateException()
+      throw JsonGeneratorError("No context")
 
     tracker.pop() match
       case context: ObjectContext => printer.writeEnd('}', context.isEmpty, tracker.size)
@@ -54,7 +54,7 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
       throw NullPointerException()
 
     if tracker.isEmpty then
-      throw IllegalStateException()
+      throw JsonGeneratorError("No context")
 
     tracker.top match
       case context: ObjectContext =>
@@ -63,14 +63,14 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
         context.size += 1
         this
 
-      case _  => throw IllegalStateException()
+      case _  => throw JsonGeneratorError("Invalid context: array")
 
   def write(value: JsonValue): this.type =
     if value == null then
       throw NullPointerException()
 
     if tracker.isEmpty then
-      throw IllegalStateException()
+      throw JsonGeneratorError("No context")
 
     tracker.top match
       case context: ArrayContext =>
@@ -79,7 +79,7 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
         context.size += 1
         this
 
-      case _  => throw IllegalStateException()
+      case _  => throw JsonGeneratorError("Invalid context: object")
 
   def flush(): Unit = writer.flush()
   def close(): Unit = writer.close()
@@ -89,7 +89,7 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
       throw NullPointerException()
 
     if tracker.isEmpty then
-      throw IllegalStateException()
+      throw JsonGeneratorError("No context")
 
     tracker.top match
       case context: ObjectContext =>
@@ -99,7 +99,7 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
         context.size += 1
         this
 
-      case _  => throw IllegalStateException()
+      case _  => throw JsonGeneratorError("Invalid context: array")
 
   private def writeStart(start: Char, newContext: JsonContext): this.type =
     if tracker.isEmpty then
@@ -115,4 +115,4 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
           context.size += 1
           this
 
-        case _  => throw IllegalStateException()
+        case _  => throw JsonGeneratorError("Invalid context: object")

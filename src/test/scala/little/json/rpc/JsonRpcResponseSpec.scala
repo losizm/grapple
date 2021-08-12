@@ -197,9 +197,8 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "create JsonRpcResponse with custom on failure" in {
-    given onFailure: PartialFunction[Throwable, JsonRpcError] = {
+    given onFailure: PartialFunction[Throwable, JsonRpcError] =
       case _: IllegalArgumentException => InvalidParams()
-    }
 
     val value = 6
     val res1 = JsonRpcResponse.builder()

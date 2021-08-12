@@ -22,23 +22,36 @@ private object EncodedString:
     yield
       "\\u" + ("0000" + c.toHexString).takeRight(4)
 
-  def apply(value: String) =
+  def apply(value: String): String =
     val buffer = StringBuilder(value.length + 16)
     buffer += '"'
-
-    value.foreach {
-      case c if c >= 0x20 && c <= 0x10ffff =>
-        if c == '"' || c == '\\' then
-          buffer += '\\'
-        buffer += c
-
-      case '\t' => buffer ++= "\\t"
-      case '\r' => buffer ++= "\\r"
-      case '\n' => buffer ++= "\\n"
-      case '\f' => buffer ++= "\\f"
-      case '\b' => buffer ++= "\\b"
-      case c    => buffer ++= unicodeSequences(c)
-    }
-
+    value.foreach(c => encode(c, buffer))
     buffer += '"'
     buffer.toString
+
+  def apply(value: Char): String =
+    if value == '\'' then
+      "(')"
+    else if value >= 0x20 && value <= 0x10ffff then
+      s"'$value'"
+    else
+      val buffer = StringBuilder(8)
+      buffer += '\''
+      encode(value, buffer)
+      buffer += '\''
+      buffer.toString
+
+  private inline def encode(value: Char, buffer: StringBuilder): Unit =
+    if value == '"' || value == '\\' then
+      buffer += '\\'
+      buffer += value
+    else if value >= 0x20 && value <= 0x10ffff then
+      buffer += value
+    else
+      value match
+        case '\t' => buffer ++= "\\t"
+        case '\r' => buffer ++= "\\r"
+        case '\n' => buffer ++= "\\n"
+        case '\f' => buffer ++= "\\f"
+        case '\b' => buffer ++= "\\b"
+        case _    => buffer ++= unicodeSequences(value)

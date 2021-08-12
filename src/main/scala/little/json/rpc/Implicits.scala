@@ -154,7 +154,6 @@ object Implicits:
       builder.build()
 
   /** Provides passthrough for `JsonRpcError` or returns `InternalError`. */
-  given defaultOnFailure: PartialFunction[Throwable, JsonRpcError] = {
+  given defaultOnFailure: PartialFunction[Throwable, JsonRpcError] =
     case err: JsonRpcError => err
     case _                 => InternalError()
-  }
