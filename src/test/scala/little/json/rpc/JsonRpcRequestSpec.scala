@@ -56,7 +56,7 @@ class JsonRpcRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
       .id(123)
       .method("compute")
       .params(Seq(1, 2, 3))
-      .attributes(Map("one" -> 1, "two" -> "2"))
+      .attributes("one" -> 1, "two" -> "2")
       .build()
 
     assert(req1.id.numberValue == 123)

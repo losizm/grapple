@@ -186,6 +186,10 @@ object JsonRpcRequest:
       _attributes = value
       this
 
+    /** Sets attributes. */
+    def attributes(one: (String, Any), more: (String, Any)*): this.type =
+      attributes((one +: more).toMap)
+
     /** Creates JSON-RPC request with current settings. */
     def build(): JsonRpcRequest =
       if _method == null then
@@ -396,6 +400,10 @@ object JsonRpcResponse:
         throw NullPointerException()
       _attributes = value
       this
+
+    /** Sets attributes. */
+    def attributes(one: (String, Any), more: (String, Any)*): this.type =
+      attributes((one +: more).toMap)
 
     /** Creates JSON-RPC response with current settings. */
     def build(): JsonRpcResponse =

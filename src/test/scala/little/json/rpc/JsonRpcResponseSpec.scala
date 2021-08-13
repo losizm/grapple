@@ -90,7 +90,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val res1 = JsonRpcResponse.builder()
       .id(123)
       .result(6)
-      .attributes(Map("one" -> 1, "two" -> "2"))
+      .attributes("one" -> 1, "two" -> "2")
       .build()
 
     assert(res1.id.numberValue == 123)
