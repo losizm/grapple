@@ -150,3 +150,21 @@ class JsonNumberSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(JsonNumber(123) == JsonNumber(BigInt(123)))
     assert(JsonNumber(123) == JsonNumber(BigDecimal(123)))
   }
+
+  it should "destructure JsonNumber" in {
+    val n = JsonNumber(123)
+
+    assert {
+      n match
+        case JsonNumber(456) => false
+        case JsonNumber(num) => num == 123
+        case _               => false
+    }
+
+    assert {
+      n match
+        case JsonNumber(456) => false
+        case JsonNumber(123) => true
+        case _               => false
+    }
+  }

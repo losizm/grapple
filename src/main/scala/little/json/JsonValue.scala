@@ -188,6 +188,12 @@ object JsonObject:
           builder.add(field._1, field._2)
         }.build()
 
+  /** Destructures JSON object to its fields. */
+  def unapply(json: JsonObject): Option[Map[String, JsonValue]] =
+    json != null match
+      case true  => Some(json.fields)
+      case false => None
+
 /**
  * Defines JSON array.
  *
@@ -288,6 +294,12 @@ object JsonArray:
       case true  => emptyArray
       case false => values.foldLeft(JsonArrayBuilder())(_ add _).build()
 
+  /** Destructures JSON array to its values. */
+  def unapply(json: JsonArray): Option[Seq[JsonValue]] =
+    json != null match
+      case true  => Some(json.values)
+      case false => None
+
 /** Defines JSON string. */
 trait JsonString extends JsonValue:
   /** Gets value. */
@@ -298,6 +310,12 @@ object JsonString:
   /** Creates JSON string with value. */
   def apply(value: String): JsonString =
     JsonStringImpl(value)
+
+  /** Destructures JSON string to its value. */
+  def unapply(json: JsonString): Option[String] =
+    json != null match
+      case true  => Some(json.value)
+      case false => None
 
 /** Defines JSON number. */
 trait JsonNumber extends JsonValue:
@@ -368,6 +386,12 @@ object JsonNumber:
   def apply(value: BigDecimal): JsonNumber =
     JsonNumberImpl(value)
 
+  /** Destructures JSON number to its value. */
+  def unapply(json: JsonNumber): Option[BigDecimal] =
+    json != null match
+      case true  => Some(json.bigDecimalValue)
+      case false => None
+
 /** Defines JSON boolean. */
 sealed trait JsonBoolean extends JsonValue:
   /** Gets value. */
@@ -378,6 +402,12 @@ object JsonBoolean:
   /** Gets JSON boolean with value. */
   def apply(value: Boolean): JsonBoolean =
     if value then JsonTrue else JsonFalse
+
+  /** Destructures JSON boolean to its value. */
+  def unapply(json: JsonBoolean): Option[Boolean] =
+    json != null match
+      case true  => Some(json.value)
+      case false => None
 
 /** Represents JSON true. */
 case object JsonTrue extends JsonBoolean:

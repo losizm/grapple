@@ -158,3 +158,11 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user("name").as[String] == "guest")
     assert(user.getOrElse("group", "none") == "none")
   }
+
+  it should "destructure JsonObject" in {
+    assert {
+      Json.obj("a" -> 1, "b" -> 2) match
+        case JsonObject(fields) => fields("a") == JsonNumber(1) && fields("b") == JsonNumber(2)
+        case _                  => false
+    }
+  }

@@ -30,6 +30,24 @@ class JsonStringSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(JsonString("abc") != JsonString("xyz"))
   }
 
+  it should "destructure JsonString" in {
+    val s = JsonString("abc")
+
+    assert {
+      s match
+        case JsonString("xyz") => false
+        case JsonString(value) => value == "abc"
+        case _                 => false
+    }
+
+    assert {
+      s match
+        case JsonString("xyz") => false
+        case JsonString("abc") => true
+        case _                 => false
+    }
+  }
+
   it should "not create JsonString with null value" in {
     assertThrows[NullPointerException](JsonString(null))
   }

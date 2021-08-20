@@ -123,3 +123,18 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user(2).as[String] == "staff")
     assert(user(3).as[String] == "Guest")
   }
+
+  it should "destructure JsonArray" in {
+    assert {
+      Json.arr(1, 2, "three") match
+        case JsonArray(values) => values(0) == JsonNumber(1) && values(1) == JsonNumber(2) && values(2) == JsonString("three")
+        case _                 => false
+    }
+
+    assert {
+      Json.arr(1, 2, "three") match
+        case JsonArray(Seq(JsonNumber(0), JsonNumber(1), JsonNumber(2)))       => false
+        case JsonArray(Seq(JsonNumber(1), JsonNumber(2), JsonString("three"))) => true
+        case _                                                                 => false
+    }
+  }
