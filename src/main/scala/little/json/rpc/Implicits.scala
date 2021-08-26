@@ -44,7 +44,7 @@ object Implicits:
       json match
         case id: JsonString => JsonRpcIdentifier(id.value)
         case id: JsonNumber => JsonRpcIdentifier(id.longValue)
-        case JsonNull       => JsonRpcIdentifier.nullValue
+        case JsonNull       => JsonRpcIdentifier.nullified
         case _              => throw JsonException("string, number, or null value expected")
 
   /** Converts `JsonRpcIdentifier` to `JsonValue`. */

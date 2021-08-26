@@ -44,7 +44,7 @@ sealed trait JsonRpcIdentifier:
 /** Provides JSON-RPC identifier factory. */
 object JsonRpcIdentifier:
   /** Gets identifier with null value. */
-  def nullValue: JsonRpcIdentifier = NullIdentifier
+  def nullified: JsonRpcIdentifier = NullIdentifier
 
   /**
    * Creates identifier with string value.

@@ -42,7 +42,7 @@ class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "inspect JsonRpcIdentifier with null value" in {
-    val id = JsonRpcIdentifier.nullValue
+    val id = JsonRpcIdentifier.nullified
     assert(id.isNull)
     assert(!id.isString)
     assert(!id.isNumber)

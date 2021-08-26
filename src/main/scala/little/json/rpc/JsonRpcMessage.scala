@@ -143,7 +143,7 @@ object JsonRpcRequest:
 
     /** Sets identifier to null value. */
     def idNull(): this.type =
-      id(JsonRpcIdentifier.nullValue)
+      id(JsonRpcIdentifier.nullified)
 
     /** Unsets identifier. */
     def idUndefined(): this.type =
@@ -339,7 +339,7 @@ object JsonRpcResponse:
 
     /** Sets identifier to null value. */
     def idNull(): this.type =
-      id(JsonRpcIdentifier.nullValue)
+      id(JsonRpcIdentifier.nullified)
 
     /**
      * Tries to set result or sets error on failure.
