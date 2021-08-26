@@ -67,64 +67,164 @@ trait JsonObject extends JsonStructure:
     get(name).map(_.as[T]).getOrElse(default)
 
   /**
-   * Gets object value.
+   * Gets JSON object.
    *
    * @param name field name
    *
    * @throws ClassCastException if not JsonObject
    */
-  def getObject(name: String): JsonObject =
+  def getJsonObject(name: String): JsonObject =
     apply(name).asInstanceOf[JsonObject]
 
   /**
-   * Gets array value.
+   * Gets JSON array.
    *
    * @param name field name
    *
    * @throws ClassCastException if not JsonArray
    */
-  def getArray(name: String): JsonArray =
+  def getJsonArray(name: String): JsonArray =
     apply(name).asInstanceOf[JsonArray]
 
   /**
-   * Gets string value.
+   * Gets JSON string.
    *
    * @param name field name
    *
    * @throws ClassCastException if not JsonString
    */
-  def getString(name: String): JsonString =
+  def getJsonString(name: String): JsonString =
     apply(name).asInstanceOf[JsonString]
 
   /**
-   * Gets number value.
+   * Gets JSON number.
    *
    * @param name field name
    *
    * @throws ClassCastException if not JsonNumber
    */
-  def getNumber(name: String): JsonNumber =
+  def getJsonNumber(name: String): JsonNumber =
     apply(name).asInstanceOf[JsonNumber]
 
   /**
-   * Gets boolean value.
+   * Gets JSON boolean.
    *
    * @param name field name
    *
    * @throws ClassCastException if not JsonBoolean
    */
-  def getBoolean(name: String): JsonBoolean =
+  def getJsonBoolean(name: String): JsonBoolean =
     apply(name).asInstanceOf[JsonBoolean]
 
   /**
-   * Gets null value.
+   * Gets JSON null.
    *
    * @param name field name
    *
    * @throws ClassCastException if not JsonNull
    */
-  def getNull(name: String): JsonNull =
+  def getJsonNull(name: String): JsonNull =
     apply(name).asInstanceOf[JsonNull]
+
+  /**
+   * Gets String.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonString
+   */
+  def getString(name: String): String =
+    apply(name).asInstanceOf[JsonString].value
+
+  /**
+   * Gets Short.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getShort(name: String): Short =
+    apply(name).asInstanceOf[JsonNumber].shortValue
+
+  /**
+   * Gets Int.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getInt(name: String): Int =
+    apply(name).asInstanceOf[JsonNumber].intValue
+
+  /**
+   * Gets Long.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getLong(name: String): Long =
+    apply(name).asInstanceOf[JsonNumber].longValue
+
+  /**
+   * Gets Float.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getFloat(name: String): Float =
+    apply(name).asInstanceOf[JsonNumber].floatValue
+
+  /**
+   * Gets Double.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getDouble(name: String): Double =
+    apply(name).asInstanceOf[JsonNumber].doubleValue
+
+  /**
+   * Gets BigInt.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getBigInt(name: String): BigInt =
+    apply(name).asInstanceOf[JsonNumber].bigIntValue
+
+  /**
+   * Gets BigDecimal.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getBigDecimal(name: String): BigDecimal =
+    apply(name).asInstanceOf[JsonNumber].bigDecimalValue
+
+  /**
+   * Gets Boolean.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonBoolean
+   */
+  def getBoolean(name: String): Boolean =
+    apply(name).asInstanceOf[JsonBoolean].value
+
+  /**
+   * Tests for null.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNull
+   */
+  def isNull(name: String): Boolean =
+    apply(name).isInstanceOf[JsonNull]
 
   /**
    * Maps optional value excluding null.
@@ -207,52 +307,128 @@ trait JsonArray extends JsonStructure:
   def apply(index: Int): JsonValue
 
   /**
-   * Gets object value at given index.
+   * Gets JSON object at given index.
    *
    * @throws ClassCastException if not JsonObject
    */
-  def getObject(index: Int): JsonObject =
+  def getJsonObject(index: Int): JsonObject =
     apply(index).asInstanceOf[JsonObject]
 
   /**
-   * Gets array value at given index.
+   * Gets JSON array at given index.
    *
    * @throws ClassCastException if not JsonArray
    */
-  def getArray(index: Int): JsonArray =
+  def getJsonArray(index: Int): JsonArray =
     apply(index).asInstanceOf[JsonArray]
 
   /**
-   * Gets string value at given index.
+   * Gets JSON string at given index.
    *
    * @throws ClassCastException if not JsonString
    */
-  def getString(index: Int): JsonString =
+  def getJsonString(index: Int): JsonString =
     apply(index).asInstanceOf[JsonString]
 
   /**
-   * Gets number value at given index.
+   * Gets JSON number at given index.
    *
    * @throws ClassCastException if not JsonNumber
    */
-  def getNumber(index: Int): JsonNumber =
+  def getJsonNumber(index: Int): JsonNumber =
     apply(index).asInstanceOf[JsonNumber]
 
   /**
-   * Gets boolean value at given index.
+   * Gets JSON boolean at given index.
    *
    * @throws ClassCastException if not JsonBoolean
    */
-  def getBoolean(index: Int): JsonBoolean =
+  def getJsonBoolean(index: Int): JsonBoolean =
     apply(index).asInstanceOf[JsonBoolean]
 
   /**
-   * Gets null value at given index.
+   * Gets JSON null at given index.
    *
    * @throws ClassCastException if not JsonNull
    */
-  def getNull(index: Int): JsonNull =
+  def getJsonNull(index: Int): JsonNull =
     apply(index).asInstanceOf[JsonNull]
+
+  /**
+   * Gets String at given index.
+   *
+   * @throws ClassCastException if not JsonString
+   */
+  def getString(index: Int): String =
+    apply(index).asInstanceOf[JsonString].value
+
+  /**
+   * Gets Short at given index.
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getShort(index: Int): Short =
+    apply(index).asInstanceOf[JsonNumber].shortValue
+
+  /**
+   * Gets Int at given index.
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getInt(index: Int): Int =
+    apply(index).asInstanceOf[JsonNumber].intValue
+
+  /**
+   * Gets Long at given index.
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getLong(index: Int): Long =
+    apply(index).asInstanceOf[JsonNumber].longValue
+
+  /**
+   * Gets Float at given index.
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getFloat(index: Int): Float =
+    apply(index).asInstanceOf[JsonNumber].floatValue
+
+  /**
+   * Gets Double at given index.
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getDouble(index: Int): Double =
+    apply(index).asInstanceOf[JsonNumber].doubleValue
+
+  /**
+   * Gets BigInt at given index.
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getBigInt(index: Int): BigInt =
+    apply(index).asInstanceOf[JsonNumber].bigIntValue
+
+  /**
+   * Gets BigDecimal at given index.
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getBigDecimal(index: Int): BigDecimal =
+    apply(index).asInstanceOf[JsonNumber].bigDecimalValue
+
+  /**
+   * Gets Boolean at given index.
+   *
+   * @throws ClassCastException if not JsonBoolean
+   */
+  def getBoolean(index: Int): Boolean =
+    apply(index).asInstanceOf[JsonBoolean].value
+
+  /** Tests for null at given index. */
+  def isNull(index: Int): Boolean =
+    apply(index).isInstanceOf[JsonNull]
 
   /**
    * Concatenates JSON array.
