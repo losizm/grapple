@@ -1,6 +1,6 @@
 organization := "com.github.losizm"
 name         := "little-json"
-version      := "7.4.0"
+version      := "8.0.0"
 description  := "The JSON library for Scala"
 homepage     := Some(url("https://github.com/losizm/little-json"))
 licenses     := List("Apache License, Version 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))

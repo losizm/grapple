@@ -11,7 +11,7 @@ provides utilities for mapping instances of your classes to JSON values.
 To get started, add **little-json** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "7.4.0"
+libraryDependencies += "com.github.losizm" %% "little-json" % "8.0.0"
 ```
 
 _**NOTE:** Starting with version 7, **little-json** is written for Scala 3. See
