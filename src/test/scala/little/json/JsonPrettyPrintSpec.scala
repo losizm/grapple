@@ -18,7 +18,7 @@ package little.json
 class JsonPrettyPrintSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "pretty print JSON object" in {
     val json = Json.parse("""{"a": "test", "b": 1, "c": true, "d": {"foo": "One", "bar": 2}, "e": ["baz", "quux"], "f": null}""")
-    val text = Json.prettyPrint(json, "    ")
+    val text = Json.toPrettyPrint(json, "    ")
 
     assert(text == """{
                       |    "a": "test",
@@ -38,7 +38,7 @@ class JsonPrettyPrintSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "pretty print JSON array" in {
     val json = Json.parse("""["test", 1, true, {"foo": "One", "bar": 2}, ["baz", "quux"], null]""")
-    val text = Json.prettyPrint(json, "    ")
+    val text = Json.toPrettyPrint(json, "    ")
 
     assert(text == """[
                       |    "test",

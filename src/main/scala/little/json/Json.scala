@@ -92,11 +92,11 @@ object Json:
     try reader.read() finally reader.close()
 
   /** Creates "pretty" print of JSON using 2-space indent. */
-  def prettyPrint(json: JsonStructure): String =
-    prettyPrint(json, "  ")
+  def toPrettyPrint(json: JsonStructure): String =
+    toPrettyPrint(json, "  ")
 
   /** Creates "pretty" print of JSON using supplied indent. */
-  def prettyPrint(json: JsonStructure, indent: String): String =
+  def toPrettyPrint(json: JsonStructure, indent: String): String =
     val output = StringWriter()
     val writer = JsonWriter(output, indent)
     try
