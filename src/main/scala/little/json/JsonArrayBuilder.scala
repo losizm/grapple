@@ -53,6 +53,93 @@ class JsonArrayBuilder:
     this
 
   /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: String): this.type =
+    if value == null then
+      throw NullPointerException()
+    values += JsonString(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: Short): this.type =
+    values += JsonNumber(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: Int): this.type =
+    values += JsonNumber(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: Long): this.type =
+    values += JsonNumber(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: Float): this.type =
+    values += JsonNumber(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: Double): this.type =
+    values += JsonNumber(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: BigInt): this.type =
+    if value == null then
+      throw NullPointerException()
+    values += JsonNumber(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: BigDecimal): this.type =
+    if value == null then
+      throw NullPointerException()
+    values += JsonNumber(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add(value: Boolean): this.type =
+    values += JsonBoolean(value)
+    this
+
+  /**
    * Adds null value to JSON array.
    *
    * @return this builder

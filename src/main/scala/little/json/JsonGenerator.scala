@@ -82,15 +82,51 @@ trait JsonGenerator extends AutoCloseable:
   def writeEnd(): this.type
 
   /**
-   * Writes field to output.
+   * Writes field to object context.
    *
    * @param name  field name
    * @param value JSON value
    */
   def write(name: String, value: JsonValue): this.type
 
+  /** Writes field to object context. */
+  def write(name: String, value: String): this.type =
+    write(name, JsonString(value))
+
+  /** Writes field to object context. */
+  def write(name: String, value: Short): this.type =
+    write(name, JsonNumber(value))
+
+  /** Writes field to object context. */
+  def write(name: String, value: Int): this.type =
+    write(name, JsonNumber(value))
+
+  /** Writes field to object context. */
+  def write(name: String, value: Long): this.type =
+    write(name, JsonNumber(value))
+
+  /** Writes field to object context. */
+  def write(name: String, value: Float): this.type =
+    write(name, JsonNumber(value))
+
+  /** Writes field to object context. */
+  def write(name: String, value: Double): this.type =
+    write(name, JsonNumber(value))
+
+  /** Writes field to object context. */
+  def write(name: String, value: BigInt): this.type =
+    write(name, JsonNumber(value))
+
+  /** Writes field to object context. */
+  def write(name: String, value: BigDecimal): this.type =
+    write(name, JsonNumber(value))
+
+  /** Writes field to object context. */
+  def write(name: String, value: Boolean): this.type =
+    write(name, JsonBoolean(value))
+
   /**
-   * Writes field with null value to output.
+   * Writes field with null value to object context.
    *
    * @param name field name
    */
@@ -98,13 +134,53 @@ trait JsonGenerator extends AutoCloseable:
     write(name, JsonNull)
 
   /**
-   * Writes value to output.
+   * Writes value to array context.
    *
    * @param value JSON value
    */
   def write(value: JsonValue): this.type
 
-  /** Writes null value to output.  */
+  /**
+   * Writes value to array context.
+   *
+   * @param value JSON value
+   */
+  def write(value: String): this.type =
+    write(JsonString(value))
+
+  /** Writes value to array context. */
+  def write(value: Short): this.type =
+    write(JsonNumber(value))
+
+  /** Writes value to array context. */
+  def write(value: Int): this.type =
+    write(JsonNumber(value))
+
+  /** Writes value to array context. */
+  def write(value: Long): this.type =
+    write(JsonNumber(value))
+
+  /** Writes value to array context. */
+  def write(value: Float): this.type =
+    write(JsonNumber(value))
+
+  /** Writes value to array context. */
+  def write(value: Double): this.type =
+    write(JsonNumber(value))
+
+  /** Writes value to array context. */
+  def write(value: BigInt): this.type =
+    write(JsonNumber(value))
+
+  /** Writes value to array context. */
+  def write(value: BigDecimal): this.type =
+    write(JsonNumber(value))
+
+  /** Writes value to array context. */
+  def write(value: Boolean): this.type =
+    write(JsonBoolean(value))
+
+  /** Writes null value to array context. */
   def writeNull(): this.type =
     write(JsonNull)
 
