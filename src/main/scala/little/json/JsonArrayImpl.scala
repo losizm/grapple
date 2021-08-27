@@ -26,6 +26,11 @@ private case class JsonArrayImpl(values: Seq[JsonValue]) extends JsonArray:
   def apply(index: Int) =
     values(index)
 
+  def updated(index: Int, value: JsonValue): JsonArray =
+    if value == null then
+      throw NullPointerException()
+    JsonArrayImpl(values.updated(index, value))
+
   @targetName("concat")
   def ++(suffix: JsonArray): JsonArray =
     if suffix == null then

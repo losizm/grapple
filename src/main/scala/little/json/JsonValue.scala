@@ -431,6 +431,13 @@ trait JsonArray extends JsonStructure:
     apply(index).isInstanceOf[JsonNull]
 
   /**
+   * Updates value at given index.
+   *
+   * @return new JSON array
+   */
+  def updated(index: Int, value: JsonValue): JsonArray
+
+  /**
    * Concatenates JSON array.
    *
    * @return new JSON array

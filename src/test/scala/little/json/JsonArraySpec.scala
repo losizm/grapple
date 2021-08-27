@@ -166,6 +166,30 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(JsonArray.empty.size == 0)
   }
 
+  it should "update JsonArray" in {
+    val user1 = Json.arr(1000, "guest", Json.arr("cdrom", "usb"))
+    assert(user1(0).as[Int] == 1000)
+    assert(user1(1).as[String] == "guest")
+    assert(user1(2).as[Set[String]] == Set("cdrom", "usb"))
+
+    val user2 = user1.updated(0, 65534)
+    assert(user2(0).as[Int] == 65534)
+    assert(user2(1).as[String] == "guest")
+    assert(user2(2).as[Set[String]] == Set("cdrom", "usb"))
+
+    val user3 = user2.updated(1, "nobody")
+    assert(user3(0).as[Int] == 65534)
+    assert(user3(1).as[String] == "nobody")
+    assert(user3(2).as[Set[String]] == Set("cdrom", "usb"))
+
+    val user4 = user3.updated(2, JsonNull)
+    assert(user4(0).as[Int] == 65534)
+    assert(user4(1).as[String] == "nobody")
+    assert(user4(2) == JsonNull)
+
+    assertThrows[IndexOutOfBoundsException](user1.updated(3, "staff"))
+  }
+
   it should "concat JsonArrays" in {
     val user = Json.arr(1000, "guest") ++ Json.arr("staff", "Guest")
     assert(user(0).as[Int] == 1000)
