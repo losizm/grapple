@@ -5,15 +5,9 @@ description  := "The JSON library for Scala"
 homepage     := Some(url("https://github.com/losizm/little-json"))
 licenses     := List("Apache License, Version 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-scalaVersion := "3.0.1"
+scalaVersion := "3.0.2"
 
-Compile / doc / scalacOptions := Seq(
-  "-project", name.value,
-  "-project-version", {
-    val ver = version.value
-    ver.substring(0, ver.lastIndexOf(".")) ++ ".x"
-  }
-)
+scalacOptions := Seq("-deprecation", "-feature", "-new-syntax", "-Yno-experimental")
 
 Compile / doc / scalacOptions := Seq("-project", name.value, "-project-version", version.value)
 
