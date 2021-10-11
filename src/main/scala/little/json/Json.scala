@@ -105,6 +105,10 @@ object Json:
     finally
       writer.close()
 
+  /** Converts JSON structure to UTF-8 encoded bytes. */
+  def toBytes(json: JsonStructure): Array[Byte] =
+    json.toString.getBytes("UTF-8")
+
   /**
    * Converts value to JSON value.
    *
