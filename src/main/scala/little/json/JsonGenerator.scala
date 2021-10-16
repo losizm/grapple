@@ -94,6 +94,10 @@ trait JsonGenerator extends AutoCloseable:
     write(name, JsonString(value))
 
   /** Writes field to object context. */
+  def write(name: String, value: Byte): this.type =
+    write(name, JsonNumber(value))
+
+  /** Writes field to object context. */
   def write(name: String, value: Short): this.type =
     write(name, JsonNumber(value))
 
@@ -147,6 +151,10 @@ trait JsonGenerator extends AutoCloseable:
    */
   def write(value: String): this.type =
     write(JsonString(value))
+
+  /** Writes value to array context. */
+  def write(value: Byte): this.type =
+    write(JsonNumber(value))
 
   /** Writes value to array context. */
   def write(value: Short): this.type =

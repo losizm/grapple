@@ -137,6 +137,11 @@ object Implicits:
     /** @inheritdoc */
     def apply(value: JsonValue) = value.asInstanceOf[JsonString].value
 
+  /** Converts `JsonValue` to `Byte`. */
+  given jsonValueToByte: JsonInput[Byte] with
+    /** @inheritdoc */
+    def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].byteValue
+
   /** Converts `JsonValue` to `Short`. */
   given jsonValueToShort: JsonInput[Short] with
     /** @inheritdoc */
@@ -204,6 +209,11 @@ object Implicits:
   given stringToJsonString: JsonOutput[String] with
     /** @inheritdoc */
     def apply(value: String): JsonString = JsonString(value)
+
+  /** Converts `Byte` to `JsonNumber`. */
+  given byteToJsonNumber: JsonOutput[Byte] with
+    /** @inheritdoc */
+    def apply(value: Byte): JsonNumber = JsonNumber(value)
 
   /** Converts `Short` to `JsonNumber`. */
   given shortToJsonNumber: JsonOutput[Short] with

@@ -19,6 +19,7 @@ private case class JsonNumberImpl(bigDecimalValue: BigDecimal) extends JsonNumbe
   if bigDecimalValue == null then
     throw NullPointerException()
 
+  lazy val byteValue   = bigDecimalValue.toByteExact
   lazy val shortValue  = bigDecimalValue.toShortExact
   lazy val intValue    = bigDecimalValue.toIntExact
   lazy val longValue   = bigDecimalValue.toLongExact

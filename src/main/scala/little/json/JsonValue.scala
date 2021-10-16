@@ -137,6 +137,16 @@ trait JsonObject extends JsonStructure:
     apply(name).asInstanceOf[JsonString].value
 
   /**
+   * Gets Byte.
+   *
+   * @param name field name
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getByte(name: String): Byte =
+    apply(name).asInstanceOf[JsonNumber].byteValue
+
+  /**
    * Gets Short.
    *
    * @param name field name
@@ -363,6 +373,14 @@ trait JsonArray extends JsonStructure:
     apply(index).asInstanceOf[JsonString].value
 
   /**
+   * Gets Byte at given index.
+   *
+   * @throws ClassCastException if not JsonNumber
+   */
+  def getByte(index: Int): Byte =
+    apply(index).asInstanceOf[JsonNumber].byteValue
+
+  /**
    * Gets Short at given index.
    *
    * @throws ClassCastException if not JsonNumber
@@ -502,6 +520,13 @@ object JsonString:
 
 /** Defines JSON number. */
 trait JsonNumber extends JsonValue:
+  /**
+   * Gets value as `Byte`.
+   *
+   * @throws ArithmeticException if value cannot be represented exactly
+   */
+  def byteValue: Byte
+
   /**
    * Gets value as `Short`.
    *

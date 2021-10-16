@@ -20,6 +20,7 @@ import Implicits.given
 class JsonNumberSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonNumber with Int value" in {
     val n = JsonNumber(42)
+    assert(n.byteValue == 42)
     assert(n.shortValue == 42)
     assert(n.intValue == 42)
     assert(n.longValue == 42L)
@@ -41,6 +42,7 @@ class JsonNumberSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "create JsonNumber with Long value" in {
     val n = JsonNumber(57L)
+    assert(n.byteValue == 57)
     assert(n.shortValue == 57)
     assert(n.intValue == 57)
     assert(n.longValue == 57L)
@@ -62,6 +64,7 @@ class JsonNumberSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "create JsonNumber with Double value" in {
     val n = JsonNumber(0.12345)
+    assertThrows[ArithmeticException](n.byteValue)
     assertThrows[ArithmeticException](n.shortValue)
     assertThrows[ArithmeticException](n.intValue)
     assertThrows[ArithmeticException](n.longValue)
@@ -83,6 +86,7 @@ class JsonNumberSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "create JsonNumber with BigDecimal value" in {
     val n1 = JsonNumber(BigDecimal("9876543210"))
+    assertThrows[ArithmeticException](n1.byteValue)
     assertThrows[ArithmeticException](n1.shortValue)
     assertThrows[ArithmeticException](n1.intValue)
     assert(n1.longValue == 9876543210L)
@@ -102,6 +106,7 @@ class JsonNumberSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](n1.as[Boolean])
 
     val n2 = JsonNumber(BigDecimal("9876543210123456789"))
+    assertThrows[ArithmeticException](n2.byteValue)
     assertThrows[ArithmeticException](n2.shortValue)
     assertThrows[ArithmeticException](n2.intValue)
     assertThrows[ArithmeticException](n2.longValue)
@@ -123,6 +128,7 @@ class JsonNumberSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "create JsonNumber with String value" in {
     val n = JsonNumber("12345")
+    assertThrows[ArithmeticException](n.byteValue)
     assert(n.shortValue == 12345)
     assert(n.intValue == 12345)
     assert(n.longValue == 12345L)

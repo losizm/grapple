@@ -68,6 +68,15 @@ class JsonArrayBuilder:
    *
    * @return this builder
    */
+  def add(value: Byte): this.type =
+    values += JsonNumber(value)
+    this
+
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
   def add(value: Short): this.type =
     values += JsonNumber(value)
     this

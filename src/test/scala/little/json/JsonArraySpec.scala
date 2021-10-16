@@ -21,9 +21,9 @@ import Implicits.{ *, given }
 class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonArray" in {
     val user = Json.arr(
-      1000,
+      100,
       "jza",
-      Json.arr("jza", "admin", 1000),
+      Json.arr("jza", "admin", 100),
       true,
       Json.obj("name" -> "Jza", "email" -> "jza@localhost", "timeout" -> 10_000_000_000L),
       JsonNull
@@ -35,18 +35,19 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getJsonObject(0))
     assertThrows[ClassCastException](user.getJsonArray(0))
     assertThrows[ClassCastException](user.getJsonString(0))
-    assert(user.getJsonNumber(0) == JsonNumber(1000))
+    assert(user.getJsonNumber(0) == JsonNumber(100))
     assertThrows[ClassCastException](user.getJsonBoolean(0))
     assertThrows[ClassCastException](user.getJsonNull(0))
 
     assertThrows[ClassCastException](user.getString(0))
-    assert(user.getShort(0) == 1000)
-    assert(user.getInt(0) == 1000)
-    assert(user.getLong(0) == 1000)
-    assert(user.getFloat(0) == 1000)
-    assert(user.getDouble(0) == 1000)
-    assert(user.getBigInt(0) == 1000)
-    assert(user.getBigDecimal(0) == 1000)
+    assert(user.getByte(0) == 100)
+    assert(user.getShort(0) == 100)
+    assert(user.getInt(0) == 100)
+    assert(user.getLong(0) == 100)
+    assert(user.getFloat(0) == 100)
+    assert(user.getDouble(0) == 100)
+    assert(user.getBigInt(0) == 100)
+    assert(user.getBigDecimal(0) == 100)
     assertThrows[ClassCastException](user.getBoolean(0))
     assert(!user.isNull(0))
 
@@ -58,6 +59,7 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getJsonNull(1))
 
     assert(user.getString(1) == "jza")
+    assertThrows[ClassCastException](user.getByte(1))
     assertThrows[ClassCastException](user.getShort(1))
     assertThrows[ClassCastException](user.getInt(1))
     assertThrows[ClassCastException](user.getLong(1))
@@ -69,13 +71,14 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(!user.isNull(1))
 
     assertThrows[ClassCastException](user.getJsonObject(2))
-    assert(user.getJsonArray(2) == JsonArray(Seq(JsonString("jza"), JsonString("admin"), JsonNumber(1000))))
+    assert(user.getJsonArray(2) == JsonArray(Seq(JsonString("jza"), JsonString("admin"), JsonNumber(100))))
     assertThrows[ClassCastException](user.getJsonString(2))
     assertThrows[ClassCastException](user.getJsonNumber(2))
     assertThrows[ClassCastException](user.getJsonBoolean(2))
     assertThrows[ClassCastException](user.getJsonNull(2))
 
     assertThrows[ClassCastException](user.getString(2))
+    assertThrows[ClassCastException](user.getByte(2))
     assertThrows[ClassCastException](user.getShort(2))
     assertThrows[ClassCastException](user.getInt(2))
     assertThrows[ClassCastException](user.getLong(2))
@@ -94,6 +97,7 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getJsonNull(3))
 
     assertThrows[ClassCastException](user.getString(3))
+    assertThrows[ClassCastException](user.getByte(3))
     assertThrows[ClassCastException](user.getShort(3))
     assertThrows[ClassCastException](user.getInt(3))
     assertThrows[ClassCastException](user.getLong(3))
@@ -112,6 +116,7 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getJsonNull(4))
 
     assertThrows[ClassCastException](user.getString(4))
+    assertThrows[ClassCastException](user.getByte(4))
     assertThrows[ClassCastException](user.getShort(4))
     assertThrows[ClassCastException](user.getInt(4))
     assertThrows[ClassCastException](user.getLong(4))
@@ -130,6 +135,7 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user.getJsonNull(5) == JsonNull)
 
     assertThrows[ClassCastException](user.getString(5))
+    assertThrows[ClassCastException](user.getByte(5))
     assertThrows[ClassCastException](user.getShort(5))
     assertThrows[ClassCastException](user.getInt(5))
     assertThrows[ClassCastException](user.getLong(5))
@@ -140,18 +146,18 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getBoolean(5))
     assert(user.isNull(5))
 
-    assert(user(0).as[Int] == 1000)
-    assert(user(0).as[Long] == 1000L)
-    assert(user(0).as[Double] == 1000.0)
-    assert(user(0).as[BigDecimal] == BigDecimal(1000))
-    assert(user(0) == JsonNumber(1000))
+    assert(user(0).as[Int] == 100)
+    assert(user(0).as[Long] == 100L)
+    assert(user(0).as[Double] == 100.0)
+    assert(user(0).as[BigDecimal] == BigDecimal(100))
+    assert(user(0) == JsonNumber(100))
 
     assert(user(1).as[String] == "jza")
 
-    assert(user(2) == Json.arr("jza", "admin", 1000))
+    assert(user(2) == Json.arr("jza", "admin", 100))
     assert((user \ 2 \ 0).as[String] == "jza")
     assert((user \ 2 \ 1).as[String] == "admin")
-    assert((user \ 2 \ 2).as[Int] == 1000)
+    assert((user \ 2 \ 2).as[Int] == 100)
 
     assert(user(3))
 
@@ -167,8 +173,8 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "update JsonArray" in {
-    val user1 = Json.arr(1000, "guest", Json.arr("cdrom", "usb"))
-    assert(user1(0).as[Int] == 1000)
+    val user1 = Json.arr(100, "guest", Json.arr("cdrom", "usb"))
+    assert(user1(0).as[Int] == 100)
     assert(user1(1).as[String] == "guest")
     assert(user1(2).as[Set[String]] == Set("cdrom", "usb"))
 
@@ -191,24 +197,24 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "concat JsonArrays" in {
-    val user = Json.arr(1000, "guest") ++ Json.arr("staff", "Guest")
-    assert(user(0).as[Int] == 1000)
+    val user = Json.arr(100, "guest") ++ Json.arr("staff", "Guest")
+    assert(user(0).as[Int] == 100)
     assert(user(1).as[String] == "guest")
     assert(user(2).as[String] == "staff")
     assert(user(3).as[String] == "Guest")
   }
 
   it should "prepend value to JsonArray" in {
-    val user = 1000 +: Json.arr("guest", "staff", "Guest")
-    assert(user(0).as[Int] == 1000)
+    val user = 100 +: Json.arr("guest", "staff", "Guest")
+    assert(user(0).as[Int] == 100)
     assert(user(1).as[String] == "guest")
     assert(user(2).as[String] == "staff")
     assert(user(3).as[String] == "Guest")
   }
 
   it should "append value to JsonObject" in {
-    val user = Json.arr(1000, "guest", "staff") :+ "Guest"
-    assert(user(0).as[Int] == 1000)
+    val user = Json.arr(100, "guest", "staff") :+ "Guest"
+    assert(user(0).as[Int] == 100)
     assert(user(1).as[String] == "guest")
     assert(user(2).as[String] == "staff")
     assert(user(3).as[String] == "Guest")
