@@ -144,7 +144,7 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user(0).as[Long] == 1000L)
     assert(user(0).as[Double] == 1000.0)
     assert(user(0).as[BigDecimal] == BigDecimal(1000))
-    assert(user(0).as[JsonValue] == JsonNumber(1000))
+    assert(user(0) == JsonNumber(1000))
 
     assert(user(1).as[String] == "jza")
 
