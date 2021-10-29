@@ -11,10 +11,10 @@
     "groups": ["guest"],
     "enabled": false
   },
-  "jza": {
+  "lupita": {
     "id": 1000,
-    "name": "jza",
-    "groups": ["jza", "adm", "sudo"],
+    "name": "lupita",
+    "groups": ["lupita", "admin", "sudoer"],
     "enabled": true
   }
 }

@@ -1,31 +1,27 @@
-# little-json
+# Grapple
+
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/grapple_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22grapple_3%22)
 
 The JSON library for Scala.
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/little-json_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22little-json_3%22)
-
 ## Getting Started
-**little-json** is a Scala library for reading and writing JSON content. It
+**Grapple** is a Scala library for reading and writing JSON content. It
 provides utilities for mapping instances of your classes to JSON values.
 
-To get started, add **little-json** to your project:
+To get started, add **Grapple** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "little-json" % "9.0.0"
+libraryDependencies += "com.github.losizm" %% "grapple" % "9.0.0"
 ```
 
-_**NOTE:** Starting with version 7, **little-json** is written for Scala 3. See
-previous releases for compatibility with Scala 2.12 and Scala 2.13._
-
-## A Taste of little-json
-Here's a taste of what **little-json** offers.
+## A Little Grapple
+Here's a little of what **Grapple** offers.
 
 ### Usual Suspects
 To model standard JSON values, the library includes a list of classes with
 familiar names: `JsonObject`, `JsonArray`, `JsonString`, `JsonNumber`,
-`JsonBoolean`, and `JsonNull`. However, when making use of contextual
-abstraction, you're not required to deal with these classes directly a whole
-lot, if at all.
+`JsonBoolean`, and `JsonNull`. When making use of contextual abstraction, you're
+not required to deal with these classes directly a whole lot, if at all.
 
 ### Reading and Writing
 Reading and writing are powered by `JsonInput` and `JsonOutput`. They convert
@@ -34,9 +30,10 @@ standard types like `String`, `Int`, and `Boolean`. You must provide custom
 implementations for converting to and from instances of your classes.
 
 ```scala
-import little.json.*
-import little.json.Implicits.{ *, given }
 import scala.language.implicitConversions
+
+import grapple.json.*
+import grapple.json.Implicits.{ *, given }
 
 case class User(id: Int, name: String)
 
@@ -44,12 +41,12 @@ case class User(id: Int, name: String)
 given jsonToUser: JsonInput[User] with
   def apply(json: JsonValue) = User(json("id"), json("name"))
 
-val json = Json.parse("""{ "id": 1000, "name": "jza" }""")
+val json = Json.parse("""{ "id": 1000, "name": "lupita" }""")
 
 // Read JsonValue as User
 val user = json.as[User]
 assert { user.id == 1000 }
-assert { user.name == "jza" }
+assert { user.name == "lupita" }
 
 // Define how to convert User to JsonValue
 given userToJson: JsonOutput[User] with
@@ -58,7 +55,7 @@ given userToJson: JsonOutput[User] with
 // Write User to JsonValue
 val dupe = Json.toJson(user)
 assert { dupe("id").as[Int] == 1000 }
-assert { dupe("name").as[String] == "jza" }
+assert { dupe("name").as[String] == "lupita" }
 ```
 
 Special implementations are available for working with collections. So, for
@@ -68,14 +65,14 @@ example, if you define `JsonInput[User]`, you automatically get
 
 ```scala
 val json = Json.parse("""[
-  { "id": 0,    "name": "root" },
-  { "id": 1000, "name": "jza"  }
+  { "id": 0,    "name": "root"   },
+  { "id": 1000, "name": "lupita" }
 ]""")
 
 // Read JsonArray as Seq[User]
 val users = json.as[Seq[User]]
 assert { users(0) == User(0, "root") }
-assert { users(1) == User(1000, "jza")  }
+assert { users(1) == User(1000, "lupita")  }
 
 // Or as other Iterable types
 val userList = json.as[List[User]]
@@ -88,7 +85,7 @@ val userArray = json.as[Array[User]]
 // Write Seq[User] to JsonArray
 val jsonUsers = Json.toJson(users)
 assert { jsonUsers(0) == Json.obj("id" -> 0, "name" -> "root") }
-assert { jsonUsers(1) == Json.obj("id" -> 1000, "name" -> "jza") }
+assert { jsonUsers(1) == Json.obj("id" -> 1000, "name" -> "lupita") }
 ```
 
 ### Extracting Values
@@ -96,9 +93,10 @@ You can traverse `JsonObject` and `JsonArray` to extract nested values. An
 extension method with a symbolic name makes this clean and easy.
 
 ```scala
-import little.json.*
-import little.json.Implicits.{ *, given }
 import scala.language.implicitConversions
+
+import grapple.json.*
+import grapple.json.Implicits.{ *, given }
 
 case class User(id: Int, name: String)
 
@@ -110,8 +108,8 @@ val json = Json.parse("""{
   "node": {
     "name": "localhost",
     "users": [
-      { "id": 0,    "name": "root" },
-      { "id": 1000, "name": "jza"  }
+      { "id": 0,    "name": "root"   },
+      { "id": 1000, "name": "lupita" }
     ]
   }
 }""")
@@ -132,7 +130,7 @@ name.
 ```scala
 // Get all "name" values
 val names = (json \\ "name").map(_.as[String])
-assert { names == Seq("localhost", "root", "jza") }
+assert { names == Seq("localhost", "root", "lupita") }
 ```
 
 ### Generating and Parsing
@@ -144,9 +142,11 @@ the entire structure in memory.
 
 ```scala
 import java.io.StringWriter
-import little.json.*
-import little.json.Implicits.{ *, given }
+
 import scala.language.implicitConversions
+
+import grapple.json.*
+import grapple.json.Implicits.{ *, given }
 
 val buf = StringWriter()
 val out = JsonGenerator(buf)
@@ -154,14 +154,14 @@ val out = JsonGenerator(buf)
 try
   out.writeStartObject()          // start root object
   out.write("id", 1000)
-  out.write("name", "jza")
+  out.write("name", "lupita")
   out.writeStartArray("groups")   // start nested array
-  out.write("jza")
-  out.write("adm")
-  out.write("sudo")
+  out.write("lupita")
+  out.write("admin")
+  out.write("sudoer")
   out.writeEnd()                  // end nested array
   out.writeStartObject("info")    // start nested object
-  out.write("home", "/home/jza")
+  out.write("home", "/home/lupita")
   out.write("storage", "8 GiB")
   out.writeEnd()                  // end nested object
   out.writeEnd()                  // end root object
@@ -169,9 +169,9 @@ try
 
   val json = Json.parse(buf.toString)
   assert { json("id") == JsonNumber(1000) }
-  assert { json("name") == JsonString("jza") }
-  assert { json("groups") == Json.arr("jza", "adm", "sudo") }
-  assert { json("info") == Json.obj("home" -> "/home/jza", "storage" -> "8 GiB") }
+  assert { json("name") == JsonString("lupita") }
+  assert { json("groups") == Json.arr("lupita", "admin", "sudoer") }
+  assert { json("info") == Json.obj("home" -> "/home/lupita", "storage" -> "8 GiB") }
 finally
   out.close()
 ```
@@ -180,13 +180,14 @@ And, the parser iterates events as it chews through data in the underlying
 stream.
 
 ```scala
-import little.json.*
-import little.json.Implicits.{ *, given }
 import scala.language.implicitConversions
+
+import grapple.json.*
+import grapple.json.Implicits.{ *, given }
 
 import JsonParser.Event
 
-val parser = JsonParser("""{ "id": 1000, "name": "jza", "groups": ["jza", "adm"] }""")
+val parser = JsonParser("""{ "id": 1000, "name": "lupita", "groups": ["lupita", "admin"] }""")
 
 try
   // Get first event (start root object)
@@ -198,13 +199,13 @@ try
 
   // Get field name and value
   assert { parser.next() == Event.FieldName("name") }
-  assert { parser.next() == Event.Value("jza") }
+  assert { parser.next() == Event.Value("lupita") }
 
   // Get field name and value
   assert { parser.next() == Event.FieldName("groups") }
   assert { parser.next() == Event.StartArray } // start nested array
-  assert { parser.next() == Event.Value("jza") }
-  assert { parser.next() == Event.Value("adm") }
+  assert { parser.next() == Event.Value("lupita") }
+  assert { parser.next() == Event.Value("admin") }
   assert { parser.next() == Event.EndArray }   // end nested array
 
   // Get final event (end root object)
@@ -217,8 +218,8 @@ finally
 
 ```
 
-See also [JsonReader](https://losizm.github.io/little-json/latest/api/little/json/JsonReader.html)
-and [JsonWriter](https://losizm.github.io/little-json/latest/api/little/json/JsonWriter.html).
+See also [JsonReader](https://losizm.github.io/grapple/latest/api/grapple/json/JsonReader.html)
+and [JsonWriter](https://losizm.github.io/grapple/latest/api/grapple/json/JsonWriter.html).
 
 ## JSON-RPC 2.0 Specification
 The library provides an API for [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification),
@@ -229,11 +230,13 @@ incrementally build them with message builders.
 
 ```scala
 import java.io.StringWriter
-import little.json.*
-import little.json.Implicits.given
-import little.json.rpc.*
-import little.json.rpc.Implicits.given
+
 import scala.language.implicitConversions
+
+import grapple.json.*
+import grapple.json.Implicits.given
+import grapple.json.rpc.*
+import grapple.json.rpc.Implicits.given
 
 case class Params(values: Int*):
   def sum = values.sum
@@ -291,9 +294,9 @@ assert { response.result.as[Int] == 6 }
 ```
 
 ## API Documentation
-See [scaladoc](https://losizm.github.io/little-json/latest/api/index.html)
+See [scaladoc](https://losizm.github.io/grapple/latest/api/index.html)
 for additional details.
 
 ## License
-**little-json** is licensed under the Apache License, Version 2. See [LICENSE](LICENSE)
+**Grapple** is licensed under the Apache License, Version 2. See [LICENSE](LICENSE)
 for more information.

@@ -1,15 +1,18 @@
 organization := "com.github.losizm"
-name         := "little-json"
+name         := "grapple"
 version      := "9.0.0"
 description  := "The JSON library for Scala"
-homepage     := Some(url("https://github.com/losizm/little-json"))
+homepage     := Some(url("https://github.com/losizm/grapple"))
 licenses     := List("Apache License, Version 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-scalaVersion := "3.0.2"
+scalaVersion := "3.1.0"
+scalacOptions := Seq("-deprecation", "-feature", "-new-syntax", "-Xfatal-warnings", "-Yno-experimental")
 
-scalacOptions := Seq("-deprecation", "-feature", "-new-syntax", "-Yno-experimental")
-
-Compile / doc / scalacOptions := Seq("-project", name.value, "-project-version", version.value)
+Compile / doc / scalacOptions := Seq(
+  "-project", name.value.capitalize,
+  "-project-version", version.value,
+  "-project-logo", "images/logo.svg"
+)
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 
@@ -24,8 +27,8 @@ developers := List(
 
 scmInfo := Some(
   ScmInfo(
-    url("https://github.com/losizm/little-json"),
-    "scm:git@github.com:losizm/little-json.git"
+    url("https://github.com/losizm/grapple"),
+    "scm:git@github.com:losizm/grapple.git"
   )
 )
 
