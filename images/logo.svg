@@ -26,24 +26,23 @@ limitations under the License.
   <title>Grapple</title>
 
   <path id="grapple-head"
-    d="M38,22 Q25,10 20,10 Q-10,30 18,55 Q50,130 82,55 Q110,30 80,10 Q75,10 62,22 Q50,18 38,22Z"
+    d="M 38,22 Q 25,10 20,10 Q -10,30 18,55 Q 50,130 82,55 Q 110,30 80,10 Q 75,10 62,22 Q 50,18 38,22 Z"
     style="stroke: #ddd; stroke-width: 4; fill: #111;"/>
 
   <g id="grapple-ears-inner" style="stroke: #102060; stroke-width: 4; fill: #081858;">
-    <path id="grapple-ear-inner-left"  d="M27,32 L20,22 Q 7,30 20,42Z"/>
-    <path id="grapple-ear-inner-right" d="M73,32 L80,22 Q93,30 80,42Z"/>
+    <path id="grapple-ear-inner-left"  d="M 27,32 L 20,22 Q  7,30 20,42 Z"/>
+    <path id="grapple-ear-inner-right" d="M 73,32 L 80,22 Q 93,30 80,42 Z"/>
   </g>
   
-
   <g id="grapple-eyes" style="stroke: none; fill: #4d6;">
     <ellipse id="grapple-eye-left"  cx="38" cy="55" rx="6" ry="2" transform="rotate(15,38,55)"/>
     <ellipse id="grapple-eye-right" cx="62" cy="55" rx="6" ry="2" transform="rotate(-15,62,55)"/>
   </g>
 
-  <path id="grapple-nose" d="M43,70 Q50,78 57,70 Q50,65 43,70Z" style="stroke: none; fill: #239;"/>
+  <path id="grapple-nose" d="M 43,70 Q 50,78 57,70 Q 50,65 43,70 Z" style="stroke: none; fill: #239;"/>
 
   <g id="grapple-mouth">
-    <path id="grapple-mouth-slit" d="M50,74 L50,85" style="stroke: #333; stroke-width: 2; fill: none;"/>
-    <path id="grapple-mouth-lips" d="M42,82 Q50,90 58,82Z" style="stroke: none; fill: #333;"/>
+    <path id="grapple-cleft" d="M 50,74 L 50,85" style="stroke: #333; stroke-width: 2; fill: none;"/>
+    <path id="grapple-lips" d="M 42,82 Q 50,90 58,82 Z" style="stroke: none; fill: #333;"/>
   </g>
 </svg>
