@@ -251,6 +251,14 @@ given booleanToJsonBoolean: JsonOutput[Boolean] with
   /** @inheritdoc */
   def write(value: Boolean): JsonBoolean = JsonBoolean(value)
 
+/** Converts `Map` to `JsonObject`. */
+given mapToJsonObject[T, M[T] <: Map[String, T]](using converter: JsonOutput[T]): JsonOutput[M[T]] with
+  /** @inheritdoc */
+  def write(value: M[T]): JsonObject =
+    value.foldLeft(JsonObjectBuilder()) {
+      case (builder, (name, value)) => builder.add(name, converter.write(value))
+    }.build()
+
 /** Converts `Array` to `JsonArray`. */
 given arrayToJsonArray[T](using converter: JsonOutput[T]): JsonOutput[Array[T]] with
   /** @inheritdoc */
