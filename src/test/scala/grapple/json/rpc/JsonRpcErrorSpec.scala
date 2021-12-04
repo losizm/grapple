@@ -18,8 +18,6 @@ package rpc
 
 import scala.language.implicitConversions
 
-import grapple.json.Implicits.given
-
 class JsonRpcErrorSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Data(name: String, value: String)
 

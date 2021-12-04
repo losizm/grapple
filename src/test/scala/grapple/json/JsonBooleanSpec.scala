@@ -15,8 +15,6 @@
  */
 package grapple.json
 
-import Implicits.given
-
 class JsonBooleanSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonBoolean" in {
     val b1 = JsonBoolean(true)

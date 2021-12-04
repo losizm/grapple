@@ -32,7 +32,6 @@ class JsonParserArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "get JSON array" in withResource("/JsonParserTestArray.json") { in =>
     import scala.language.implicitConversions
-    import Implicits.{ *, given }
 
     val parser = JsonParser("""[0, 1, [2, 3], {"x": 4, "y": 5}, [], {}]""")
     try

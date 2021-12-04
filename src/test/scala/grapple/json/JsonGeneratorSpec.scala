@@ -16,8 +16,8 @@
 package grapple.json
 
 import java.io.StringWriter
+
 import scala.language.implicitConversions
-import Implicits.given
 
 class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class User(id: Int, name: String)

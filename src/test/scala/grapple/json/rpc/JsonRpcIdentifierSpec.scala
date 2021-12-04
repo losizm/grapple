@@ -16,8 +16,6 @@
 package grapple.json
 package rpc
 
-import Implicits.given
-
 class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "inspect JsonRpcIdentifier with string value" in {
     val id = JsonRpcIdentifier("abc")

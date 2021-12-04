@@ -18,9 +18,6 @@ package rpc
 
 import scala.language.implicitConversions
 
-import grapple.json.Implicits.given
-import grapple.json.rpc.Implicits.given
-
 class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Answer(value: Int)
 

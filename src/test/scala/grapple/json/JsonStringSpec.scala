@@ -15,8 +15,6 @@
  */
 package grapple.json
 
-import Implicits.given
-
 class JsonStringSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonString" in {
     val s = JsonString("Hello, world!")

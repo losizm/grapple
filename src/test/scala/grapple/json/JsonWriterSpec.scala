@@ -16,8 +16,8 @@
 package grapple.json
 
 import java.io.StringWriter
+
 import scala.language.implicitConversions
-import Implicits.given
 
 class JsonWriterSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "write JSON object" in {

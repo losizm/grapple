@@ -17,7 +17,6 @@ package grapple.json
 
 import scala.language.implicitConversions
 import scala.util.{ Failure, Success }
-import Implicits.given
 
 class JsonOutputSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class User(id: Int, name: String, groups: Set[String])

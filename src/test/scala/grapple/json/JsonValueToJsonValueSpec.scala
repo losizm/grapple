@@ -15,8 +15,6 @@
  */
 package grapple.json
 
-import Implicits.{ jsonValueToCollection, jsonValueToJsonValue }
-
 class JsonValueToJsonValueSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "get list of JSON values" in {
     val obj = Json.obj(

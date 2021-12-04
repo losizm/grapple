@@ -15,8 +15,6 @@
  */
 package grapple.json
 
-import Implicits.given
-
 class JsonNumberSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonNumber with Int value" in {
     val n = JsonNumber(42)

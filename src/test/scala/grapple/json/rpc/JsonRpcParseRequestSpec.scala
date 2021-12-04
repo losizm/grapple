@@ -18,9 +18,6 @@ package rpc
 
 import scala.language.implicitConversions
 
-import grapple.json.Implicits.given
-import grapple.json.rpc.Implicits.given
-
 class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "parse request without params" in {
     val text = """{

@@ -15,8 +15,6 @@
  */
 package grapple.json
 
-import Implicits.given
-
 class JsonNullSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "inspect JsonNull" in {
     assert(JsonNull.toString == "null")

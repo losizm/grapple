@@ -17,8 +17,8 @@ package grapple.json
 
 import java.io.{ File, FileInputStream, FileReader }
 import java.nio.file.Paths
+
 import scala.language.implicitConversions
-import Implicits.{ *, given }
 
 class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   private val textObject = """{ "id": 1000, "name": "lupita", "groups": ["lupita", "admin", "sudoer"] }"""

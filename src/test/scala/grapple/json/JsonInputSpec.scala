@@ -17,7 +17,6 @@ package grapple.json
 
 import scala.language.implicitConversions
 import scala.util.Try
-import Implicits.{ *, given }
 
 class JsonInputSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "use default JsonInputs" in {

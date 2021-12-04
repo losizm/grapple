@@ -16,7 +16,6 @@
 package grapple.json
 
 import scala.language.implicitConversions
-import Implicits.{ *, given }
 
 class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonObject" in {
