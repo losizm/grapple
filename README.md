@@ -11,7 +11,7 @@ provides utilities for mapping instances of your classes to JSON values.
 To get started, add **Grapple** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "grapple" % "9.0.0"
+libraryDependencies += "com.github.losizm" %% "grapple" % "10.0.0"
 ```
 
 ## A Little Grapple
@@ -21,7 +21,7 @@ Here's a little of what **Grapple** offers.
 To model standard JSON values, the library includes a list of classes with
 familiar names: `JsonObject`, `JsonArray`, `JsonString`, `JsonNumber`,
 `JsonBoolean`, and `JsonNull`. When making use of contextual abstraction, you're
-not required to deal with these classes directly a whole lot, if at all.
+not required to deal with these classes directly a whole lot.
 
 ### Reading and Writing
 Reading and writing are powered by `JsonInput` and `JsonOutput`. They convert
@@ -32,14 +32,16 @@ implementations for converting to and from instances of your classes.
 ```scala
 import scala.language.implicitConversions
 
-import grapple.json.*
-import grapple.json.Implicits.{ *, given }
+import grapple.json.{ *, given }
 
 case class User(id: Int, name: String)
 
 // Define how to convert JsonValue to User
-given jsonToUser: JsonInput[User] with
-  def apply(json: JsonValue) = User(json("id"), json("name"))
+given userInput: JsonInput[User] with
+  def read(json: JsonValue) =
+    json match
+      case json: JsonObject => User(json("id"), json("name"))
+      case _                => throw IllegalArgumentException("Expected JSON object")
 
 val json = Json.parse("""{ "id": 1000, "name": "lupita" }""")
 
@@ -49,11 +51,11 @@ assert { user.id == 1000 }
 assert { user.name == "lupita" }
 
 // Define how to convert User to JsonValue
-given userToJson: JsonOutput[User] with
-  def apply(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
+given userOutput: JsonOutput[User] with
+  def write(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
 
 // Write User to JsonValue
-val dupe = Json.toJson(user)
+val dupe = Json.toJson(user).as[JsonObject]
 assert { dupe("id").as[Int] == 1000 }
 assert { dupe("name").as[String] == "lupita" }
 ```
@@ -83,7 +85,7 @@ val userSet  = json.as[Set[User]]
 val userArray = json.as[Array[User]]
 
 // Write Seq[User] to JsonArray
-val jsonUsers = Json.toJson(users)
+val jsonUsers = Json.toJson(users).as[JsonArray]
 assert { jsonUsers(0) == Json.obj("id" -> 0, "name" -> "root") }
 assert { jsonUsers(1) == Json.obj("id" -> 1000, "name" -> "lupita") }
 ```
@@ -95,14 +97,14 @@ extension method with a symbolic name makes this clean and easy.
 ```scala
 import scala.language.implicitConversions
 
-import grapple.json.*
-import grapple.json.Implicits.{ *, given }
+import grapple.json.{ *, given }
 
 case class User(id: Int, name: String)
 
 // Define how to convert JsonValue to User
-given jsonToUser: JsonInput[User] with
-  def apply(json: JsonValue) = User(json("id"), json("name"))
+given userInput: JsonInput[User] =
+  case json: JsonObject => User(json("id"), json("name"))
+  case _                => throw IllegalArgumentException("Expected JSON object")
 
 val json = Json.parse("""{
   "node": {
@@ -145,8 +147,7 @@ import java.io.StringWriter
 
 import scala.language.implicitConversions
 
-import grapple.json.*
-import grapple.json.Implicits.{ *, given }
+import grapple.json.{ *, given }
 
 val buf = StringWriter()
 val out = JsonGenerator(buf)
@@ -167,7 +168,7 @@ try
   out.writeEnd()                  // end root object
   out.flush()
 
-  val json = Json.parse(buf.toString)
+  val json = Json.parse(buf.toString).as[JsonObject]
   assert { json("id") == JsonNumber(1000) }
   assert { json("name") == JsonString("lupita") }
   assert { json("groups") == Json.arr("lupita", "admin", "sudoer") }
@@ -180,11 +181,6 @@ And, the parser iterates events as it chews through data in the underlying
 stream.
 
 ```scala
-import scala.language.implicitConversions
-
-import grapple.json.*
-import grapple.json.Implicits.{ *, given }
-
 import JsonParser.Event
 
 val parser = JsonParser("""{ "id": 1000, "name": "lupita", "groups": ["lupita", "admin"] }""")
@@ -233,10 +229,8 @@ import java.io.StringWriter
 
 import scala.language.implicitConversions
 
-import grapple.json.*
-import grapple.json.Implicits.given
-import grapple.json.rpc.*
-import grapple.json.rpc.Implicits.given
+import grapple.json.{ *, given }
+import grapple.json.rpc.{ *, given }
 
 case class Params(values: Int*):
   def sum = values.sum

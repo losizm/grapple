@@ -24,8 +24,7 @@ import java.nio.file.Path
  * {{{
  * import scala.language.implicitConversions
  *
- * import grapple.json.*
- * import grapple.json.Implicits.given
+ * import grapple.json.{ *, given }
  *
  * // Create JSON object
  * val user = Json.obj("id" -> 1000, "name" -> "lupita")
@@ -38,8 +37,8 @@ import java.nio.file.Path
  *
  * case class User(id: Int, name: String)
  *
- * given userToJson: JsonOutput[User] with
- *   def apply(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
+ * given userOutput: JsonOutput[User] with
+ *   def write(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
  *
  * // Convert value to JSON object
  * val nobody = Json.toJson(User(65534, "nobody"))

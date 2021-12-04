@@ -26,8 +26,7 @@ import java.nio.file.Path
  *
  * import scala.language.implicitConversions
  *
- * import grapple.json.*
- * import grapple.json.Implicits.given
+ * import grapple.json.{ *, given }
  *
  * val buf = StringWriter()
  * val out = JsonGenerator(buf)
@@ -48,7 +47,7 @@ import java.nio.file.Path
  *   out.writeEnd()                  // end root object
  *   out.flush()
  *
- *   val json = Json.parse(buf.toString)
+ *   val json = Json.parse(buf.toString).as[JsonObject]
  *   assert { json("id") == JsonNumber(1000) }
  *   assert { json("name") == JsonString("lupita") }
  *   assert { json("groups") == Json.arr("lupita", "admin", "sudoer") }

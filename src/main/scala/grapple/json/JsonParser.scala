@@ -24,10 +24,8 @@ import java.nio.file.Path
  * {{{
  * import scala.language.implicitConversions
  *
- * import grapple.json.*
- * import grapple.json.Implicits.given
- *
- * import JsonParser.Event
+ * import grapple.json.{ *, given }
+ * import grapple.json.JsonParser.Event
  *
  * val parser = JsonParser("""{ "id": 1000, "name": "lupita", "groups": ["lupita", "admin"] }""")
  *
@@ -74,10 +72,8 @@ trait JsonParser extends Iterator[JsonParser.Event], AutoCloseable:
    * {{{
    * import scala.language.implicitConversions
    *
-   * import grapple.json.Implicits.{ *, given }
-   * import grapple.json.{ Json, JsonParser }
-   *
-   * import JsonParser.Event
+   * import grapple.json.{ Json, JsonParser, given }
+   * import grapple.json.JsonParser.Event
    *
    * val parser = JsonParser("""{ "id": 1000, "name": "lupita" }""")
    *
@@ -96,10 +92,8 @@ trait JsonParser extends Iterator[JsonParser.Event], AutoCloseable:
    * {{{
    * import scala.language.implicitConversions
    *
-   * import grapple.json.Implicits.{ *, given }
-   * import grapple.json.{ Json, JsonParser }
-   *
-   * import JsonParser.Event
+   * import grapple.json.{ Json, JsonParser, given }
+   * import grapple.json.JsonParser.Event
    *
    * val parser = JsonParser("""[1000, "lupita"]""")
    *

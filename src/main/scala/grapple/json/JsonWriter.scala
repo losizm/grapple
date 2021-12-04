@@ -26,8 +26,7 @@ import java.nio.file.Path
  *
  * import scala.language.implicitConversions
  *
- * import grapple.json.*
- * import grapple.json.Implicits.given
+ * import grapple.json.{ *, given }
  *
  * val buf = StringWriter()
  * val out = JsonWriter(buf)

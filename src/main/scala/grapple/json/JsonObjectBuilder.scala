@@ -24,8 +24,7 @@ import scala.collection.mutable.{ SeqMap as MutableSeqMap }
  * {{{
  * import scala.language.implicitConversions
  *
- * import grapple.json.*
- * import grapple.json.Implicits.given
+ * import grapple.json.{ *, given }
  *
  * val user = JsonObjectBuilder()
  *   .add("id", 1000)

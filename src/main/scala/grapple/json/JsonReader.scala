@@ -24,13 +24,12 @@ import java.nio.file.Path
  * {{{
  * import scala.language.implicitConversions
  *
- * import grapple.json.*
- * import grapple.json.Implicits.given
+ * import grapple.json.{ *, given }
  *
  * val in = JsonReader("""{ "id": 1000, "name": "lupita" }""")
  *
  * try
- *   val user = in.read()
+ *   val user = in.read().as[JsonObject]
  *   assert { user("id").as[Int] == 1000 }
  *   assert { user("name").as[String] == "lupita" }
  * finally

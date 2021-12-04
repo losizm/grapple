@@ -23,8 +23,7 @@ import scala.collection.mutable.ListBuffer
  * {{{
  * import scala.language.implicitConversions
  *
- * import grapple.json.*
- * import grapple.json.Implicits.given
+ * import grapple.json.{ *, given }
  *
  * val user = JsonArrayBuilder()
  *   .add(1000)

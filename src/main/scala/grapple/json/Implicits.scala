@@ -47,8 +47,7 @@ extension (json: JsonValue)
    * arrays.
    *
    * {{{
-   * import grapple.json.Json
-   * import grapple.json.Implicits.{ *, given }
+   * import grapple.json.{ Json, \\, given }
    *
    * val json = Json.parse("""{
    *   "node": {
@@ -87,8 +86,7 @@ extension (json: JsonValue)
  * {{{
  * import scala.language.implicitConversions
  *
- * import grapple.json.{ Json, JsonValue }
- * import grapple.json.Implicits.given
+ * import grapple.json.{ Json, JsonValue, given }
  *
  * val json = Json.obj("values" -> Json.arr("abc", 123, true))
  *

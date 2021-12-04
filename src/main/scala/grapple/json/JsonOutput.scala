@@ -21,14 +21,13 @@ package grapple.json
  * {{{
  * import scala.language.implicitConversions
  *
- * import grapple.json.*
- * import grapple.json.Implicits.given
+ * import grapple.json.{ *, given }
  *
  * case class User(id: Int, name: String)
  *
  * // Define how to convert User to JsonValue
- * given userToJson: JsonOutput[User] with
- *   def apply(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
+ * given userOutput: JsonOutput[User] =
+ *   user => Json.obj("id" -> user.id, "name" -> user.name)
  *
  * val users = Json.arr(User(0, "root"), User(1000, "lupita"))
  * assert { users(0) == Json.obj("id" -> 0, "name" -> "root") }
