@@ -113,6 +113,14 @@ object ParseError:
    *
    * @param data error data
    */
+  def apply(data: String): ParseError =
+    apply(Option(JsonString(data)))
+
+  /**
+   * Creates `ParseError` with data.
+   *
+   * @param data error data
+   */
   def apply(data: JsonValue): ParseError =
     apply(Option(data))
 
@@ -143,6 +151,14 @@ object InvalidRequest:
   /** Creates `InvalidRequest`. */
   def apply(): InvalidRequest =
     apply(None)
+
+  /**
+   * Creates `InvalidRequest` with data.
+   *
+   * @param data error data
+   */
+  def apply(data: String): InvalidRequest =
+    apply(Option(JsonString(data)))
 
   /**
    * Creates `InvalidRequest` with data.
@@ -185,6 +201,14 @@ object MethodNotFound:
    *
    * @param data error data
    */
+  def apply(data: String): MethodNotFound =
+    apply(Option(JsonString(data)))
+
+  /**
+   * Creates `MethodNotFound` with data.
+   *
+   * @param data error data
+   */
   def apply(data: JsonValue): MethodNotFound =
     apply(Option(data))
 
@@ -221,6 +245,14 @@ object InvalidParams:
    *
    * @param data error data
    */
+  def apply(data: String): InvalidParams =
+    apply(Option(JsonString(data)))
+
+  /**
+   * Creates `InvalidParams` with data.
+   *
+   * @param data error data
+   */
   def apply(data: JsonValue): InvalidParams =
     apply(Option(data))
 
@@ -251,6 +283,14 @@ object InternalError:
   /** Creates `InternalError`. */
   def apply(): InternalError =
     apply(None)
+
+  /**
+   * Creates `InternalError` with data.
+   *
+   * @param data error data
+   */
+  def apply(data: String): InternalError =
+    apply(Option(JsonString(data)))
 
   /**
    * Creates `InternalError` with data.
