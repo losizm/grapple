@@ -29,7 +29,7 @@ import java.nio.file.Path
  * val in = JsonReader("""{ "id": 1000, "name": "lupita" }""")
  *
  * try
- *   val user = in.read().as[JsonObject]
+ *   val user = in.read()
  *   assert { user("id").as[Int] == 1000 }
  *   assert { user("name").as[String] == "lupita" }
  * finally

@@ -55,7 +55,7 @@ given userOutput: JsonOutput[User] with
   def write(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
 
 // Write User to JsonValue
-val dupe = Json.toJson(user).as[JsonObject]
+val dupe = Json.toJson(user)
 assert { dupe("id").as[Int] == 1000 }
 assert { dupe("name").as[String] == "lupita" }
 ```
@@ -85,7 +85,7 @@ val userSet  = json.as[Set[User]]
 val userArray = json.as[Array[User]]
 
 // Write Seq[User] to JsonArray
-val jsonUsers = Json.toJson(users).as[JsonArray]
+val jsonUsers = Json.toJson(users)
 assert { jsonUsers(0) == Json.obj("id" -> 0, "name" -> "root") }
 assert { jsonUsers(1) == Json.obj("id" -> 1000, "name" -> "lupita") }
 ```
@@ -168,7 +168,7 @@ try
   out.writeEnd()                  // end root object
   out.flush()
 
-  val json = Json.parse(buf.toString).as[JsonObject]
+  val json = Json.parse(buf.toString)
   assert { json("id") == JsonNumber(1000) }
   assert { json("name") == JsonString("lupita") }
   assert { json("groups") == Json.arr("lupita", "admin", "sudoer") }

@@ -47,7 +47,7 @@ import java.nio.file.Path
  *   out.writeEnd()                  // end root object
  *   out.flush()
  *
- *   val json = Json.parse(buf.toString).as[JsonObject]
+ *   val json = Json.parse(buf.toString)
  *   assert { json("id") == JsonNumber(1000) }
  *   assert { json("name") == JsonString("lupita") }
  *   assert { json("groups") == Json.arr("lupita", "admin", "sudoer") }

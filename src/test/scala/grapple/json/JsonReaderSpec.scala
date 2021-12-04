@@ -25,41 +25,41 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   private val textArray  = """[1000, "lupita", ["lupita", "admin", "sudoer"]]"""
 
   it should "parse JSON text" in {
-    val obj = Json.parse(textObject).as[JsonObject]
+    val obj = Json.parse(textObject)
     assert(obj.names == Seq("id", "name", "groups"))
     assert((obj \ "id")     == JsonNumber(1000))
     assert((obj \ "name")   == JsonString("lupita"))
     assert((obj \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val arr = Json.parse(textArray).as[JsonArray]
+    val arr = Json.parse(textArray)
     assert(arr.size == 3)
     assert((arr \ 0) == JsonNumber(1000))
     assert((arr \ 1) == JsonString("lupita"))
     assert((arr \ 2) == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    assert(Json.parse("{}").as[JsonObject].isEmpty)
-    assert(Json.parse("[]").as[JsonArray].isEmpty)
+    assert(Json.parse("{}").isEmpty)
+    assert(Json.parse("[]").isEmpty)
   }
 
   it should "parse JSON bytes" in {
-    val obj = Json.parse(textObject.getBytes()).as[JsonObject]
+    val obj = Json.parse(textObject.getBytes())
     assert(obj.names == Seq("id", "name", "groups"))
     assert((obj \ "id")     == JsonNumber(1000))
     assert((obj \ "name")   == JsonString("lupita"))
     assert((obj \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val arr = Json.parse(textArray.getBytes()).as[JsonArray]
+    val arr = Json.parse(textArray.getBytes())
     assert(arr.size == 3)
     assert((arr \ 0) == JsonNumber(1000))
     assert((arr \ 1) == JsonString("lupita"))
     assert((arr \ 2) == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    assert(Json.parse("{}").as[JsonObject].isEmpty)
-    assert(Json.parse("[]").as[JsonArray].isEmpty)
+    assert(Json.parse("{}").isEmpty)
+    assert(Json.parse("[]").isEmpty)
   }
 
   it should "parse JSON file" in {
-    val json1 = Json.parse(File("./src/test/resources/users.json")).as[JsonObject]
+    val json1 = Json.parse(File("./src/test/resources/users.json"))
     assert(json1.names == Seq("root", "guest", "lupita"))
 
     assert((json1 \ "root" \ "id")     == JsonNumber(0))
@@ -74,7 +74,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert((json1 \ "lupita" \ "name")   == JsonString("lupita"))
     assert((json1 \ "lupita" \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val json2 = Json.parse(Paths.get("./src/test/resources/users.json")).as[JsonObject]
+    val json2 = Json.parse(Paths.get("./src/test/resources/users.json"))
     assert(json2.names == Seq("root", "guest", "lupita"))
 
     assert((json2 \ "root" \ "id")     == JsonNumber(0))
@@ -91,7 +91,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "parse JSON input stream" in {
-    val json1 = withResource(FileInputStream("./src/test/resources/users.json")) { Json.parse(_).as[JsonObject] }
+    val json1 = withResource(FileInputStream("./src/test/resources/users.json")) { Json.parse(_) }
     assert(json1.names == Seq("root", "guest", "lupita"))
 
     assert((json1 \ "root" \ "id")     == JsonNumber(0))
@@ -106,7 +106,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert((json1 \ "lupita" \ "name")   == JsonString("lupita"))
     assert((json1 \ "lupita" \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val json2 = withResource(FileReader("./src/test/resources/users.json")) { Json.parse(_).as[JsonObject] }
+    val json2 = withResource(FileReader("./src/test/resources/users.json")) { Json.parse(_) }
     assert(json2.names == Seq("root", "guest", "lupita"))
 
     assert((json2 \ "root" \ "id")     == JsonNumber(0))
