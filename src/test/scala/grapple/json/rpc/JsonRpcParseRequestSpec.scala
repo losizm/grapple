@@ -47,7 +47,8 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(req.method == "compute")
     assert(
       req.params.exists {
-        case params => params("a").as[Int] == 1 && params("b").as[Int] == 2
+        case params: JsonObject => params("a").as[Int] == 1 && params("b").as[Int] == 2
+        case _                  => throw IllegalArgumentException("Expected JSON object")
       }
     )
   }

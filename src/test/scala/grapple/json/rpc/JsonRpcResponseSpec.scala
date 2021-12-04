@@ -22,7 +22,8 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Result(name: String, value: Int)
 
   given JsonInput[Result] =
-    json => Result(json("name"), json("value"))
+    case json: JsonObject => Result(json("name"), json("value"))
+    case _                => throw IllegalArgumentException("Expected JSON object")
 
   given JsonOutput[Result] =
     param => Json.obj("name" -> param.name, "value" -> param.value)

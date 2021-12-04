@@ -23,7 +23,7 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class User(id: Int, name: String)
 
   given userToJson: JsonOutput[User] with
-    def apply(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
+    def write(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
 
   it should "write JSON object" in {
     val json = Json.obj(

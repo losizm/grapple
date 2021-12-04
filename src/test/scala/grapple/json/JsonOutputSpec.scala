@@ -26,7 +26,7 @@ class JsonOutputSpec extends org.scalatest.flatspec.AnyFlatSpec:
   val other = User(1001, "other", Set("other"))
 
   given userToJson: JsonOutput[User] with
-    def apply(value: User) =
+    def write(value: User) =
       Json.obj(
         "id"     -> value.id,
         "name"   -> value.name,

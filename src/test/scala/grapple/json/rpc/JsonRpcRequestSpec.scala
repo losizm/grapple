@@ -21,8 +21,12 @@ import scala.language.implicitConversions
 class JsonRpcRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Param(name: String, value: Int)
 
-  given JsonInput[Param]  = json => Param(json("name"), json("value"))
-  given JsonOutput[Param] = param => Json.obj("name" -> param.name, "value" -> param.value)
+  given JsonInput[Param] =
+    case json: JsonObject => Param(json("name"), json("value"))
+    case _                => throw IllegalArgumentException("Expected JSON object")
+
+  given JsonOutput[Param] =
+    param => Json.obj("name" -> param.name, "value" -> param.value)
 
   it should "create JsonRpcRequest" in {
     val req1 = JsonRpcRequest("2.0", JsonRpcIdentifier("abc"), "compute", None)

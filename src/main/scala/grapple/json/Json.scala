@@ -113,8 +113,8 @@ object Json:
   /**
    * Converts value to JSON value.
    *
-   * @param value   value
-   * @param convert output converter
+   * @param value  value
+   * @param output converter
    */
-  def toJson[T](value: T)(using convert: JsonOutput[T]): JsonValue =
-    convert(value)
+  def toJson[T](value: T)(using converter: JsonOutput[T]): JsonValue =
+    converter.write(value)

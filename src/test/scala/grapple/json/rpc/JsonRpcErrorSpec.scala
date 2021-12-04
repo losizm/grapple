@@ -21,8 +21,12 @@ import scala.language.implicitConversions
 class JsonRpcErrorSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Data(name: String, value: String)
 
-  given JsonInput[Data]  = json => Data(json("name"), json("value"))
-  given JsonOutput[Data] = data => Json.obj("name" -> data.name, "value" -> data.value)
+  given JsonInput[Data] =
+    case json: JsonObject => Data(json("name"), json("value"))
+    case _                => throw IllegalArgumentException("Expected JSON object")
+
+  given JsonOutput[Data] =
+    data => Json.obj("name" -> data.name, "value" -> data.value)
 
   it should "create JsonRpcError" in {
     val err1 = JsonRpcError(100, "Error")

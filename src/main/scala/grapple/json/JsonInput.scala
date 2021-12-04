@@ -36,6 +36,7 @@ package grapple.json
  *
  * @see [[JsonOutput]]
  */
-trait JsonInput[T] extends Conversion[JsonValue, T]:
+@FunctionalInterface
+trait JsonInput[T]:
   /** Converts JSON value. */
-  def apply(value: JsonValue): T
+  def read(value: JsonValue): T

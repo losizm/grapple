@@ -18,7 +18,7 @@ package rpc
 
 /** Converts `JsonValue` to `JsonRpcError`. */
 given jsonValueToJsonRpcError: JsonInput[JsonRpcError] with
-  def apply(json: JsonValue): JsonRpcError =
+  def read(json: JsonValue): JsonRpcError =
     json match
       case json: JsonObject =>
         JsonRpcError(
@@ -32,7 +32,7 @@ given jsonValueToJsonRpcError: JsonInput[JsonRpcError] with
 
 /** Converts `JsonRpcError` to `JsonValue`. */
 given jsonRpcErrorToJsonValue: JsonOutput[JsonRpcError] with
-  def apply(error: JsonRpcError): JsonValue =
+  def write(error: JsonRpcError): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("code", error.code)
     builder.add("message", error.message)
@@ -41,7 +41,7 @@ given jsonRpcErrorToJsonValue: JsonOutput[JsonRpcError] with
 
 /** Converts `JsonValue` to `JsonRpcIdentifier`. */
 given jsonValueToJsonRpcIdentifier: JsonInput[JsonRpcIdentifier] with
-  def apply(json: JsonValue): JsonRpcIdentifier =
+  def read(json: JsonValue): JsonRpcIdentifier =
     json match
       case id: JsonString => JsonRpcIdentifier(id.value)
       case id: JsonNumber => JsonRpcIdentifier(id.longValue)
@@ -50,14 +50,14 @@ given jsonValueToJsonRpcIdentifier: JsonInput[JsonRpcIdentifier] with
 
 /** Converts `JsonRpcIdentifier` to `JsonValue`. */
 given jsonRpcIdentifierToJsonValue: JsonOutput[JsonRpcIdentifier] with
-  def apply(id: JsonRpcIdentifier): JsonValue =
+  def write(id: JsonRpcIdentifier): JsonValue =
     if      id.isString then JsonString(id.stringValue)
     else if id.isNumber then JsonNumber(id.numberValue)
     else                     JsonNull
 
 /** Converts `JsonValue` to `JsonRpcRequest`. */
 given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] with
-  def apply(json: JsonValue): JsonRpcRequest =
+  def read(json: JsonValue): JsonRpcRequest =
     json match
       case json: JsonObject => toRequest(json)
       case _                => throw InvalidRequest("object value expected")
@@ -96,7 +96,7 @@ given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] with
 
 /** Converts `JsonRpcRequest` to `JsonValue`. */
 given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] with
-  def apply(request: JsonRpcRequest): JsonValue =
+  def write(request: JsonRpcRequest): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("version", request.version)
 
@@ -110,7 +110,7 @@ given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] with
 
 /** Converts `JsonValue` to `JsonRpcResponse`. */
 given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
-  def apply(json: JsonValue): JsonRpcResponse =
+  def read(json: JsonValue): JsonRpcResponse =
     json match
       case json: JsonObject => toResponse(json)
       case _                => throw JsonException("object value expected")
@@ -147,7 +147,7 @@ given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
 
 /** Converts `JsonRpcResponse` to `JsonValue`. */
 given jsonRpcResponseToJsonValue: JsonOutput[JsonRpcResponse] with
-  def apply(response: JsonRpcResponse): JsonValue =
+  def write(response: JsonRpcResponse): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("version", response.version)
     builder.add("id", Json.toJson(response.id))

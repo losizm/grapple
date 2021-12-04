@@ -20,8 +20,8 @@ import scala.annotation.targetName
 /** Defines JSON value. */
 sealed trait JsonValue:
   /** Converts value. */
-  final def as[T](using convert: JsonInput[T]): T =
-    convert(this)
+  final def as[T](using converter: JsonInput[T]): T =
+    converter.read(this)
 
 /** Defines JSON structure. */
 sealed trait JsonStructure extends JsonValue:

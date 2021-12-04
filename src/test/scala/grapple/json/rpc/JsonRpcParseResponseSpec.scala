@@ -22,7 +22,8 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Answer(value: Int)
 
   given JsonInput[Answer] =
-    json => Answer(json("answer"))
+    case json: JsonObject => Answer(json("answer"))
+    case _                => throw IllegalArgumentException("Expected JSON object")
 
   it should "parse response with object result" in {
     val text = """{

@@ -91,7 +91,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "parse JSON input stream" in {
-    val json1 = withResource(FileInputStream("./src/test/resources/users.json")) { Json.parse(_) }
+    val json1 = withResource(FileInputStream("./src/test/resources/users.json")) { Json.parse(_).as[JsonObject] }
     assert(json1.names == Seq("root", "guest", "lupita"))
 
     assert((json1 \ "root" \ "id")     == JsonNumber(0))
@@ -106,7 +106,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert((json1 \ "lupita" \ "name")   == JsonString("lupita"))
     assert((json1 \ "lupita" \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val json2 = withResource(FileReader("./src/test/resources/users.json")) { Json.parse(_) }
+    val json2 = withResource(FileReader("./src/test/resources/users.json")) { Json.parse(_).as[JsonObject] }
     assert(json2.names == Seq("root", "guest", "lupita"))
 
     assert((json2 \ "root" \ "id")     == JsonNumber(0))

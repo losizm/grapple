@@ -98,102 +98,102 @@ extension (json: JsonValue)
  */
 given jsonValueToJsonValue: JsonInput[JsonValue] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value
+  def read(value: JsonValue) = value
 
 /** Casts `JsonValue` to `JsonObject`. */
 given jsonValueToJsonObject: JsonInput[JsonObject] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonObject]
+  def read(value: JsonValue) = value.asInstanceOf[JsonObject]
 
 /** Casts `JsonValue` to `JsonArray`. */
 given jsonValueToJsonArray: JsonInput[JsonArray] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonArray]
+  def read(value: JsonValue) = value.asInstanceOf[JsonArray]
 
 /** Casts `JsonValue` to `JsonString`. */
 given jsonValueToJsonString: JsonInput[JsonString] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonString]
+  def read(value: JsonValue) = value.asInstanceOf[JsonString]
 
 /** Casts `JsonValue` to `JsonNumber`. */
 given jsonValueToJsonNumber: JsonInput[JsonNumber] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber]
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber]
 
 /** Casts `JsonValue` to `JsonBoolean`. */
 given jsonValueToJsonBoolean: JsonInput[JsonBoolean] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonBoolean]
+  def read(value: JsonValue) = value.asInstanceOf[JsonBoolean]
 
 /** Casts `JsonValue` to `JsonNull`. */
 given jsonValueToJsonNull: JsonInput[JsonNull] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNull]
+  def read(value: JsonValue) = value.asInstanceOf[JsonNull]
 
 /** Converts `JsonValue` to `String`. */
 given jsonValueToString: JsonInput[String] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonString].value
+  def read(value: JsonValue) = value.asInstanceOf[JsonString].value
 
 /** Converts `JsonValue` to `Byte`. */
 given jsonValueToByte: JsonInput[Byte] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].byteValue
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber].byteValue
 
 /** Converts `JsonValue` to `Short`. */
 given jsonValueToShort: JsonInput[Short] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].shortValue
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber].shortValue
 
 /** Converts `JsonValue` to `Int`. */
 given jsonValueToInt: JsonInput[Int] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].intValue
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber].intValue
 
 /** Converts `JsonValue` to `Long`. */
 given jsonValueToLong: JsonInput[Long] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].longValue
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber].longValue
 
 /** Converts `JsonValue` to `Float`. */
 given jsonValueToFloat: JsonInput[Float] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].floatValue
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber].floatValue
 
 /** Converts `JsonValue` to `Double`. */
 given jsonValueToDouble: JsonInput[Double] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].doubleValue
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber].doubleValue
 
 /** Converts `JsonValue` to `BigInt`. */
 given jsonValueToBigInt: JsonInput[BigInt] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].bigIntValue
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber].bigIntValue
 
 /** Converts `JsonValue` to `BigDecimal`. */
 given jsonValueToBigDecimal: JsonInput[BigDecimal] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonNumber].bigDecimalValue
+  def read(value: JsonValue) = value.asInstanceOf[JsonNumber].bigDecimalValue
 
 /** Converts `JsonValue` to `Boolean`. */
 given jsonValueToBoolean: JsonInput[Boolean] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonBoolean].value
+  def read(value: JsonValue) = value.asInstanceOf[JsonBoolean].value
 
 /** Converts `JsonValue` to collection of converted values. */
-given jsonValueToCollection[T, M[T]](using convert: JsonInput[T])(using factory: Factory[T, M[T]]): JsonInput[M[T]] with
+given jsonValueToCollection[T, M[T]](using converter: JsonInput[T])(using factory: Factory[T, M[T]]): JsonInput[M[T]] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = value.asInstanceOf[JsonArray].values.map(_.as[T]).to(factory)
+  def read(value: JsonValue) = value.asInstanceOf[JsonArray].values.map(_.as[T]).to(factory)
 
 /** Converts `JsonValue` to `Some` or returns `None` if value is `JsonNull`. */
-given jsonValueToOption[T](using convert: JsonInput[T]): JsonInput[Option[T]] with
+given jsonValueToOption[T](using converter: JsonInput[T]): JsonInput[Option[T]] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = Option.when(value != JsonNull)(value.as[T])
+  def read(value: JsonValue) = Option.when(value != JsonNull)(value.as[T])
 
 /** Converts `JsonValue` to `Success` or returns `Failure` if unsuccessful. */
-given jsonValueToTry[T](using convert: JsonInput[T]): JsonInput[Try[T]] with
+given jsonValueToTry[T](using converter: JsonInput[T]): JsonInput[Try[T]] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = Try(value.as[T])
+  def read(value: JsonValue) = Try(value.as[T])
 
 /**
  * Converts `JsonValue` to `Right` using right converter or to `Left` using
@@ -201,91 +201,91 @@ given jsonValueToTry[T](using convert: JsonInput[T]): JsonInput[Try[T]] with
  */
 given jsonValueToEither[A, B](using left: JsonInput[A])(using right: JsonInput[B]): JsonInput[Either[A, B]] with
   /** @inheritdoc */
-  def apply(value: JsonValue) = Try(Right(right(value))).getOrElse(Left(left(value)))
+  def read(value: JsonValue) = Try(Right(right.read(value))).getOrElse(Left(left.read(value)))
 
 /** Converts `String` to `JsonString`. */
 given stringToJsonString: JsonOutput[String] with
   /** @inheritdoc */
-  def apply(value: String): JsonString = JsonString(value)
+  def write(value: String): JsonString = JsonString(value)
 
 /** Converts `Byte` to `JsonNumber`. */
 given byteToJsonNumber: JsonOutput[Byte] with
   /** @inheritdoc */
-  def apply(value: Byte): JsonNumber = JsonNumber(value)
+  def write(value: Byte): JsonNumber = JsonNumber(value)
 
 /** Converts `Short` to `JsonNumber`. */
 given shortToJsonNumber: JsonOutput[Short] with
   /** @inheritdoc */
-  def apply(value: Short): JsonNumber = JsonNumber(value)
+  def write(value: Short): JsonNumber = JsonNumber(value)
 
 /** Converts `Int` to `JsonNumber`. */
 given intToJsonNumber: JsonOutput[Int] with
   /** @inheritdoc */
-  def apply(value: Int): JsonNumber = JsonNumber(value)
+  def write(value: Int): JsonNumber = JsonNumber(value)
 
 /** Converts `Long` to `JsonNumber`. */
 given longToJsonNumber: JsonOutput[Long] with
   /** @inheritdoc */
-  def apply(value: Long): JsonNumber = JsonNumber(value)
+  def write(value: Long): JsonNumber = JsonNumber(value)
 
 /** Converts `Float` to `JsonNumber`. */
 given floatToJsonNumber: JsonOutput[Float] with
   /** @inheritdoc */
-  def apply(value: Float): JsonNumber = JsonNumber(value)
+  def write(value: Float): JsonNumber = JsonNumber(value)
 
 /** Converts `Double` to `JsonNumber`. */
 given doubleToJsonNumber: JsonOutput[Double] with
   /** @inheritdoc */
-  def apply(value: Double): JsonNumber = JsonNumber(value)
+  def write(value: Double): JsonNumber = JsonNumber(value)
 
 /** Converts `BigInt` to `JsonNumber`. */
 given bigIntToJsonNumber: JsonOutput[BigInt] with
   /** @inheritdoc */
-  def apply(value: BigInt): JsonNumber = JsonNumber(value)
+  def write(value: BigInt): JsonNumber = JsonNumber(value)
 
 /** Converts `BigDecimal` to `JsonNumber`. */
 given bigDecimalToJsonNumber: JsonOutput[BigDecimal] with
   /** @inheritdoc */
-  def apply(value: BigDecimal): JsonNumber = JsonNumber(value)
+  def write(value: BigDecimal): JsonNumber = JsonNumber(value)
 
 /** Converts `Boolean` to `JsonBoolean`. */
 given booleanToJsonBoolean: JsonOutput[Boolean] with
   /** @inheritdoc */
-  def apply(value: Boolean): JsonBoolean = JsonBoolean(value)
+  def write(value: Boolean): JsonBoolean = JsonBoolean(value)
 
 /** Converts `Array` to `JsonArray`. */
-given arrayToJsonArray[T](using convert: JsonOutput[T]): JsonOutput[Array[T]] with
+given arrayToJsonArray[T](using converter: JsonOutput[T]): JsonOutput[Array[T]] with
   /** @inheritdoc */
-  def apply(value: Array[T]): JsonArray = value.foldLeft(JsonArrayBuilder()) {
-    (builder, value) => builder.add(convert(value))
+  def write(value: Array[T]): JsonArray = value.foldLeft(JsonArrayBuilder()) {
+    (builder, value) => builder.add(converter.write(value))
   }.build()
 
 /** Converts `Iterable` to `JsonArray`. */
-given iterableToJsonArray[T, M[T] <: Iterable[T]](using convert: JsonOutput[T]): JsonOutput[M[T]] with
+given iterableToJsonArray[T, M[T] <: Iterable[T]](using converter: JsonOutput[T]): JsonOutput[M[T]] with
   /** @inheritdoc */
-  def apply(value: M[T]): JsonArray = value.foldLeft(JsonArrayBuilder()) {
-    (builder, value) => builder.add(convert(value))
+  def write(value: M[T]): JsonArray = value.foldLeft(JsonArrayBuilder()) {
+    (builder, value) => builder.add(converter.write(value))
   }.build()
 
 /** Converts `Some` to `JsonValue` or returns `JsonNull` if `None`. */
-given optionToJsonValue[T, M[T] <: Option[T]](using convert: JsonOutput[T]): JsonOutput[M[T]] with
+given optionToJsonValue[T, M[T] <: Option[T]](using converter: JsonOutput[T]): JsonOutput[M[T]] with
   /** @inheritdoc */
-  def apply(value: M[T]) = value.fold(JsonNull)(convert(_))
+  def write(value: M[T]) = value.fold(JsonNull)(converter.write(_))
 
 /** Converts `None` to `JsonNull`. */
 given noneToJsonNull: JsonOutput[None.type] with
   /** @inheritdoc */
-  def apply(value: None.type): JsonNull = JsonNull
+  def write(value: None.type): JsonNull = JsonNull
 
 /** Converts `Success` to `JsonValue` or returns `JsonNull` if `Failure`. */
-given tryToJsonValue[T, M[T] <: Try[T]](using convert: JsonOutput[T]): JsonOutput[M[T]] with
+given tryToJsonValue[T, M[T] <: Try[T]](using converter: JsonOutput[T]): JsonOutput[M[T]] with
   /** @inheritdoc */
-  def apply(value: M[T]) = value.fold(_ => JsonNull, convert(_))
+  def write(value: M[T]) = value.fold(_ => JsonNull, converter.write(_))
 
 /** Converts `Failure` to `JsonNull`. */
 given failureToJsonNull: JsonOutput[Failure[?]] with
   /** @inheritdoc */
-  def apply(value: Failure[?]): JsonNull = JsonNull
+  def write(value: Failure[?]): JsonNull = JsonNull
 
 /**
  * Converts `Right` to `JsonValue` using right converter or converts `Left`
@@ -293,19 +293,29 @@ given failureToJsonNull: JsonOutput[Failure[?]] with
  */
 given eitherToJsonValue[A, B, M[A, B] <: Either[A, B]](using left: JsonOutput[A])(using right: JsonOutput[B]): JsonOutput[M[A, B]] with
   /** @inheritdoc */
-  def apply(value: M[A, B]) = value.fold(left(_), right(_))
+  def write(value: M[A, B]) = value.fold(left.write(_), right.write(_))
 
 /** Converts `Right` to `JsonValue`. */
-given rightToJsonValue[T](using convert: JsonOutput[T]): JsonOutput[Right[?, T]] with
+given rightToJsonValue[T](using converter: JsonOutput[T]): JsonOutput[Right[?, T]] with
   /** @inheritdoc */
-  def apply(value: Right[?, T]) = value.fold(_ => JsonNull, convert(_))
+  def write(value: Right[?, T]) = value.fold(_ => JsonNull, converter.write(_))
 
 /** Converts `Left` to `JsonValue`. */
-given leftToJsonValue[T](using convert: JsonOutput[T]): JsonOutput[Left[T, ?]] with
+given leftToJsonValue[T](using converter: JsonOutput[T]): JsonOutput[Left[T, ?]] with
   /** @inheritdoc */
-  def apply(value: Left[T, ?]) = value.fold(convert(_), _ => JsonNull)
+  def write(value: Left[T, ?]) = value.fold(converter.write(_), _ => JsonNull)
 
 /** Converts `(String, T)` to `(String, JsonValue)`. */
-given tupleToJsonField[T](using convert: JsonOutput[T]): Conversion[(String, T), (String, JsonValue)] with
+given tupleToJsonField[T](using converter: JsonOutput[T]): Conversion[(String, T), (String, JsonValue)] with
   /** @inheritdoc */
-  def apply(value: (String, T)) = value(0) -> convert(value(1))
+  def apply(value: (String, T)) = value(0) -> converter.write(value(1))
+
+/** Applies conversion using `JsonInput`. */
+given jsonInputConversion[T](using converter: JsonInput[T]): Conversion[JsonValue, T] with
+  /** @inheritdoc */
+  def apply(value: JsonValue) = converter.read(value)
+
+/** Applies conversion using `JsonOutput`. */
+given jsonOutputConversion[T](using converter: JsonOutput[T]): Conversion[T, JsonValue] with
+  /** @inheritdoc */
+  def apply(value: T) = converter.write(value)
