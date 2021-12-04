@@ -16,14 +16,19 @@
 package grapple.json
 package rpc
 
-import scala.language.implicitConversions
-
 /** Converts `JsonValue` to `JsonRpcError`. */
 given jsonValueToJsonRpcError: JsonInput[JsonRpcError] with
   def apply(json: JsonValue): JsonRpcError =
-    if !json.isInstanceOf[JsonObject] then
-      throw JsonException("object value expected")
-    JsonRpcError(json("code"), json("message"), json.get("data"))
+    json match
+      case json: JsonObject =>
+        JsonRpcError(
+          json.getInt("code"),
+          json.getString("message"),
+          json.get("data")
+        )
+
+      case _ =>
+        throw JsonException("object value expected")
 
 /** Converts `JsonRpcError` to `JsonValue`. */
 given jsonRpcErrorToJsonValue: JsonOutput[JsonRpcError] with
@@ -53,13 +58,15 @@ given jsonRpcIdentifierToJsonValue: JsonOutput[JsonRpcIdentifier] with
 /** Converts `JsonValue` to `JsonRpcRequest`. */
 given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] with
   def apply(json: JsonValue): JsonRpcRequest =
-    if !json.isInstanceOf[JsonObject] then
-      throw InvalidRequest("object value expected")
+    json match
+      case json: JsonObject => toRequest(json)
+      case _                => throw InvalidRequest("object value expected")
 
+  private def toRequest(json: JsonObject) =
     val builder = JsonRpcRequest.builder()
 
     json.get("jsonrpc") match
-      case Some(s: JsonString) => builder.version(s)
+      case Some(s: JsonString) => builder.version(s.value)
       case Some(_: JsonValue)  => throw InvalidRequest("string value expected for jsonrpc")
       case None                => throw InvalidRequest("jsonrpc required")
 
@@ -71,7 +78,7 @@ given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] with
       case Some(_: JsonValue)   => throw InvalidRequest("string or number value expected for id")
 
     json.get("method") match
-      case Some(s: JsonString) => builder.method(s)
+      case Some(s: JsonString) => builder.method(s.value)
       case Some(_: JsonValue)  => throw InvalidRequest("string value expected for method")
       case None                => throw InvalidRequest("method required")
 
@@ -94,7 +101,7 @@ given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] with
     builder.add("version", request.version)
 
     if !request.isNotification then
-      builder.add("id", request.id)
+      builder.add("id", Json.toJson(request.id))
 
     builder.add("method", request.method)
     request.params.foreach(builder.add("params", _))
@@ -104,13 +111,15 @@ given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] with
 /** Converts `JsonValue` to `JsonRpcResponse`. */
 given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
   def apply(json: JsonValue): JsonRpcResponse =
-    if !json.isInstanceOf[JsonObject] then
-      throw JsonException("object value expected")
+    json match
+      case json: JsonObject => toResponse(json)
+      case _                => throw JsonException("object value expected")
 
+  private def toResponse(json: JsonObject) =
     val builder = JsonRpcResponse.builder()
 
     json.get("jsonrpc") match
-      case Some(s: JsonString) => builder.version(s)
+      case Some(s: JsonString) => builder.version(s.value)
       case Some(_: JsonValue)  => throw JsonException("string value expected for jsonrpc")
       case None                => throw JsonException("jsonrpc required")
 
@@ -125,7 +134,7 @@ given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
       case Some(value) => builder.result(value)
       case None        =>
         json.get("error") match
-          case Some(o: JsonObject) => builder.error(o)
+          case Some(o: JsonObject) => builder.error(o.as[JsonRpcError])
           case Some(_: JsonValue)  => throw JsonException("object value expected for error")
           case None                => throw JsonException("include must include either result or error")
 
@@ -141,11 +150,11 @@ given jsonRpcResponseToJsonValue: JsonOutput[JsonRpcResponse] with
   def apply(response: JsonRpcResponse): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("version", response.version)
-    builder.add("id", response.id)
+    builder.add("id", Json.toJson(response.id))
 
     response.isResult match
       case true  => builder.add("result", response.result)
-      case false => builder.add("error", response.error)
+      case false => builder.add("error", Json.toJson(response.error))
 
     builder.build()
 
