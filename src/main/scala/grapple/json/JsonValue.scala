@@ -317,6 +317,51 @@ trait JsonArray extends JsonStructure:
   def apply(index: Int): JsonValue
 
   /**
+   * Selects first value in array.
+   *
+   * @throws NoSuchElementException if array is empty
+   */
+  def head: JsonValue
+
+  /** Optionally selects first value in array. */
+  def headOption: Option[JsonValue]
+
+  /**
+   * Selects last value in array.
+   *
+   * @throws NoSuchElementException if array is empty
+   */
+  def last: JsonValue
+
+  /** Optionally selects last value in array. */
+  def lastOption: Option[JsonValue]
+
+  /**
+   * Selects all values in array excluding last.
+   *
+   * @throws UnsupportedOperationException if array is empty
+   */
+  def init: JsonArray
+
+  /**
+   * Selects all values in array excluding first.
+   *
+   * @throws UnsupportedOperationException if array is empty
+   */
+  def tail: JsonArray
+
+  /**
+   * Selects slice of array.
+   *
+   * @param from  lowest index to include
+   * @param until lowest index to exclude
+   *
+   * @return slice of JSON array containing elements whose indexes are greater
+   * than or equal to `from` and less than `until`
+   */
+  def slice(from: Int, until: Int): JsonArray
+
+  /**
    * Gets JSON object at given index.
    *
    * @throws ClassCastException if not JsonObject

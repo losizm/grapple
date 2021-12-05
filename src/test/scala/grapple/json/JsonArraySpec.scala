@@ -166,9 +166,76 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert((user \ 4 \ "timeout").as[Long] == 10_000_000_000L)
   }
 
-  it should "inspect emtpy JsonArray" in {
+  it should "inspect empty JsonArray" in {
     assert(JsonArray.empty.isEmpty)
     assert(JsonArray.empty.size == 0)
+  }
+
+  it should "select head of JsonArray" in {
+    assert(Json.arr(0).head == JsonNumber(0))
+    assert(Json.arr(0).headOption.contains(JsonNumber(0)))
+
+    assert(Json.arr(1, 2).head == JsonNumber(1))
+    assert(Json.arr(1, 2).headOption.contains(JsonNumber(1)))
+
+    assertThrows[NoSuchElementException](JsonArray.empty.head)
+    assert(JsonArray.empty.headOption.isEmpty)
+  }
+
+  it should "select tail of JsonArray" in {
+    assert(Json.arr(0).tail.isEmpty)
+    assert(Json.arr(1, 2).tail == Json.arr(2))
+    assert(Json.arr(1, 2, 3).tail == Json.arr(2, 3))
+    assertThrows[UnsupportedOperationException](JsonArray.empty.tail)
+  }
+
+  it should "select init of JsonArray" in {
+    assert(Json.arr(0).init.isEmpty)
+    assert(Json.arr(1, 2).init == Json.arr(1))
+    assert(Json.arr(1, 2, 3).init == Json.arr(1, 2))
+    assertThrows[UnsupportedOperationException](JsonArray.empty.init)
+  }
+
+  it should "select last of JsonArray" in {
+    assert(Json.arr(0).last == JsonNumber(0))
+    assert(Json.arr(0).lastOption.contains(JsonNumber(0)))
+
+    assert(Json.arr(1, 2).last == JsonNumber(2))
+    assert(Json.arr(1, 2).lastOption.contains(JsonNumber(2)))
+
+    assertThrows[NoSuchElementException](JsonArray.empty.last)
+    assert(JsonArray.empty.lastOption.isEmpty)
+  }
+
+  it should "select slice of JsonArray" in {
+    assert(Json.arr(0).slice(0, 0).isEmpty)
+    assert(Json.arr(0).slice(0, 1) == Json.arr(0))
+    assert(Json.arr(0).slice(0, 2) == Json.arr(0))
+    assert(Json.arr(0).slice(1, 1).isEmpty)
+    assert(Json.arr(0).slice(2, 1).isEmpty)
+
+    assert(Json.arr(0).slice(-1, 0).isEmpty)
+    assert(Json.arr(0).slice(-1, 1) == Json.arr(0))
+    assert(Json.arr(0).slice(-1, 2) == Json.arr(0))
+    assert(Json.arr(0).slice(2, -1).isEmpty)
+
+    assert(Json.arr(0, 1, 2, 3, 4).slice(0, 0).isEmpty)
+    assert(Json.arr(0, 1, 2, 3, 4).slice(0, 1) == Json.arr(0))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(0, 2) == Json.arr(0, 1))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(0, 3) == Json.arr(0, 1, 2))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(0, 4) == Json.arr(0, 1, 2, 3))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(0, 5) == Json.arr(0, 1, 2, 3, 4))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(0, 6) == Json.arr(0, 1, 2, 3, 4))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(6, 3).isEmpty)
+
+    assert(Json.arr(0, 1, 2, 3, 4).slice(-3, 0).isEmpty)
+    assert(Json.arr(0, 1, 2, 3, 4).slice(-3, 1) == Json.arr(0))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(-3, 2) == Json.arr(0, 1))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(-3, 3) == Json.arr(0, 1, 2))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(-3, 4) == Json.arr(0, 1, 2, 3))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(-3, 5) == Json.arr(0, 1, 2, 3, 4))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(-3, 6) == Json.arr(0, 1, 2, 3, 4))
+    assert(Json.arr(0, 1, 2, 3, 4).slice(6, -3).isEmpty)
   }
 
   it should "update JsonArray" in {
