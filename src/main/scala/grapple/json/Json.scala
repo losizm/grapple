@@ -91,23 +91,36 @@ object Json:
     val reader = JsonReader(input)
     try reader.read() finally reader.close()
 
-  /** Creates "pretty" print of JSON using 2-space indent. */
-  def toPrettyPrint(json: JsonStructure): String =
-    toPrettyPrint(json, "  ")
+  /**
+   * Creates "pretty" print of JSON using 2-space indent.
+   *
+   * @note If value is not a JSON structure, identation is not used and the
+   * output is equivalent to `value.toString()`.
+   */
+  def toPrettyPrint(value: JsonValue): String =
+    toPrettyPrint(value, "  ")
 
-  /** Creates "pretty" print of JSON using supplied indent. */
-  def toPrettyPrint(json: JsonStructure, indent: String): String =
-    val output = StringWriter()
-    val writer = JsonWriter(output, indent)
-    try
-      writer.write(json)
-      output.toString
-    finally
-      writer.close()
+  /**
+   * Creates "pretty" print of JSON using supplied indent.
+   *
+   * @note If value is not a JSON structure, identation is not used and the
+   * output is equivalent to `value.toString()`.
+   */
+  def toPrettyPrint(value: JsonValue, indent: String): String =
+    value match
+      case struct: JsonStructure =>
+        val output = StringWriter()
+        val writer = JsonWriter(output, indent)
+        try
+          writer.write(struct)
+          output.toString
+        finally
+          writer.close()
+      case _ => value.toString
 
-  /** Converts JSON structure to UTF-8 encoded bytes. */
-  def toBytes(json: JsonStructure): Array[Byte] =
-    json.toString.getBytes("UTF-8")
+  /** Converts JSON value to UTF-8 encoded bytes. */
+  def toBytes(value: JsonValue): Array[Byte] =
+    value.toString.getBytes("UTF-8")
 
   /**
    * Converts value to JSON value.

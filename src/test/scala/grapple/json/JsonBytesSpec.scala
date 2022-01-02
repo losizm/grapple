@@ -29,3 +29,11 @@ class JsonBytesSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val bytes = Json.toBytes(json)
     assert(Arrays.equals(bytes, json.toString.getBytes("utf-8")))
   }
+
+  it should "get UTF-8 encoded bytes for other JSON values" in {
+    assert(Json.toBytes(JsonString("Hello, world!")) sameElements "\"Hello, world!\"".getBytes("UTF-8"))
+    assert(Json.toBytes(JsonNumber(123.456)) sameElements "123.456".getBytes("UTF-8"))
+    assert(Json.toBytes(JsonTrue) sameElements "true".getBytes("UTF-8"))
+    assert(Json.toBytes(JsonFalse) sameElements "false".getBytes("UTF-8"))
+    assert(Json.toBytes(JsonNull) sameElements "null".getBytes("UTF-8"))
+  }
