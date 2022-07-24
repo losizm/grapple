@@ -11,7 +11,7 @@ provides utilities for mapping instances of your classes to JSON values.
 To get started, add **Grapple** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "grapple" % "12.0.0"
+libraryDependencies += "com.github.losizm" %% "grapple" % "12.1.0"
 ```
 
 ## A Little Grapple
