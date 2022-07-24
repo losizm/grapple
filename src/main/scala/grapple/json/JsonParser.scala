@@ -15,7 +15,7 @@
  */
 package grapple.json
 
-import java.io.{ File, FileReader, InputStream, InputStreamReader, Reader, StringReader }
+import java.io.*
 import java.nio.file.Path
 
 /**
@@ -148,7 +148,11 @@ object JsonParser:
 
   /** Creates JSON parser from bytes. */
   def apply(bytes: Array[Byte]): JsonParser =
-    JsonParserImpl(StringReader(String(bytes)))
+    JsonParserImpl(InputStreamReader(ByteArrayInputStream(bytes)))
+
+  /** Creates JSON parser from bytes. */
+  def apply(bytes: Array[Byte], offset: Int, length: Int): JsonParser =
+    JsonParserImpl(InputStreamReader(ByteArrayInputStream(bytes, offset, length)))
 
   /** Creates JSON parser from input. */
   def apply(input: InputStream): JsonParser =

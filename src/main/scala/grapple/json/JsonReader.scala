@@ -15,7 +15,7 @@
  */
 package grapple.json
 
-import java.io.{ EOFException, File, FileReader, InputStream, InputStreamReader, Reader, StringReader }
+import java.io.*
 import java.nio.file.Path
 
 /**
@@ -53,7 +53,11 @@ object JsonReader:
 
   /** Creates JSON reader from bytes. */
   def apply(bytes: Array[Byte]): JsonReader =
-    JsonReaderImpl(StringReader(String(bytes)))
+    JsonReaderImpl(InputStreamReader(ByteArrayInputStream(bytes)))
+
+  /** Creates JSON reader from bytes. */
+  def apply(bytes: Array[Byte], offset: Int, length: Int): JsonReader =
+    JsonReaderImpl(InputStreamReader(ByteArrayInputStream(bytes, offset, length)))
 
   /** Creates JSON reader from input. */
   def apply(input: Reader): JsonReader =

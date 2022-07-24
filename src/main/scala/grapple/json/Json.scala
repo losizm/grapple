@@ -63,6 +63,11 @@ object Json:
     val reader = JsonReader(bytes)
     try reader.read() finally reader.close()
 
+  /** Parses JSON structure from bytes. */
+  def parse(bytes: Array[Byte], offset: Int, length: Int): JsonStructure =
+    val reader = JsonReader(bytes, offset, length)
+    try reader.read() finally reader.close()
+
   /**
    * Parses JSON structure from input.
    *
