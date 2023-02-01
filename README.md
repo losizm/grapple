@@ -5,28 +5,28 @@
 The JSON library for Scala.
 
 ## Getting Started
-**Grapple** is a Scala library for reading and writing JSON content. It
-provides utilities for mapping instances of your classes to JSON values.
-
 To get started, add **Grapple** to your project:
 
 ```scala
 libraryDependencies += "com.github.losizm" %% "grapple" % "12.1.0"
 ```
 
-## A Little Grapple
-Here's a little of what **Grapple** offers.
+## Let's Grapple!
+**Grapple** is a library for reading and writing JSON content. It provides
+utilities for mapping instances of your classes to JSON values.
+
+Here is what the library offers&hellip;
 
 ### Usual Suspects
 To model standard JSON values, the library includes a list of classes with
 familiar names: `JsonObject`, `JsonArray`, `JsonString`, `JsonNumber`,
-`JsonBoolean`, and `JsonNull`. When making use of contextual abstraction, you're
-not required to deal with these classes directly a whole lot.
+`JsonBoolean`, and `JsonNull`. When using implicit conversions, you're not
+required to deal with these classes directly.
 
 ### Reading and Writing
 Reading and writing are powered by `JsonInput` and `JsonOutput`. They convert
 values to and from JSON, with library-provided implementations for working with
-standard types like `String`, `Int`, and `Boolean`. You must provide custom
+standard types like `String`, `Int`, etc. You must provide custom
 implementations for converting to and from instances of your classes.
 
 ```scala
@@ -37,11 +37,8 @@ import grapple.json.{ *, given }
 case class User(id: Int, name: String)
 
 // Define how to convert JsonValue to User
-given userInput: JsonInput[User] with
-  def read(json: JsonValue) =
-    json match
-      case json: JsonObject => User(json("id"), json("name"))
-      case _                => throw IllegalArgumentException("Expected JSON object")
+given JsonInput[User] with
+  def read(json: JsonValue) = User(json("id"), json("name"))
 
 val json = Json.parse("""{ "id": 1000, "name": "lupita" }""")
 
@@ -51,7 +48,7 @@ assert { user.id == 1000 }
 assert { user.name == "lupita" }
 
 // Define how to convert User to JsonValue
-given userOutput: JsonOutput[User] with
+given JsonOutput[User] with
   def write(u: User) = Json.obj("id" -> u.id, "name" -> u.name)
 
 // Write User to JsonValue
@@ -102,9 +99,8 @@ import grapple.json.{ *, given }
 case class User(id: Int, name: String)
 
 // Define how to convert JsonValue to User
-given userInput: JsonInput[User] =
-  case json: JsonObject => User(json("id"), json("name"))
-  case _                => throw IllegalArgumentException("Expected JSON object")
+given JsonInput[User] =
+  json => User(json("id"), json("name"))
 
 val json = Json.parse("""{
   "node": {
