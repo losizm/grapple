@@ -191,7 +191,7 @@ object JsonRpcRequest:
       attributes((one +: more).toMap)
 
     /** Creates JSON-RPC request with current settings. */
-    def build(): JsonRpcRequest =
+    def toJsonRpcRequest(): JsonRpcRequest =
       if _method == null then
         throw IllegalStateException("method is not set")
       JsonRpcRequestImpl(_version, _id, _method, _params, _attributes)
@@ -212,7 +212,7 @@ object JsonRpcRequest:
       .version(version)
       .method(method)
       .params(params)
-      .build()
+      .toJsonRpcRequest()
 
   /**
    * Creates JSON-RPC request.
@@ -228,7 +228,7 @@ object JsonRpcRequest:
       .id(id)
       .method(method)
       .params(params)
-      .build()
+      .toJsonRpcRequest()
 
 private case class JsonRpcRequestImpl(
   version:    String,
@@ -406,7 +406,7 @@ object JsonRpcResponse:
       attributes((one +: more).toMap)
 
     /** Creates JSON-RPC response with current settings. */
-    def build(): JsonRpcResponse =
+    def toJsonRpcResponse(): JsonRpcResponse =
       if _id == null then
         throw IllegalStateException("id is not set")
       if _content == null then
@@ -428,7 +428,7 @@ object JsonRpcResponse:
       .version(version)
       .id(id)
       .result(result)
-      .build()
+      .toJsonRpcResponse()
 
   /**
    * Creates JSON-RPC response with error.
@@ -442,7 +442,7 @@ object JsonRpcResponse:
       .version(version)
       .id(id)
       .error(error)
-      .build()
+      .toJsonRpcResponse()
 
 private case class JsonRpcResponseImpl(
   version:    String,

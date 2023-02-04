@@ -37,7 +37,7 @@ given jsonRpcErrorToJsonValue: JsonOutput[JsonRpcError] with
     builder.add("code", error.code)
     builder.add("message", error.message)
     error.data.foreach(builder.add("data", _))
-    builder.build()
+    builder.toJsonObject()
 
 /** Converts `JsonValue` to `JsonRpcIdentifier`. */
 given jsonValueToJsonRpcIdentifier: JsonInput[JsonRpcIdentifier] with
@@ -87,7 +87,7 @@ given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] with
       case None                   => builder.params(None)
       case Some(_: JsonValue)     => throw InvalidRequest("array or object value expected for params")
 
-    builder.build()
+    builder.toJsonRpcRequest()
 
   private def getLongIdentifier(n: JsonNumber) =
     try n.longValue
@@ -106,7 +106,7 @@ given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] with
     builder.add("method", request.method)
     request.params.foreach(builder.add("params", _))
 
-    builder.build()
+    builder.toJsonObject()
 
 /** Converts `JsonValue` to `JsonRpcResponse`. */
 given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
@@ -138,7 +138,7 @@ given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
           case Some(_: JsonValue)  => throw JsonException("object value expected for error")
           case None                => throw JsonException("include must include either result or error")
 
-    builder.build()
+    builder.toJsonRpcResponse()
 
   private def getLongIdentifier(n: JsonNumber) =
     try n.longValue
@@ -156,7 +156,7 @@ given jsonRpcResponseToJsonValue: JsonOutput[JsonRpcResponse] with
       case true  => builder.add("result", response.result)
       case false => builder.add("error", Json.toJson(response.error))
 
-    builder.build()
+    builder.toJsonObject()
 
 /** Provides passthrough for `JsonRpcError` or returns `InternalError`. */
 given defaultOnFailure: PartialFunction[Throwable, JsonRpcError] =

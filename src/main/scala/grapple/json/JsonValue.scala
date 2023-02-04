@@ -272,7 +272,7 @@ trait JsonObject extends JsonStructure:
 
 /** Provides JSON object factory. */
 object JsonObject:
-  private val emptyObject = JsonObjectBuilder().build()
+  private val emptyObject = JsonObjectBuilder().toJsonObject()
 
   /** Gets empty JSON object. */
   def empty: JsonObject = emptyObject
@@ -287,7 +287,7 @@ object JsonObject:
       case false =>
         fields.foldLeft(JsonObjectBuilder()) { (builder, field) =>
           builder.add(field._1, field._2)
-        }.build()
+        }.toJsonObject()
 
   /** Creates JSON object with supplied fields. */
   def apply(fields: Seq[(String, JsonValue)]): JsonObject =
@@ -296,7 +296,7 @@ object JsonObject:
       case false =>
         fields.foldLeft(JsonObjectBuilder()) { (builder, field) =>
           builder.add(field._1, field._2)
-        }.build()
+        }.toJsonObject()
 
   /** Destructures JSON object to its fields. */
   def unapply(json: JsonObject): Option[Map[String, JsonValue]] =
@@ -526,7 +526,7 @@ trait JsonArray extends JsonStructure:
 
 /** Provides JSON array factory. */
 object JsonArray:
-  private val emptyArray = JsonArrayBuilder().build()
+  private val emptyArray = JsonArrayBuilder().toJsonArray()
 
   /** Gets empty JSON array. */
   def empty: JsonArray = emptyArray
@@ -538,7 +538,7 @@ object JsonArray:
   def apply(values: Seq[JsonValue]): JsonArray =
     values.isEmpty match
       case true  => emptyArray
-      case false => values.foldLeft(JsonArrayBuilder())(_ add _).build()
+      case false => values.foldLeft(JsonArrayBuilder())(_ add _).toJsonArray()
 
   /** Destructures JSON array to its values. */
   def unapply(json: JsonArray): Option[Seq[JsonValue]] =

@@ -178,25 +178,22 @@ given jsonValueToBoolean: JsonInput[Boolean] with
   /** @inheritdoc */
   def read(value: JsonValue): Boolean = value.asInstanceOf[JsonBoolean].value
 
-/** Converts `JsonValue` to collection of converted values. */
+/** Converts `JsonValue` to collection. */
 given jsonValueToCollection[T, M[T]](using converter: JsonInput[T])(using factory: Factory[T, M[T]]): JsonInput[M[T]] with
   /** @inheritdoc */
   def read(value: JsonValue): M[T] = value.asInstanceOf[JsonArray].values.map(_.as[T]).to(factory)
 
-/** Converts `JsonValue` to `Some` or returns `None` if value is `JsonNull`. */
+/** Converts `JsonValue` to `Option`. */
 given jsonValueToOption[T](using converter: JsonInput[T]): JsonInput[Option[T]] with
   /** @inheritdoc */
   def read(value: JsonValue): Option[T] = Option.when(value != JsonNull)(value.as[T])
 
-/** Converts `JsonValue` to `Success` or returns `Failure` if unsuccessful. */
+/** Converts `JsonValue` to `Try`. */
 given jsonValueToTry[T](using converter: JsonInput[T]): JsonInput[Try[T]] with
   /** @inheritdoc */
   def read(value: JsonValue): Try[T] = Try(value.as[T])
 
-/**
- * Converts `JsonValue` to `Right` using right converter or to `Left` using
- * left if right is unsuccessful.
- */
+/** Converts `JsonValue` to `Either`. */
 given jsonValueToEither[A, B](using left: JsonInput[A])(using right: JsonInput[B]): JsonInput[Either[A, B]] with
   /** @inheritdoc */
   def read(value: JsonValue): Either[A, B] = Try(Right(right.read(value))).getOrElse(Left(left.read(value)))
@@ -257,21 +254,21 @@ given mapToJsonObject[T, M[T] <: Map[String, T]](using converter: JsonOutput[T])
   def write(value: M[T]): JsonObject =
     value.foldLeft(JsonObjectBuilder()) {
       case (builder, (name, value)) => builder.add(name, converter.write(value))
-    }.build()
+    }.toJsonObject()
 
 /** Converts `Array` to `JsonArray`. */
 given arrayToJsonArray[T](using converter: JsonOutput[T]): JsonOutput[Array[T]] with
   /** @inheritdoc */
   def write(value: Array[T]): JsonArray = value.foldLeft(JsonArrayBuilder()) {
     (builder, value) => builder.add(converter.write(value))
-  }.build()
+  }.toJsonArray()
 
 /** Converts `Iterable` to `JsonArray`. */
 given iterableToJsonArray[T, M[T] <: Iterable[T]](using converter: JsonOutput[T]): JsonOutput[M[T]] with
   /** @inheritdoc */
   def write(value: M[T]): JsonArray = value.foldLeft(JsonArrayBuilder()) {
     (builder, value) => builder.add(converter.write(value))
-  }.build()
+  }.toJsonArray()
 
 /** Converts `Some` to `JsonValue` or returns `JsonNull` if `None`. */
 given optionToJsonValue[T, M[T] <: Option[T]](using converter: JsonOutput[T]): JsonOutput[M[T]] with
@@ -293,10 +290,7 @@ given failureToJsonNull: JsonOutput[Failure[?]] with
   /** @inheritdoc */
   def write(value: Failure[?]): JsonNull = JsonNull
 
-/**
- * Converts `Right` to `JsonValue` using right converter or converts `Left`
- * using left.
- */
+/** Converts `Either` to `JsonValue`. */
 given eitherToJsonValue[A, B, M[A, B] <: Either[A, B]](using left: JsonOutput[A])(using right: JsonOutput[B]): JsonOutput[M[A, B]] with
   /** @inheritdoc */
   def write(value: M[A, B]): JsonValue = value.fold(left.write(_), right.write(_))

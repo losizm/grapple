@@ -30,7 +30,7 @@ import scala.collection.mutable.{ SeqMap as MutableSeqMap }
  *   .add("id", 1000)
  *   .add("name", "lupita")
  *   .add("groups", Set("lupita", "sudoer"))
- *   .build()
+ *   .toJsonObject()
  *
  * assert { user("id").as[Int] == 1000 }
  * assert { user("name").as[String] == "lupita" }
@@ -175,7 +175,7 @@ class JsonObjectBuilder:
     this
 
   /** Builds JSON object. */
-  def build(): JsonObject =
+  def toJsonObject(): JsonObject =
     val obj = JsonObjectImpl(values.to(ImmutableSeqMap))
     values.clear()
     obj

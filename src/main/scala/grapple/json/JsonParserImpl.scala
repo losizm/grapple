@@ -71,7 +71,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
             case Event.Value(value) => builder.add(name, value)
             case _                  => throw JsonException("Unexpected event")
         case _                      => throw JsonException("Unexpected event")
-    builder.build()
+    builder.toJsonObject()
 
   def getArray(): JsonArray =
     if tracker.isEmpty || !tracker.top.isArray then
@@ -87,7 +87,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
         case Event.StartArray   => builder.add(getArray())
         case Event.Value(value) => builder.add(value)
         case _                  => throw JsonException("Unexpected event")
-    builder.build()
+    builder.toJsonArray()
 
   def close(): Unit =
     state = State.Done

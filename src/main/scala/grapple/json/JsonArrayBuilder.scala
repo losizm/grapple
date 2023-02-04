@@ -29,7 +29,7 @@ import scala.collection.mutable.ListBuffer
  *   .add(1000)
  *   .add("lupita")
  *   .add(Set("lupita", "sudoer"))
- *   .build()
+ *   .toJsonArray()
  *
  * assert { user(0).as[Int] == 1000 }
  * assert { user(1).as[String] == "lupita" }
@@ -158,7 +158,7 @@ class JsonArrayBuilder:
     this
 
   /** Builds JSON array. */
-  def build(): JsonArray =
+  def toJsonArray(): JsonArray =
     val arr = JsonArrayImpl(values.toSeq)
     values.clear()
     arr

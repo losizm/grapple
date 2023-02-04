@@ -25,7 +25,7 @@ class JsonArrayBuilderSpec extends org.scalatest.flatspec.AnyFlatSpec:
       .add(Json.arr("lupita", "admin"))
       .add(true)
       .add(Json.obj("name" -> "lupita", "email" -> "lupita@localhost", "timeout" -> 10_000_000_000L))
-      .build()
+      .toJsonArray()
 
     assert(!user.isEmpty)
     assert(user.size == 5)
@@ -38,7 +38,7 @@ class JsonArrayBuilderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "build emtpy JsonArray" in {
-    val arr = JsonArrayBuilder().build()
+    val arr = JsonArrayBuilder().toJsonArray()
     assert(arr.isEmpty)
     assert(arr.size == 0)
   }

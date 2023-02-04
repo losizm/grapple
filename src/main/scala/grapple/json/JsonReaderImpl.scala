@@ -45,7 +45,7 @@ private class JsonReaderImpl(input: Reader) extends JsonReader:
         case event             => builder.add(name, getValue(event))
       event = reader.next()
 
-    builder.build()
+    builder.toJsonObject()
 
   private def readArray(): JsonArray =
     val builder = JsonArrayBuilder()
@@ -58,7 +58,7 @@ private class JsonReaderImpl(input: Reader) extends JsonReader:
         case _                 => builder.add(getValue(event))
       event = reader.next()
 
-    builder.build()
+    builder.toJsonArray()
 
   private inline def getFieldName(event: Event): String =
     event.asInstanceOf[Event.FieldName].get
