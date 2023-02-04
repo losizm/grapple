@@ -20,7 +20,7 @@ private object EncodedString:
     for
       c <- 0 to Char.MaxValue
     yield
-      "\\u" + ("0000" + c.toHexString).takeRight(4)
+      f"\\u$c%04x"
 
   def apply(value: String): String =
     val buffer = StringBuilder(value.length + 16)
