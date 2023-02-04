@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Carlos Conyers
+ * Copyright 2023 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] with
       case _                => throw InvalidRequest("object value expected")
 
   private def toRequest(json: JsonObject) =
-    val builder = JsonRpcRequest.builder()
+    val builder = JsonRpcRequestBuilder()
 
     json.get("jsonrpc") match
       case Some(s: JsonString) => builder.version(s.value)
@@ -116,7 +116,7 @@ given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
       case _                => throw JsonException("object value expected")
 
   private def toResponse(json: JsonObject) =
-    val builder = JsonRpcResponse.builder()
+    val builder = JsonRpcResponseBuilder()
 
     json.get("jsonrpc") match
       case Some(s: JsonString) => builder.version(s.value)

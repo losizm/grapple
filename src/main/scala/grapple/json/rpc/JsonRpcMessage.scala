@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Carlos Conyers
+ * Copyright 2023 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package grapple.json
 package rpc
-
-import scala.util.Try
 
 /** Defines JSON-RPC message. */
 sealed trait JsonRpcMessage:
@@ -111,94 +109,6 @@ sealed trait JsonRpcRequest extends JsonRpcMessage:
 
 /** Provides JSON-RPC request factory. */
 object JsonRpcRequest:
-  /** Provides JSON-RPC request builder. */
-  class Builder private[JsonRpcRequest]:
-    private var _version: String = "2.0"
-    private var _id: Option[JsonRpcIdentifier] = None
-    private var _method: String = null
-    private var _params: Option[JsonValue] = None
-    private var _attributes: Map[String, Any] = Map.empty
-
-    /** Sets version. */
-    def version(value: String): this.type =
-      if value == null then
-        throw NullPointerException()
-      _version = value
-      this
-
-    /** Sets identifier. */
-    def id(value: JsonRpcIdentifier): this.type =
-      if value == null then
-        throw NullPointerException()
-      _id = Some(value)
-      this
-
-    /** Sets identifier. */
-    def id(value: String): this.type =
-      id(JsonRpcIdentifier(value))
-
-    /** Sets identifier. */
-    def id(value: Long): this.type =
-      id(JsonRpcIdentifier(value))
-
-    /** Sets identifier to null value. */
-    def idNull(): this.type =
-      id(JsonRpcIdentifier.nullified)
-
-    /** Unsets identifier. */
-    def idUndefined(): this.type =
-      _id = None
-      this
-
-    /** Sets method. */
-    def method(value: String): this.type =
-      if value == null then
-        throw NullPointerException()
-      _method = value
-      this
-
-    /** Sets optional params. */
-    def params(value: Option[JsonValue]): this.type =
-      if value == null || value.contains(null) then
-        throw NullPointerException()
-
-      if !value.forall(_.isInstanceOf[JsonStructure]) then
-        throw IllegalArgumentException("params must be JSON structure")
-
-      _params = value
-      this
-
-    /** Sets params. */
-    def params(value: JsonValue): this.type =
-      if value == null then
-        throw NullPointerException()
-
-      if !value.isInstanceOf[JsonStructure] then
-        throw IllegalArgumentException("params must be JSON structure")
-
-      _params = Some(value)
-      this
-
-    /** Sets attributes. */
-    def attributes(value: Map[String, Any]): this.type =
-      if value == null then
-        throw NullPointerException()
-      _attributes = value
-      this
-
-    /** Sets attributes. */
-    def attributes(one: (String, Any), more: (String, Any)*): this.type =
-      attributes((one +: more).toMap)
-
-    /** Creates JSON-RPC request with current settings. */
-    def toJsonRpcRequest(): JsonRpcRequest =
-      if _method == null then
-        throw IllegalStateException("method is not set")
-      JsonRpcRequestImpl(_version, _id, _method, _params, _attributes)
-
-  /** Gets new request builder. */
-  def builder(): Builder = Builder()
-
   /**
    * Creates JSON-RPC request as notification &ndash; that is, without
    * identifier.
@@ -208,7 +118,7 @@ object JsonRpcRequest:
    * @param params optional method params
    */
   def apply(version: String, method: String, params: Option[JsonValue]): JsonRpcRequest =
-    builder()
+    JsonRpcRequestBuilder()
       .version(version)
       .method(method)
       .params(params)
@@ -223,7 +133,7 @@ object JsonRpcRequest:
    * @param params optional method params
    */
   def apply(version: String, id: JsonRpcIdentifier, method: String, params: Option[JsonValue]): JsonRpcRequest =
-    builder()
+    JsonRpcRequestBuilder()
       .version(version)
       .id(id)
       .method(method)
@@ -308,114 +218,6 @@ sealed trait JsonRpcResponse extends JsonRpcMessage:
 
 /** Provides JSON-RPC response factory. */
 object JsonRpcResponse:
-  /** Provides JSON-RPC response builder. */
-  final class Builder private[JsonRpcResponse]:
-    private var _version: String = "2.0"
-    private var _id: JsonRpcIdentifier = null
-    private var _content: Either[JsonRpcError, JsonValue] = null
-    private var _attributes: Map[String, Any] = Map.empty
-
-    /** Sets version. */
-    def version(value: String): this.type =
-      if value == null then
-        throw NullPointerException()
-      _version = value
-      this
-
-    /** Sets identifier. */
-    def id(value: JsonRpcIdentifier): this.type =
-      if value == null then
-        throw NullPointerException()
-      _id = value
-      this
-
-    /** Sets identifier. */
-    def id(value: String): this.type =
-      id(JsonRpcIdentifier(value))
-
-    /** Sets identifier. */
-    def id(value: Long): this.type =
-      id(JsonRpcIdentifier(value))
-
-    /** Sets identifier to null value. */
-    def idNull(): this.type =
-      id(JsonRpcIdentifier.nullified)
-
-    /**
-     * Tries to set result or sets error on failure.
-     *
-     * @note If `value` throws exception that does not match `onFailure`, then
-     * the exception is raised.
-     */
-    def tryResult(value: => JsonValue)(using onFailure: PartialFunction[Throwable, JsonRpcError]): this.type =
-      Try(value)
-        .map(result(_))
-        .recover { case err if onFailure.isDefinedAt(err) => error(onFailure(err)) }
-        .get
-      this
-
-    /** Sets either result or error. */
-    def resultOrError(value: JsonValue | JsonRpcError): this.type =
-      value match
-        case json: JsonValue   => result(json)
-        case err: JsonRpcError => error(err)
-
-    /** Sets result. */
-    def result(value: JsonValue): this.type =
-      if value == null then
-        throw NullPointerException()
-      _content = Right(value)
-      this
-
-    /** Sets error. */
-    def error(value: JsonRpcError): this.type =
-      if value == null then
-        throw NullPointerException()
-      _content = Left(value)
-      this
-
-    /**
-     * Sets error.
-     *
-     * @param code error code
-     * @param message error message
-     * @param data optional additional data
-     */
-    def error(code: Int, message: String, data: Option[JsonValue]): this.type =
-      error(JsonRpcError(code, message, data))
-
-    /**
-     * Sets error.
-     *
-     * @param code error code
-     * @param message error message
-     * @param data additional data
-     */
-    def error(code: Int, message: String, data: JsonValue): this.type =
-      error(JsonRpcError(code, message, data))
-
-    /** Sets attributes. */
-    def attributes(value: Map[String, Any]): this.type =
-      if value == null then
-        throw NullPointerException()
-      _attributes = value
-      this
-
-    /** Sets attributes. */
-    def attributes(one: (String, Any), more: (String, Any)*): this.type =
-      attributes((one +: more).toMap)
-
-    /** Creates JSON-RPC response with current settings. */
-    def toJsonRpcResponse(): JsonRpcResponse =
-      if _id == null then
-        throw IllegalStateException("id is not set")
-      if _content == null then
-        throw IllegalStateException("neither result nor error is set")
-      JsonRpcResponseImpl(_version, _id, _content, _attributes)
-
-  /** Gets new response builder. */
-  def builder(): Builder = Builder()
-
   /**
    * Creates JSON-RPC response with result.
    *
@@ -424,7 +226,7 @@ object JsonRpcResponse:
    * @param result result
    */
   def apply(version: String, id: JsonRpcIdentifier, result: JsonValue): JsonRpcResponse =
-    builder()
+    JsonRpcResponseBuilder()
       .version(version)
       .id(id)
       .result(result)
@@ -438,7 +240,7 @@ object JsonRpcResponse:
    * @param error error
    */
   def apply(version: String, id: JsonRpcIdentifier, error: JsonRpcError): JsonRpcResponse =
-    builder()
+    JsonRpcResponseBuilder()
       .version(version)
       .id(id)
       .error(error)

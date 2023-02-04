@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Carlos Conyers
+ * Copyright 2023 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class JsonRpcRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "create JsonRpcRequest with attributes" in {
-    val req1 = JsonRpcRequest.builder()
+    val req1 = JsonRpcRequestBuilder()
       .id(123)
       .method("compute")
       .params(Seq(1, 2, 3))

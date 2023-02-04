@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Carlos Conyers
+ * Copyright 2023 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "create JsonRpcResponse with attributes" in {
-    val res1 = JsonRpcResponse.builder()
+    val res1 = JsonRpcResponseBuilder()
       .id(123)
       .result(6)
       .attributes("one" -> 1, "two" -> "2")
@@ -130,7 +130,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "create JsonRpcResponse with either result or error" in {
     val value = 6
-    val res1 = JsonRpcResponse.builder()
+    val res1 = JsonRpcResponseBuilder()
       .id(123)
       .resultOrError(if value < 10 then value else InvalidParams())
       .toJsonRpcResponse()
@@ -140,7 +140,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res1.result.as[Int] == 6)
     assertThrows[NoSuchElementException](res1.error)
 
-    val res2 = JsonRpcResponse.builder()
+    val res2 = JsonRpcResponseBuilder()
       .id(123)
       .resultOrError(if value < 10 then InvalidParams() else value)
       .toJsonRpcResponse()
@@ -153,7 +153,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "create JsonRpcResponse with default on failure" in {
     val value = 6
-    val res1 = JsonRpcResponse.builder()
+    val res1 = JsonRpcResponseBuilder()
       .id(123)
       .tryResult(if value < 10 then value else throw InvalidParams())
       .toJsonRpcResponse()
@@ -163,7 +163,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res1.result.as[Int] == 6)
     assertThrows[NoSuchElementException](res1.error)
 
-    val res2 = JsonRpcResponse.builder()
+    val res2 = JsonRpcResponseBuilder()
       .id(123)
       .tryResult(if value < 10 then throw InvalidParams() else value)
       .toJsonRpcResponse()
@@ -173,7 +173,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[NoSuchElementException](res2.result)
     assert(res2.error.isInvalidParams)
 
-    val res3 = JsonRpcResponse.builder()
+    val res3 = JsonRpcResponseBuilder()
       .id(123)
       .tryResult(if value < 10 then value else throw IllegalArgumentException())
       .toJsonRpcResponse()
@@ -183,7 +183,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res3.result.as[Int] == 6)
     assertThrows[NoSuchElementException](res3.error)
 
-    val res4 = JsonRpcResponse.builder()
+    val res4 = JsonRpcResponseBuilder()
       .id(123)
       .tryResult(if value < 10 then throw IllegalArgumentException() else value)
       .toJsonRpcResponse()
@@ -199,7 +199,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
       case _: IllegalArgumentException => InvalidParams()
 
     val value = 6
-    val res1 = JsonRpcResponse.builder()
+    val res1 = JsonRpcResponseBuilder()
       .id(123)
       .tryResult(if value < 10 then value else throw IllegalArgumentException())
       .toJsonRpcResponse()
@@ -209,7 +209,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res1.result.as[Int] == 6)
     assertThrows[NoSuchElementException](res1.error)
 
-    val res2 = JsonRpcResponse.builder()
+    val res2 = JsonRpcResponseBuilder()
       .id(123)
       .tryResult(if value < 10 then throw IllegalArgumentException() else value)
       .toJsonRpcResponse()
@@ -219,7 +219,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[NoSuchElementException](res2.result)
     assert(res2.error.isInvalidParams)
 
-    val res3 = JsonRpcResponse.builder()
+    val res3 = JsonRpcResponseBuilder()
       .id(123)
       .tryResult(if value < 10 then value else throw ArithmeticException())
       .toJsonRpcResponse()
@@ -230,13 +230,13 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[NoSuchElementException](res3.error)
 
     assertThrows[ArithmeticException](
-      JsonRpcResponse.builder()
+      JsonRpcResponseBuilder()
         .id(123)
         .tryResult(if value < 10 then throw ArithmeticException() else value)
         .toJsonRpcResponse()
     )
 
-    val res4 = JsonRpcResponse.builder()
+    val res4 = JsonRpcResponseBuilder()
       .id(123)
       .tryResult(if value < 10 then throw ArithmeticException() else value)(using defaultOnFailure)
       .toJsonRpcResponse()
