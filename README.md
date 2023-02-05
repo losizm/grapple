@@ -8,7 +8,7 @@ The JSON library for Scala.
 To get started, add **Grapple** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "grapple" % "12.1.0"
+libraryDependencies += "com.github.losizm" %% "grapple" % "13.0.0"
 ```
 
 ## Let's Grapple!
@@ -20,8 +20,8 @@ Here is what the library offers&hellip;
 ### Usual Suspects
 To model standard JSON values, the library includes a list of classes with
 familiar names: `JsonObject`, `JsonArray`, `JsonString`, `JsonNumber`,
-`JsonBoolean`, and `JsonNull`. When using implicit conversions, you're not
-required to deal with these classes directly.
+`JsonBoolean`, and `JsonNull`. However, when using implicit conversions, you're
+not required to deal with these classes directly.
 
 ### Reading and Writing
 Reading and writing are powered by `JsonInput` and `JsonOutput`. They convert
@@ -57,10 +57,9 @@ assert { dupe("id").as[Int] == 1000 }
 assert { dupe("name").as[String] == "lupita" }
 ```
 
-Special implementations are available for working with collections. So, for
-example, if you define `JsonInput[User]`, you automatically get
-`JsonInput[Seq[User]]`. The same applies to `JsonOutput[User]`: you get
-`JsonOutput[Seq[User]]` for free.
+Special implementations are available for working with collections. For example,
+if you define `JsonInput[User]`, you automatically get `JsonInput[Seq[User]]`.
+The same applies to `JsonOutput[User]`: you get `JsonOutput[Seq[User]]` for free.
 
 ```scala
 val json = Json.parse("""[
@@ -173,8 +172,7 @@ finally
   out.close()
 ```
 
-And, the parser iterates events as it chews through data in the underlying
-stream.
+And, the parser iterates events as it chews through data in an underlying stream.
 
 ```scala
 import JsonParser.Event
@@ -236,25 +234,22 @@ given JsonInput[Params]  = json   => Params(json.as[Seq[Int]]*)
 given JsonOutput[Params] = params => Json.toJson(params.values)
 
 // Create request with builder
-val request = JsonRpcRequest.builder()
+val request = JsonRpcRequestBuilder()
   .version("2.0")
   .id("590d24ae-500a-486c-8d73-8035e78529bd")
   .method("sum")
   .params(Params(1, 2, 3))
-  .build()
+  .toJsonRpcRequest()
 
 // Create response with builder
-val response = JsonRpcResponse.builder()
+val response = JsonRpcResponseBuilder()
   .version(request.version)
   .id(request.id)
   .resultOrError {
     request.method match
-      // Set result
       case "sum" => request.params.get.as[Params].sum
-
-      // Or set error if unknown method
-      case name  =>  MethodNotFound(name)
-  }.build()
+      case name  => MethodNotFound(name)
+  }.toJsonRpcResponse()
 ```
 
 And, you can parse them using library-provided magic.

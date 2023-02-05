@@ -53,17 +53,29 @@ object Json:
   def arr(values: JsonValue*): JsonArray =
     JsonArray(values)
 
-  /** Parses JSON structure from text. */
+  /**
+   * Parses JSON structure from text.
+   *
+   * @throws JsonParserError if text cannot be parsed to JSON structure
+   */
   def parse(text: String): JsonStructure =
     val reader = JsonReader(text)
     try reader.read() finally reader.close()
 
-  /** Parses JSON structure from bytes. */
+  /**
+   * Parses JSON structure from bytes.
+   *
+   * @throws JsonParserError if bytes cannot be parsed to JSON structure
+   */
   def parse(bytes: Array[Byte]): JsonStructure =
     val reader = JsonReader(bytes)
     try reader.read() finally reader.close()
 
-  /** Parses JSON structure from bytes. */
+  /**
+   * Parses JSON structure from bytes.
+   *
+   * @throws JsonParserError if bytes cannot be parsed to JSON structure
+   */
   def parse(bytes: Array[Byte], offset: Int, length: Int): JsonStructure =
     val reader = JsonReader(bytes, offset, length)
     try reader.read() finally reader.close()
@@ -72,6 +84,8 @@ object Json:
    * Parses JSON structure from input.
    *
    * @note Closes input on return.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON structure
    */
   def parse(input: Reader): JsonStructure =
     val reader = JsonReader(input)
@@ -81,17 +95,27 @@ object Json:
    * Parses JSON structure from input.
    *
    * @note Closes input on return.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON structure
    */
   def parse(input: InputStream): JsonStructure =
     val reader = JsonReader(input)
     try reader.read() finally reader.close()
 
-  /** Parses JSON structure from input. */
+  /**
+   * Parses JSON structure from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON structure
+   */
   def parse(input: File): JsonStructure =
     val reader = JsonReader(input)
     try reader.read() finally reader.close()
 
-  /** Parses JSON structure from input. */
+  /**
+   * Parses JSON structure from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON structure
+   */
   def parse(input: Path): JsonStructure =
     val reader = JsonReader(input)
     try reader.read() finally reader.close()

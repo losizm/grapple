@@ -39,7 +39,11 @@ import java.nio.file.Path
  * @see [[JsonParser]], [[JsonWriter]]
  */
 trait JsonReader extends AutoCloseable:
-  /** Reads JSON structure. */
+  /**
+   * Reads JSON structure.
+   *
+   * @throws JsonException if it cannot read JSON structure
+   */
   def read(): JsonStructure
 
   /** Closes reader. */
