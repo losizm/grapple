@@ -1,6 +1,6 @@
 # Grapple
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/grapple_3.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.losizm%22%20AND%20a:%22grapple_3%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.losizm/grapple_3.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=g:com.github.losizm%20a:grapple_3)
 
 The JSON library for Scala.
 
@@ -8,7 +8,7 @@ The JSON library for Scala.
 To get started, add **Grapple** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "grapple" % "13.0.0"
+libraryDependencies += "com.github.losizm" %% "grapple" % "14.0.0"
 ```
 
 ## Let's Grapple!
