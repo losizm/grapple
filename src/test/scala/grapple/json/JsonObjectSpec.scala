@@ -187,7 +187,7 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user.get("_name").isEmpty)
     assert(user.get("name").contains(JsonString("lupita")))
     assert(user.get("_enabled").isEmpty)
-    assert(user.get("enabled").contains(JsonTrue))
+    assert(user.get("enabled").contains(JsonBoolean.True))
     assert(user.get("_secret").isEmpty)
     assert(user.get("secret").contains(JsonNull))
 
@@ -200,7 +200,7 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user.map[String]("secret").isEmpty)
     assert(user.map[Int]("secret").isEmpty)
     assert(user.map[Boolean]("secret").isEmpty)
-    assert(user.map[JsonNull]("secret").isEmpty)
+    assert(user.map[JsonNull.type]("secret").isEmpty)
   }
 
   it should "inspect empty JsonObject" in {

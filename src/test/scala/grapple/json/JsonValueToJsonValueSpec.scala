@@ -29,6 +29,6 @@ class JsonValueToJsonValueSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val list = obj("values").as[List[JsonValue]]
     assert(list(0) == JsonString("abc"))
     assert(list(1) == JsonNumber(123))
-    assert(list(2) == JsonTrue)
+    assert(list(2) == JsonBoolean.True)
     assert(list(3) == JsonNull)
   }

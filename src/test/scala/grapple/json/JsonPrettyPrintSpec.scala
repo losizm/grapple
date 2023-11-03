@@ -59,7 +59,7 @@ class JsonPrettyPrintSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "pretty print other JSON values" in {
     assert(Json.toPrettyPrint(JsonString("Hello, world!")) == "\"Hello, world!\"")
     assert(Json.toPrettyPrint(JsonNumber(123.456)) == "123.456")
-    assert(Json.toPrettyPrint(JsonTrue) == "true")
-    assert(Json.toPrettyPrint(JsonFalse) == "false")
+    assert(Json.toPrettyPrint(JsonBoolean.True) == "true")
+    assert(Json.toPrettyPrint(JsonBoolean.False) == "false")
     assert(Json.toPrettyPrint(JsonNull) == "null")
   }

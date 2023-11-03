@@ -112,7 +112,7 @@ given jsonValueToJsonNumber: JsonInput[JsonNumber] = _.asInstanceOf[JsonNumber]
 given jsonValueToJsonBoolean: JsonInput[JsonBoolean] = _.asInstanceOf[JsonBoolean]
 
 /** Casts `JsonValue` to `JsonNull`. */
-given jsonValueToJsonNull: JsonInput[JsonNull] = _.asInstanceOf[JsonNull]
+given jsonValueToJsonNull: JsonInput[JsonNull.type] = _.asInstanceOf[JsonNull.type]
 
 /** Converts `JsonValue` to `String`. */
 given jsonValueToString: JsonInput[String] = _.asInstanceOf[JsonString].value

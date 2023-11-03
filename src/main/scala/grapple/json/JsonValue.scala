@@ -123,8 +123,8 @@ trait JsonObject extends JsonStructure:
    *
    * @throws ClassCastException if not JsonNull
    */
-  def getJsonNull(name: String): JsonNull =
-    apply(name).asInstanceOf[JsonNull]
+  def getJsonNull(name: String): JsonNull.type =
+    apply(name).asInstanceOf[JsonNull.type]
 
   /**
    * Gets String.
@@ -234,7 +234,7 @@ trait JsonObject extends JsonStructure:
    * @throws ClassCastException if not JsonNull
    */
   def isNull(name: String): Boolean =
-    apply(name).isInstanceOf[JsonNull]
+    apply(name) == JsonNull
 
   /**
    * Maps optional value excluding null.
@@ -406,8 +406,8 @@ trait JsonArray extends JsonStructure:
    *
    * @throws ClassCastException if not JsonNull
    */
-  def getJsonNull(index: Int): JsonNull =
-    apply(index).asInstanceOf[JsonNull]
+  def getJsonNull(index: Int): JsonNull.type =
+    apply(index).asInstanceOf[JsonNull.type]
 
   /**
    * Gets String at given index.
@@ -491,7 +491,7 @@ trait JsonArray extends JsonStructure:
 
   /** Tests for null at given index. */
   def isNull(index: Int): Boolean =
-    apply(index).isInstanceOf[JsonNull]
+    apply(index) == JsonNull
 
   /**
    * Updates value at given index.
@@ -568,28 +568,28 @@ trait JsonNumber extends JsonValue:
   /**
    * Gets value as `Byte`.
    *
-   * @throws ArithmeticException if value cannot be represented exactly
+   * @throws java.lang.ArithmeticException if value cannot be represented exactly
    */
   def byteValue: Byte
 
   /**
    * Gets value as `Short`.
    *
-   * @throws ArithmeticException if value cannot be represented exactly
+   * @throws java.lang.ArithmeticException if value cannot be represented exactly
    */
   def shortValue: Short
 
   /**
    * Gets value as `Int`.
    *
-   * @throws ArithmeticException if value cannot be represented exactly
+   * @throws java.lang.ArithmeticException if value cannot be represented exactly
    */
   def intValue: Int
 
   /**
    * Gets value as `Long`.
    *
-   * @throws ArithmeticException if value cannot be represented exactly
+   * @throws java.lang.ArithmeticException if value cannot be represented exactly
    */
   def longValue: Long
 
@@ -602,7 +602,7 @@ trait JsonNumber extends JsonValue:
   /**
    * Gets value as `BigInt`.
    *
-   * @throws ArithmeticException if value cannot be represented exactly
+   * @throws java.lang.ArithmeticException if value cannot be represented exactly
    */
   def bigIntValue: BigInt
 
@@ -652,9 +652,31 @@ sealed trait JsonBoolean extends JsonValue:
 
 /** Provides JSON boolean factory. */
 object JsonBoolean:
+  /** Represents JSON true. */
+  case object True extends JsonBoolean:
+    val value = true
+
+    /**
+     * Gets string representation.
+     *
+     * @return `"true"`
+     */
+    override val toString = "true"
+
+  /** Represents JSON false. */
+  case object False extends JsonBoolean:
+    val value = false
+
+    /**
+     * Gets string representation.
+     *
+     * @return `"false"`
+     */
+    override val toString = "false"
+
   /** Gets JSON boolean with value. */
   def apply(value: Boolean): JsonBoolean =
-    if value then JsonTrue else JsonFalse
+    if value then True else False
 
   /** Destructures JSON boolean to its value. */
   def unapply(json: JsonBoolean): Option[Boolean] =
@@ -662,34 +684,11 @@ object JsonBoolean:
       case true  => Some(json.value)
       case false => None
 
-/** Represents JSON true. */
-case object JsonTrue extends JsonBoolean:
-  /**
-   * @inheritdoc
-   *
-   * @return `true`
-   */
-  val value = true
-
-  /** Returns `"true"`. */
-  override val toString = "true"
-
-/** Represents JSON false. */
-case object JsonFalse extends JsonBoolean:
-  /**
-   * @inheritdoc
-   *
-   * @return `false`
-   */
-  val value = false
-
-  /** Returns `"false"`. */
-  override val toString = "false"
-
-/** Defines JSON null. */
-sealed trait JsonNull extends JsonValue
-
 /** Represents JSON null. */
-case object JsonNull extends JsonNull:
-  /** Returns `"null"`. */
+case object JsonNull extends JsonValue:
+  /**
+   * Gets string representation.
+   *
+   * @return `"null"`
+   */
   override val toString = "null"
