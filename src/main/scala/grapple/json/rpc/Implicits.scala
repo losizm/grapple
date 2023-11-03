@@ -17,7 +17,35 @@ package grapple.json
 package rpc
 
 /** Converts `JsonValue` to `JsonRpcError`. */
-given jsonValueToJsonRpcError: JsonInput[JsonRpcError] with
+given jsonValueToJsonRpcError: JsonInput[JsonRpcError] = JsonValueToJsonRpcError
+
+/** Converts `JsonRpcError` to `JsonValue`. */
+given jsonRpcErrorToJsonValue: JsonOutput[JsonRpcError] = JsonRpcErrorToJsonValue
+
+/** Converts `JsonValue` to `JsonRpcIdentifier`. */
+given jsonValueToJsonRpcIdentifier: JsonInput[JsonRpcIdentifier] = JsonValueToJsonRpcIdentifier
+
+/** Converts `JsonRpcIdentifier` to `JsonValue`. */
+given jsonRpcIdentifierToJsonValue: JsonOutput[JsonRpcIdentifier] = JsonRpcIdentifierToJsonValue
+
+/** Converts `JsonValue` to `JsonRpcRequest`. */
+given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] = JsonValueToJsonRpcRequest
+
+/** Converts `JsonRpcRequest` to `JsonValue`. */
+given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] = JsonRpcRequestToJsonValue
+
+/** Converts `JsonValue` to `JsonRpcResponse`. */
+given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] = JsonValueToJsonRpcResponse
+
+/** Converts `JsonRpcResponse` to `JsonValue`. */
+given jsonRpcResponseToJsonValue: JsonOutput[JsonRpcResponse] = JsonRpcResponseToJsonValue
+
+/** Provides passthrough for `JsonRpcError` or returns `InternalError`. */
+given defaultOnFailure: PartialFunction[Throwable, JsonRpcError] =
+  case err: JsonRpcError => err
+  case _                 => InternalError()
+
+private object JsonValueToJsonRpcError extends JsonInput[JsonRpcError]:
   def read(json: JsonValue): JsonRpcError =
     json match
       case json: JsonObject =>
@@ -30,8 +58,7 @@ given jsonValueToJsonRpcError: JsonInput[JsonRpcError] with
       case _ =>
         throw JsonException("object value expected")
 
-/** Converts `JsonRpcError` to `JsonValue`. */
-given jsonRpcErrorToJsonValue: JsonOutput[JsonRpcError] with
+private object JsonRpcErrorToJsonValue extends JsonOutput[JsonRpcError]:
   def write(error: JsonRpcError): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("code", error.code)
@@ -39,8 +66,7 @@ given jsonRpcErrorToJsonValue: JsonOutput[JsonRpcError] with
     error.data.foreach(builder.add("data", _))
     builder.toJsonObject()
 
-/** Converts `JsonValue` to `JsonRpcIdentifier`. */
-given jsonValueToJsonRpcIdentifier: JsonInput[JsonRpcIdentifier] with
+private object JsonValueToJsonRpcIdentifier extends JsonInput[JsonRpcIdentifier]:
   def read(json: JsonValue): JsonRpcIdentifier =
     json match
       case id: JsonString => JsonRpcIdentifier(id.value)
@@ -48,15 +74,13 @@ given jsonValueToJsonRpcIdentifier: JsonInput[JsonRpcIdentifier] with
       case JsonNull       => JsonRpcIdentifier.nullified
       case _              => throw JsonException("string, number, or null value expected")
 
-/** Converts `JsonRpcIdentifier` to `JsonValue`. */
-given jsonRpcIdentifierToJsonValue: JsonOutput[JsonRpcIdentifier] with
+private object JsonRpcIdentifierToJsonValue extends JsonOutput[JsonRpcIdentifier]:
   def write(id: JsonRpcIdentifier): JsonValue =
     if      id.isString then JsonString(id.stringValue)
     else if id.isNumber then JsonNumber(id.numberValue)
     else                     JsonNull
 
-/** Converts `JsonValue` to `JsonRpcRequest`. */
-given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] with
+private object JsonValueToJsonRpcRequest extends JsonInput[JsonRpcRequest]:
   def read(json: JsonValue): JsonRpcRequest =
     json match
       case json: JsonObject => toRequest(json)
@@ -94,8 +118,7 @@ given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] with
     catch case _: ArithmeticException =>
       throw InvalidRequest("integer value expected for id")
 
-/** Converts `JsonRpcRequest` to `JsonValue`. */
-given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] with
+private object JsonRpcRequestToJsonValue extends JsonOutput[JsonRpcRequest]:
   def write(request: JsonRpcRequest): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("version", request.version)
@@ -108,8 +131,7 @@ given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] with
 
     builder.toJsonObject()
 
-/** Converts `JsonValue` to `JsonRpcResponse`. */
-given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
+private object JsonValueToJsonRpcResponse extends JsonInput[JsonRpcResponse]:
   def read(json: JsonValue): JsonRpcResponse =
     json match
       case json: JsonObject => toResponse(json)
@@ -145,8 +167,7 @@ given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] with
     catch case _: ArithmeticException =>
       throw JsonException("integer value expected for id")
 
-/** Converts `JsonRpcResponse` to `JsonValue`. */
-given jsonRpcResponseToJsonValue: JsonOutput[JsonRpcResponse] with
+private object JsonRpcResponseToJsonValue extends JsonOutput[JsonRpcResponse]:
   def write(response: JsonRpcResponse): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("version", response.version)
@@ -157,8 +178,3 @@ given jsonRpcResponseToJsonValue: JsonOutput[JsonRpcResponse] with
       case false => builder.add("error", Json.toJson(response.error))
 
     builder.toJsonObject()
-
-/** Provides passthrough for `JsonRpcError` or returns `InternalError`. */
-given defaultOnFailure: PartialFunction[Throwable, JsonRpcError] =
-  case err: JsonRpcError => err
-  case _                 => InternalError()
