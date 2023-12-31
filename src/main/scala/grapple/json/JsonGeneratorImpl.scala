@@ -27,11 +27,11 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
 
   private given BufferedWriter = writer
 
-  def writeStartObject(name: String): this.type =
-    writeStart(name, '{', ObjectContext(0))
+  def writeStartObject(key: String): this.type =
+    writeStart(key, '{', ObjectContext(0))
 
-  def writeStartArray(name: String): this.type =
-    writeStart(name, '[', ArrayContext(0))
+  def writeStartArray(key: String): this.type =
+    writeStart(key, '[', ArrayContext(0))
 
   def writeStartObject(): this.type =
     writeStart('{', ObjectContext(0))
@@ -49,8 +49,8 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
 
     this
 
-  def write(name: String, value: JsonValue): this.type =
-    if name == null || value == null then
+  def write(key: String, value: JsonValue): this.type =
+    if key == null || value == null then
       throw NullPointerException()
 
     if tracker.isEmpty then
@@ -59,7 +59,7 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
     tracker.top match
       case context: ObjectContext =>
         if context.size > 0 then writer.write(',')
-        printer.write(name, value, tracker.size)
+        printer.write(key, value, tracker.size)
         context.size += 1
         this
 
@@ -84,8 +84,8 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
   def flush(): Unit = writer.flush()
   def close(): Unit = writer.close()
 
-  private def writeStart(name: String, start: Char, newContext: JsonContext): this.type =
-    if name == null then
+  private def writeStart(key: String, start: Char, newContext: JsonContext): this.type =
+    if key == null then
       throw NullPointerException()
 
     if tracker.isEmpty then
@@ -94,7 +94,7 @@ private class JsonGeneratorImpl(output: Writer, printer: JsonPrinter) extends Js
     tracker.top match
       case context: ObjectContext =>
         if context.size > 0 then writer.write(',')
-        printer.writeStart(name, start, tracker.size)
+        printer.writeStart(key, start, tracker.size)
         tracker.push(newContext)
         context.size += 1
         this

@@ -21,14 +21,25 @@ private case class JsonObjectImpl(fields: Map[String, JsonValue]) extends JsonOb
   if fields == null then
     throw NullPointerException()
 
-  lazy val names = fields.keys.toSeq
-  lazy val size  = fields.size
+  lazy val keys = fields.keys.toSet
+  lazy val size = fields.size
 
-  def apply(name: String) =
-    fields(name)
+  def apply(key: String) =
+    fields(key)
 
-  def get(name: String) =
-    fields.get(name)
+  def get(key: String) =
+    fields.get(key)
+
+  def updated(key: String, value: JsonValue): JsonObject =
+    (key, value) match
+      case (null, _    ) => throw NullPointerException()
+      case (key,  null ) => JsonObjectImpl(fields.updated(key, JsonNull))
+      case (key,  value) => JsonObjectImpl(fields.updated(key, value))
+
+  def removed(key: String): JsonObject =
+    if key == null then
+      throw NullPointerException()
+    JsonObjectImpl(fields.removed(key))
 
   @targetName("concat")
   def ++(other: JsonObject): JsonObject =
@@ -36,19 +47,6 @@ private case class JsonObjectImpl(fields: Map[String, JsonValue]) extends JsonOb
       throw NullPointerException()
     JsonObjectImpl(fields ++ other.fields)
 
-  @targetName("updated")
-  def +(field: (String, JsonValue)): JsonObject =
-    field match
-      case (null, _    ) => throw NullPointerException()
-      case (name, null ) => JsonObjectImpl(fields + (name -> JsonNull))
-      case (name, value) => JsonObjectImpl(fields + (name -> value))
-
-  @targetName("removed")
-  def -(name: String): JsonObject =
-    if name == null then
-      throw NullPointerException()
-    JsonObjectImpl(fields - name)
-
   override lazy val toString =
-    fields.map((name, value) => s"${EncodedString(name)}:$value")
+    fields.map((key, value) => s"${EncodedString(key)}:$value")
       .mkString("{", ",", "}")

@@ -17,232 +17,374 @@ package grapple.json
 
 import scala.annotation.targetName
 
-/** Defines JSON value. */
+/** Represents JSON value. */
 sealed trait JsonValue:
-  /** Converts value. */
-  final def as[T](using converter: JsonInput[T]): T =
-    converter.read(this)
+  /**
+   * Converts value.
+   *
+   * @param input converter
+   */
+  final def as[T](using input: JsonInput[T]): T =
+    input.read(this)
 
-/** Defines JSON structure. */
+/** Represents JSON null. */
+case object JsonNull extends JsonValue:
+  /**
+   * Gets string representation.
+   *
+   * @return `"null"`
+   */
+  override val toString = "null"
+
+/** Represents JSON string. */
+sealed trait JsonString extends JsonValue:
+  /** Gets value. */
+  def value: String
+
+/** Provides JSON string factory. */
+object JsonString:
+  /** Creates JSON string. */
+  def apply(value: String): JsonString =
+    JsonStringImpl(value)
+
+  /** Deconstructs JSON string. */
+  def unapply(json: JsonString): Option[String] =
+    json != null match
+      case true  => Some(json.value)
+      case false => None
+
+/** Represents JSON boolean. */
+sealed trait JsonBoolean extends JsonValue:
+  /** Gets value. */
+  def value: Boolean
+
+/** Provides JSON boolean factory. */
+object JsonBoolean:
+  /** Represents JSON true. */
+  case object True extends JsonBoolean:
+    val value = true
+
+    /**
+     * Gets string representation.
+     *
+     * @return `"true"`
+     */
+    override val toString = "true"
+
+  /** Represents JSON false. */
+  case object False extends JsonBoolean:
+    val value = false
+
+    /**
+     * Gets string representation.
+     *
+     * @return `"false"`
+     */
+    override val toString = "false"
+
+  /** Creates JSON boolean. */
+  def apply(value: Boolean): JsonBoolean =
+    if value then True else False
+
+  /** Deconstructs JSON boolean. */
+  def unapply(json: JsonBoolean): Option[Boolean] =
+    json != null match
+      case true  => Some(json.value)
+      case false => None
+
+/** Represents JSON number. */
+sealed trait JsonNumber extends JsonValue:
+  /**
+   * Gets value as `Int`.
+   *
+   * @throws java.lang.ArithmeticException if not represented exactly
+   */
+  def toInt: Int
+
+  /**
+   * Gets value as `Long`.
+   *
+   * @throws java.lang.ArithmeticException if not represented exactly
+   */
+  def toLong: Long
+
+  /** Gets value as `Float`. */
+  def toFloat: Float
+
+  /** Gets value as `Double`. */
+  def toDouble: Double
+
+  /**
+   * Gets value as `BigInt`.
+   *
+   * @throws java.lang.ArithmeticException if not represented exactly
+   */
+  def toBigInt: BigInt
+
+  /** Gets value as `BigDecimal`. */
+  def toBigDecimal: BigDecimal
+
+/** Provides JSON number factory. */
+object JsonNumber:
+  /**
+   * Creates JSON number.
+   *
+   * @throws NumberFormatException if value is invalid numeric representation
+   */
+  def apply(value: String): JsonNumber =
+    JsonNumberImpl(BigDecimal(value))
+
+  /** Creates JSON number. */
+  def apply(value: Int): JsonNumber =
+    JsonNumberImpl(BigDecimal(value))
+
+  /** Creates JSON number. */
+  def apply(value: Long): JsonNumber =
+    JsonNumberImpl(BigDecimal(value))
+
+  /** Creates JSON number. */
+  def apply(value: Double): JsonNumber =
+    JsonNumberImpl(BigDecimal(value))
+
+  /** Creates JSON number. */
+  def apply(value: BigInt): JsonNumber =
+    JsonNumberImpl(BigDecimal(value))
+
+  /** Creates JSON number. */
+  def apply(value: BigDecimal): JsonNumber =
+    JsonNumberImpl(value)
+
+  /** Deconstructs JSON number. */
+  def unapply(json: JsonNumber): Option[BigDecimal] =
+    json != null match
+      case true  => Some(json.toBigDecimal)
+      case false => None
+
+/** Represents JSON structure. */
 sealed trait JsonStructure extends JsonValue:
   /** Gets size. */
   def size: Int
 
-  /** Tests for emptiness. */
+  /** Tests for empty. */
   def isEmpty: Boolean = size == 0
 
+  /** Tests for non-empty. */
+  def nonEmpty: Boolean = size > 0
+
 /**
- * Defines JSON object.
+ * Represents JSON object.
  *
  * @see [[JsonObjectBuilder]]
  */
-trait JsonObject extends JsonStructure:
-  /** Gets field names. */
-  def names: Seq[String]
+trait JsonObject private[json] extends JsonStructure:
+  /** Gets object keys. */
+  def keys: Set[String]
 
-  /** Gets fields. */
+  /** Gets object fields. */
   def fields: Map[String, JsonValue]
 
   /**
    * Gets value.
    *
-   * @param name field name
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
    */
-  def apply(name: String): JsonValue
+  def apply(key: String): JsonValue
 
   /**
-   * Gets optional value.
+   * Optionally gets value.
    *
-   * @param name field name
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
    */
-  def get(name: String): Option[JsonValue]
+  def get(key: String): Option[JsonValue]
 
   /**
-   * Gets converted value or returns default if not present.
+   * Gets value or returns default.
    *
-   * @param name    field name
+   * @param key     object key
    * @param default default value
    */
-  def getOrElse[T](name: String, default: => T)(using JsonInput[T]): T =
-    get(name).map(_.as[T]).getOrElse(default)
-
-  /**
-   * Gets JSON object.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonObject
-   */
-  def getJsonObject(name: String): JsonObject =
-    apply(name).asInstanceOf[JsonObject]
-
-  /**
-   * Gets JSON array.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonArray
-   */
-  def getJsonArray(name: String): JsonArray =
-    apply(name).asInstanceOf[JsonArray]
-
-  /**
-   * Gets JSON string.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonString
-   */
-  def getJsonString(name: String): JsonString =
-    apply(name).asInstanceOf[JsonString]
-
-  /**
-   * Gets JSON number.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getJsonNumber(name: String): JsonNumber =
-    apply(name).asInstanceOf[JsonNumber]
-
-  /**
-   * Gets JSON boolean.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonBoolean
-   */
-  def getJsonBoolean(name: String): JsonBoolean =
-    apply(name).asInstanceOf[JsonBoolean]
-
-  /**
-   * Gets JSON null.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNull
-   */
-  def getJsonNull(name: String): JsonNull.type =
-    apply(name).asInstanceOf[JsonNull.type]
-
-  /**
-   * Gets String.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonString
-   */
-  def getString(name: String): String =
-    apply(name).asInstanceOf[JsonString].value
-
-  /**
-   * Gets Byte.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getByte(name: String): Byte =
-    apply(name).asInstanceOf[JsonNumber].byteValue
-
-  /**
-   * Gets Short.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getShort(name: String): Short =
-    apply(name).asInstanceOf[JsonNumber].shortValue
-
-  /**
-   * Gets Int.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getInt(name: String): Int =
-    apply(name).asInstanceOf[JsonNumber].intValue
-
-  /**
-   * Gets Long.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getLong(name: String): Long =
-    apply(name).asInstanceOf[JsonNumber].longValue
-
-  /**
-   * Gets Float.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getFloat(name: String): Float =
-    apply(name).asInstanceOf[JsonNumber].floatValue
-
-  /**
-   * Gets Double.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getDouble(name: String): Double =
-    apply(name).asInstanceOf[JsonNumber].doubleValue
-
-  /**
-   * Gets BigInt.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getBigInt(name: String): BigInt =
-    apply(name).asInstanceOf[JsonNumber].bigIntValue
-
-  /**
-   * Gets BigDecimal.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getBigDecimal(name: String): BigDecimal =
-    apply(name).asInstanceOf[JsonNumber].bigDecimalValue
-
-  /**
-   * Gets Boolean.
-   *
-   * @param name field name
-   *
-   * @throws ClassCastException if not JsonBoolean
-   */
-  def getBoolean(name: String): Boolean =
-    apply(name).asInstanceOf[JsonBoolean].value
+  def getOrElse(key: String, default: => JsonValue): JsonValue =
+    get(key).getOrElse(default)
 
   /**
    * Tests for null.
    *
-   * @param name field name
+   * @param key object key
    *
-   * @throws ClassCastException if not JsonNull
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
    */
-  def isNull(name: String): Boolean =
-    apply(name) == JsonNull
+  def isNull(key: String): Boolean =
+    apply(key) == JsonNull
 
   /**
-   * Maps optional value excluding null.
+   * Gets value as `String`.
    *
-   * @param name field name
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonString
    */
-  def map[T](name: String)(using JsonInput[T]): Option[T] =
-    get(name).filter(JsonNull.!=).map(_.as[T])
+  def getString(key: String): String =
+    apply(key).asInstanceOf[JsonString].value
+
+  /**
+   * Gets value as `Boolean`.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonBoolean
+   */
+  def getBoolean(key: String): Boolean =
+    apply(key).asInstanceOf[JsonBoolean].value
+
+  /**
+   * Gets value as `Int`.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws java.lang.ArithmeticException if not represented exactly
+   */
+  def getInt(key: String): Int =
+    apply(key).asInstanceOf[JsonNumber].toInt
+
+  /**
+   * Gets value as `Long`.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws java.lang.ArithmeticException if not represented exactly
+   */
+  def getLong(key: String): Long =
+    apply(key).asInstanceOf[JsonNumber].toLong
+
+  /**
+   * Gets value as `Float`.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonNumber
+   */
+  def getFloat(key: String): Float =
+    apply(key).asInstanceOf[JsonNumber].toFloat
+
+  /**
+   * Gets value as `Double`.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonNumber
+   */
+  def getDouble(key: String): Double =
+    apply(key).asInstanceOf[JsonNumber].toDouble
+
+  /**
+   * Gets value as `BigInt`.
+   *
+   * @param key object key
+   *
+   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws java.lang.ArithmeticException if not represented exactly
+   */
+  def getBigInt(key: String): BigInt =
+    apply(key).asInstanceOf[JsonNumber].toBigInt
+
+  /**
+   * Gets value as `BigDecimal`.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonNumber
+   */
+  def getBigDecimal(key: String): BigDecimal =
+    apply(key).asInstanceOf[JsonNumber].toBigDecimal
+
+  /**
+   * Gets value as `JsonObject`.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonObject
+   */
+  def getObject(key: String): JsonObject =
+    apply(key).asInstanceOf[JsonObject]
+
+  /**
+   * Gets value as `JsonArray`.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws java.lang.ClassCastException if not JsonArray
+   */
+  def getArray(key: String): JsonArray =
+    apply(key).asInstanceOf[JsonArray]
+
+  /**
+   * Reads value.
+   *
+   * @param key object key
+   *
+   * @throws java.util.NoSuchElementException if key does not exists
+   * @throws java.lang.NullPointerException if value is null
+   */
+  def read[T](key: String)(using JsonInput[T]): T =
+    apply(key) match
+      case JsonNull => throw NullPointerException()
+      case value    => value.as[T]
+
+  /**
+   * Optionally reads value.
+   *
+   * @param key object key
+   *
+   * @note The value is not read if it is null.
+   */
+  def readOption[T](key: String)(using JsonInput[T]): Option[T] =
+    get(key).filter(JsonNull.!=).map(_.as[T])
+
+  /**
+   * Reads value or returns default value.
+   *
+   * @param key     object key
+   * @param default default value
+   *
+   * @note The value is not read if it is null.
+   */
+  def readOrElse[T](key: String, default: => T)(using JsonInput[T]): T =
+   readOption(key).getOrElse(default)
+
+  /**
+   * Adds or updates field.
+   *
+   * @param key   object key
+   * @param value new value
+   *
+   * @return new JSON object
+   */
+  def updated(key: String, value: JsonValue): JsonObject
+
+  /**
+   * Removes field.
+   *
+   * @param key object key
+   *
+   * @return new JSON object
+   */
+  def removed(key: String): JsonObject
 
   /**
    * Concatenates JSON object.
@@ -251,24 +393,6 @@ trait JsonObject extends JsonStructure:
    */
   @targetName("concat")
   def ++(other: JsonObject): JsonObject
-
-  /**
-   * Adds or updates field.
-   *
-   * @return new JSON object
-   */
-  @targetName("updated")
-  def +(field: (String, JsonValue)): JsonObject
-
-  /**
-   * Removes field.
-   *
-   * @param name field name
-   *
-   * @return new JSON object
-   */
-  @targetName("removed")
-  def -(name: String): JsonObject
 
 /** Provides JSON object factory. */
 object JsonObject:
@@ -298,207 +422,190 @@ object JsonObject:
           builder.add(field._1, field._2)
         }.toJsonObject()
 
-  /** Destructures JSON object to its fields. */
+  /** Deconstructs JSON object. */
   def unapply(json: JsonObject): Option[Map[String, JsonValue]] =
     json != null match
       case true  => Some(json.fields)
       case false => None
 
 /**
- * Defines JSON array.
+ * Represents JSON array.
  *
  * @see [[JsonArrayBuilder]]
  */
-trait JsonArray extends JsonStructure:
-  /** Gets values. */
+trait JsonArray private[json] extends JsonStructure:
+  /** Gets array values. */
   def values: Seq[JsonValue]
 
-  /** Gets value at given index. */
+  /**
+   * Gets value.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   */
   def apply(index: Int): JsonValue
 
   /**
-   * Selects first value in array.
+   * Tests for null.
    *
-   * @throws NoSuchElementException if array is empty
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
    */
-  def head: JsonValue
-
-  /** Optionally selects first value in array. */
-  def headOption: Option[JsonValue]
+  def isNull(index: Int): Boolean =
+    apply(index) == JsonNull
 
   /**
-   * Selects last value in array.
+   * Gets value as `String`.
    *
-   * @throws NoSuchElementException if array is empty
-   */
-  def last: JsonValue
-
-  /** Optionally selects last value in array. */
-  def lastOption: Option[JsonValue]
-
-  /**
-   * Selects all values in array excluding last.
+   * @param index array index
    *
-   * @throws UnsupportedOperationException if array is empty
-   */
-  def init: JsonArray
-
-  /**
-   * Selects all values in array excluding first.
-   *
-   * @throws UnsupportedOperationException if array is empty
-   */
-  def tail: JsonArray
-
-  /**
-   * Selects slice of array.
-   *
-   * @param from  lowest index to include
-   * @param until lowest index to exclude
-   *
-   * @return slice of JSON array containing elements whose indexes are greater
-   * than or equal to `from` and less than `until`
-   */
-  def slice(from: Int, until: Int): JsonArray
-
-  /**
-   * Gets JSON object at given index.
-   *
-   * @throws ClassCastException if not JsonObject
-   */
-  def getJsonObject(index: Int): JsonObject =
-    apply(index).asInstanceOf[JsonObject]
-
-  /**
-   * Gets JSON array at given index.
-   *
-   * @throws ClassCastException if not JsonArray
-   */
-  def getJsonArray(index: Int): JsonArray =
-    apply(index).asInstanceOf[JsonArray]
-
-  /**
-   * Gets JSON string at given index.
-   *
-   * @throws ClassCastException if not JsonString
-   */
-  def getJsonString(index: Int): JsonString =
-    apply(index).asInstanceOf[JsonString]
-
-  /**
-   * Gets JSON number at given index.
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getJsonNumber(index: Int): JsonNumber =
-    apply(index).asInstanceOf[JsonNumber]
-
-  /**
-   * Gets JSON boolean at given index.
-   *
-   * @throws ClassCastException if not JsonBoolean
-   */
-  def getJsonBoolean(index: Int): JsonBoolean =
-    apply(index).asInstanceOf[JsonBoolean]
-
-  /**
-   * Gets JSON null at given index.
-   *
-   * @throws ClassCastException if not JsonNull
-   */
-  def getJsonNull(index: Int): JsonNull.type =
-    apply(index).asInstanceOf[JsonNull.type]
-
-  /**
-   * Gets String at given index.
-   *
-   * @throws ClassCastException if not JsonString
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonString
    */
   def getString(index: Int): String =
     apply(index).asInstanceOf[JsonString].value
 
   /**
-   * Gets Byte at given index.
+   * Gets value as `Boolean`.
    *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getByte(index: Int): Byte =
-    apply(index).asInstanceOf[JsonNumber].byteValue
-
-  /**
-   * Gets Short at given index.
+   * @param index array index
    *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getShort(index: Int): Short =
-    apply(index).asInstanceOf[JsonNumber].shortValue
-
-  /**
-   * Gets Int at given index.
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getInt(index: Int): Int =
-    apply(index).asInstanceOf[JsonNumber].intValue
-
-  /**
-   * Gets Long at given index.
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getLong(index: Int): Long =
-    apply(index).asInstanceOf[JsonNumber].longValue
-
-  /**
-   * Gets Float at given index.
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getFloat(index: Int): Float =
-    apply(index).asInstanceOf[JsonNumber].floatValue
-
-  /**
-   * Gets Double at given index.
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getDouble(index: Int): Double =
-    apply(index).asInstanceOf[JsonNumber].doubleValue
-
-  /**
-   * Gets BigInt at given index.
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getBigInt(index: Int): BigInt =
-    apply(index).asInstanceOf[JsonNumber].bigIntValue
-
-  /**
-   * Gets BigDecimal at given index.
-   *
-   * @throws ClassCastException if not JsonNumber
-   */
-  def getBigDecimal(index: Int): BigDecimal =
-    apply(index).asInstanceOf[JsonNumber].bigDecimalValue
-
-  /**
-   * Gets Boolean at given index.
-   *
-   * @throws ClassCastException if not JsonBoolean
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonBoolean
    */
   def getBoolean(index: Int): Boolean =
     apply(index).asInstanceOf[JsonBoolean].value
 
-  /** Tests for null at given index. */
-  def isNull(index: Int): Boolean =
-    apply(index) == JsonNull
+  /**
+   * Gets value as `Int`.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws java.lang.ArithmeticException if not represented exactly
+   */
+  def getInt(index: Int): Int =
+    apply(index).asInstanceOf[JsonNumber].toInt
+
+  /**
+   * Gets value as `Long`.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws java.lang.ArithmeticException if not represented exactly
+   */
+  def getLong(index: Int): Long =
+    apply(index).asInstanceOf[JsonNumber].toLong
+
+  /**
+   * Gets value as `Float`.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonNumber
+   */
+  def getFloat(index: Int): Float =
+    apply(index).asInstanceOf[JsonNumber].toFloat
+
+  /**
+   * Gets value as `Double`.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonNumber
+   */
+  def getDouble(index: Int): Double =
+    apply(index).asInstanceOf[JsonNumber].toDouble
+
+  /**
+   * Gets value as `BigInt`.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws java.lang.ArithmeticException if value cannot be represented exactly
+   */
+  def getBigInt(index: Int): BigInt =
+    apply(index).asInstanceOf[JsonNumber].toBigInt
+
+  /**
+   * Gets value as `BigDecimal`.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonNumber
+   */
+  def getBigDecimal(index: Int): BigDecimal =
+    apply(index).asInstanceOf[JsonNumber].toBigDecimal
+
+  /**
+   * Gets value as `JsonObject`.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonObject
+   */
+  def getObject(index: Int): JsonObject =
+    apply(index).asInstanceOf[JsonObject]
+
+  /**
+   * Gets value as `JsonArray`.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.ClassCastException if not JsonArray
+   */
+  def getArray(index: Int): JsonArray =
+    apply(index).asInstanceOf[JsonArray]
+
+  /**
+   * Reads value.
+   *
+   * @param index array index
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws java.lang.NullPointerException if value is null
+   */
+  def read[T](index: Int)(using JsonInput[T]): T =
+    apply(index) match
+      case JsonNull => throw NullPointerException()
+      case value    => value.as[T]
 
   /**
    * Updates value at given index.
    *
+   * @param index array index
+   * @param value JSON value
+   *
    * @return new JSON array
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
    */
   def updated(index: Int, value: JsonValue): JsonArray
+
+  /**
+   * Removes value at given index.
+   *
+   * @param index array index
+   *
+   * @return new JSON array
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   *
+   * @note Subsequent values to index are shifted left.
+   */
+  def removed(index: Int): JsonArray
 
   /**
    * Concatenates JSON array.
@@ -540,155 +647,26 @@ object JsonArray:
       case true  => emptyArray
       case false => values.foldLeft(JsonArrayBuilder())(_ add _).toJsonArray()
 
-  /** Destructures JSON array to its values. */
+  /** Deconstructs JSON array. */
   def unapply(json: JsonArray): Option[Seq[JsonValue]] =
     json != null match
       case true  => Some(json.values)
       case false => None
 
-/** Defines JSON string. */
-trait JsonString extends JsonValue:
-  /** Gets value. */
-  def value: String
+private case class JsonStringImpl(value: String) extends JsonString:
+  if value == null then
+    throw NullPointerException()
 
-/** Provides JSON string factory. */
-object JsonString:
-  /** Creates JSON string with value. */
-  def apply(value: String): JsonString =
-    JsonStringImpl(value)
+  override lazy val toString = EncodedString(value)
 
-  /** Destructures JSON string to its value. */
-  def unapply(json: JsonString): Option[String] =
-    json != null match
-      case true  => Some(json.value)
-      case false => None
+private case class JsonNumberImpl(toBigDecimal: BigDecimal) extends JsonNumber:
+  if toBigDecimal == null then
+    throw NullPointerException()
 
-/** Defines JSON number. */
-trait JsonNumber extends JsonValue:
-  /**
-   * Gets value as `Byte`.
-   *
-   * @throws java.lang.ArithmeticException if value cannot be represented exactly
-   */
-  def byteValue: Byte
+  lazy val toInt    = toBigDecimal.toIntExact
+  lazy val toLong   = toBigDecimal.toLongExact
+  lazy val toFloat  = toBigDecimal.toFloat
+  lazy val toDouble = toBigDecimal.toDouble
+  lazy val toBigInt = toBigDecimal.toBigIntExact.getOrElse(throw ArithmeticException())
 
-  /**
-   * Gets value as `Short`.
-   *
-   * @throws java.lang.ArithmeticException if value cannot be represented exactly
-   */
-  def shortValue: Short
-
-  /**
-   * Gets value as `Int`.
-   *
-   * @throws java.lang.ArithmeticException if value cannot be represented exactly
-   */
-  def intValue: Int
-
-  /**
-   * Gets value as `Long`.
-   *
-   * @throws java.lang.ArithmeticException if value cannot be represented exactly
-   */
-  def longValue: Long
-
-  /** Gets value as `Float`. */
-  def floatValue: Float
-
-  /** Gets value as `Double`. */
-  def doubleValue: Double
-
-  /**
-   * Gets value as `BigInt`.
-   *
-   * @throws java.lang.ArithmeticException if value cannot be represented exactly
-   */
-  def bigIntValue: BigInt
-
-  /** Gets value as `BigDecimal`. */
-  def bigDecimalValue: BigDecimal
-
-/** Provides JSON number factory. */
-object JsonNumber:
-  /**
-   * Creates JSON number with value.
-   *
-   * @throws NumberFormatException if value is invalid numeric representation
-   */
-  def apply(value: String): JsonNumber =
-    JsonNumberImpl(BigDecimal(value))
-
-  /** Creates JSON number with value. */
-  def apply(value: Int): JsonNumber =
-    JsonNumberImpl(BigDecimal(value))
-
-  /** Creates JSON number with value. */
-  def apply(value: Long): JsonNumber =
-    JsonNumberImpl(BigDecimal(value))
-
-  /** Creates JSON number with value. */
-  def apply(value: Double): JsonNumber =
-    JsonNumberImpl(BigDecimal(value))
-
-  /** Creates JSON number with value. */
-  def apply(value: BigInt): JsonNumber =
-    JsonNumberImpl(BigDecimal(value))
-
-  /** Creates JSON number with value. */
-  def apply(value: BigDecimal): JsonNumber =
-    JsonNumberImpl(value)
-
-  /** Destructures JSON number to its value. */
-  def unapply(json: JsonNumber): Option[BigDecimal] =
-    json != null match
-      case true  => Some(json.bigDecimalValue)
-      case false => None
-
-/** Defines JSON boolean. */
-sealed trait JsonBoolean extends JsonValue:
-  /** Gets value. */
-  def value: Boolean
-
-/** Provides JSON boolean factory. */
-object JsonBoolean:
-  /** Represents JSON true. */
-  case object True extends JsonBoolean:
-    val value = true
-
-    /**
-     * Gets string representation.
-     *
-     * @return `"true"`
-     */
-    override val toString = "true"
-
-  /** Represents JSON false. */
-  case object False extends JsonBoolean:
-    val value = false
-
-    /**
-     * Gets string representation.
-     *
-     * @return `"false"`
-     */
-    override val toString = "false"
-
-  /** Gets JSON boolean with value. */
-  def apply(value: Boolean): JsonBoolean =
-    if value then True else False
-
-  /** Destructures JSON boolean to its value. */
-  def unapply(json: JsonBoolean): Option[Boolean] =
-    json != null match
-      case true  => Some(json.value)
-      case false => None
-
-/** Represents JSON null. */
-case object JsonNull extends JsonValue:
-  /**
-   * Gets string representation.
-   *
-   * @return `"null"`
-   */
-  override val toString = "null"
+  override lazy val toString = toBigDecimal.toString

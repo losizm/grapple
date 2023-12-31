@@ -23,22 +23,19 @@ private case class JsonArrayImpl(values: Seq[JsonValue]) extends JsonArray:
 
   lazy val size = values.size
   lazy val head = values.head
-  lazy val headOption = values.headOption
-  lazy val last = values.last
-  lazy val lastOption = values.lastOption
-  lazy val init = JsonArrayImpl(values.init)
-  lazy val tail = JsonArrayImpl(values.tail)
 
   def apply(index: Int) =
     values(index)
-
-  def slice(from: Int, until: Int) =
-    JsonArrayImpl(values.slice(from, until))
 
   def updated(index: Int, value: JsonValue): JsonArray =
     if value == null then
       throw NullPointerException()
     JsonArrayImpl(values.updated(index, value))
+
+  def removed(index: Int): JsonArray =
+    if index < 0 || index >= size then
+      throw IndexOutOfBoundsException()
+    JsonArrayImpl(values.take(index) ++ values.drop(index + 1))
 
   @targetName("concat")
   def ++(suffix: JsonArray): JsonArray =

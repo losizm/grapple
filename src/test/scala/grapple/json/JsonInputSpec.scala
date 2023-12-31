@@ -15,6 +15,9 @@
  */
 package grapple.json
 
+import java.time.LocalDate
+
+import scala.collection.immutable.{ ListMap, TreeMap }
 import scala.language.implicitConversions
 import scala.util.Try
 
@@ -77,6 +80,33 @@ class JsonInputSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     assert(test(0).as[Try[String]].get == "hello")
     assertThrows[ClassCastException](test(0).as[Try[Int]].get)
+  }
+
+  it should "read JsonObject as Map" in {
+    given JsonInput[LocalDate] = json => LocalDate.parse(json.as[String])
+
+    val json = Json.obj(
+      "lupita" -> "1983-03-01",
+      "denzel" -> "1954-12-28",
+      "wesley" -> "1962-07-31",
+      "kerry"  -> "1977-01-31"
+    )
+
+    val dob1 = json.as[ListMap[String, LocalDate]]
+    assert(dob1.size == 4)
+    assert(dob1.keys.toSeq == Seq("lupita", "denzel", "wesley", "kerry"))
+    assert(dob1("lupita") == LocalDate.parse("1983-03-01"))
+    assert(dob1("denzel") == LocalDate.parse("1954-12-28"))
+    assert(dob1("wesley") == LocalDate.parse("1962-07-31"))
+    assert(dob1("kerry")  == LocalDate.parse("1977-01-31"))
+
+    val dob2 = json.as[TreeMap[String, LocalDate]]
+    assert(dob2.size == 4)
+    assert(dob2.keys.toSeq == Seq("denzel", "kerry", "lupita", "wesley"))
+    assert(dob2("lupita") == LocalDate.parse("1983-03-01"))
+    assert(dob2("denzel") == LocalDate.parse("1954-12-28"))
+    assert(dob2("wesley") == LocalDate.parse("1962-07-31"))
+    assert(dob2("kerry")  == LocalDate.parse("1977-01-31"))
   }
 
   it should "use custom JsonInput" in {

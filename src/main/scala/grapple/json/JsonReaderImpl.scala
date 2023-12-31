@@ -27,7 +27,7 @@ private class JsonReaderImpl(input: Reader) extends JsonReader:
       reader.next() match
         case Event.StartObject => readObject()
         case Event.StartArray  => readArray()
-        case _                 => throw JsonException("Unexpected event")
+        case event             => throw JsonException(s"Unexpected event: $event")
     catch
         case e: EOFException   => throw JsonException("Unexpected end of input", e)
 
@@ -38,11 +38,11 @@ private class JsonReaderImpl(input: Reader) extends JsonReader:
 
     var event = reader.next()
     while event != Event.EndObject do
-      val name = getFieldName(event)
+      val key = getKey(event)
       reader.next() match
-        case Event.StartObject => builder.add(name, readObject())
-        case Event.StartArray  => builder.add(name, readArray())
-        case event             => builder.add(name, getValue(event))
+        case Event.StartObject => builder.add(key, readObject())
+        case Event.StartArray  => builder.add(key, readArray())
+        case event             => builder.add(key, getValue(event))
       event = reader.next()
 
     builder.toJsonObject()
@@ -60,8 +60,12 @@ private class JsonReaderImpl(input: Reader) extends JsonReader:
 
     builder.toJsonArray()
 
-  private inline def getFieldName(event: Event): String =
-    event.asInstanceOf[Event.FieldName].get
+  private inline def getKey(event: Event): String =
+    event match
+      case Event.Key(key) => key
+      case _              => throw JsonException(s"Unexpected event: $event")
 
   private inline def getValue(event: Event): JsonValue =
-    event.asInstanceOf[Event.Value].get
+    event match
+      case Event.Value(value) => value
+      case _                  => throw JsonException(s"Unexpected event: $event")

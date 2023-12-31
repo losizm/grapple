@@ -34,7 +34,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
-    assert(res.id.stringValue == "abc")
+    assert(res.id.string == "abc")
     assert(res.result.as[Answer] == Answer(3))
   }
 
@@ -47,7 +47,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
-    assert(res.id.stringValue == "abc")
+    assert(res.id.string == "abc")
     assert(res.result.as[Seq[Int]] == Seq(0, 1, 2))
   }
 
@@ -60,7 +60,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
-    assert(res.id.stringValue == "abc")
+    assert(res.id.string == "abc")
     assert(res.result.as[Int] == 3)
   }
 
@@ -73,7 +73,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
-    assert(res.id.numberValue == 123)
+    assert(res.id.number == 123)
     assert(res.result.as[String] == "success")
   }
 
@@ -86,7 +86,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
-    assert(res.id.numberValue == 123)
+    assert(res.id.number == 123)
     assert(res.result.as[Boolean])
   }
 
@@ -99,7 +99,7 @@ class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val res = Json.parse(text).as[JsonRpcResponse]
     assert(res.version == "2.0")
-    assert(res.id.numberValue == 123)
+    assert(res.id.number == 123)
     assert(res.error.isInternalError)
     assert(res.error.message == "Internal Error")
   }

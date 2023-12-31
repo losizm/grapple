@@ -23,7 +23,7 @@ class MapToJsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val json  = Json.toJson(users).as[JsonObject]
 
     assert(json.size == 3)
-    assert(json.names == Seq("root", "lupita", "nobody"))
+    assert(json.keys == Set("root", "lupita", "nobody"))
     assert(json.getInt("root")   == 0)
     assert(json.getInt("lupita") == 100)
     assert(json.getInt("nobody") == 65534)
@@ -39,11 +39,11 @@ class MapToJsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val json  = Json.toJson(users).as[JsonObject]
 
     assert(json.size == 4)
-    assert(json.names == Seq("root", "chadwick", "lupita", "nobody"))
-    assert(json.getJsonArray("root")     == Json.arr("root"))
-    assert(json.getJsonArray("chadwick") == Json.arr("chadwick", "sudo", "admin"))
-    assert(json.getJsonArray("lupita")   == Json.arr("lupita", "admin"))
-    assert(json.getJsonArray("nobody")   == Json.arr("nobody"))
+    assert(json.keys == Set("root", "chadwick", "lupita", "nobody"))
+    assert(json.getArray("root")     == Json.arr("root"))
+    assert(json.getArray("chadwick") == Json.arr("chadwick", "sudo", "admin"))
+    assert(json.getArray("lupita")   == Json.arr("lupita", "admin"))
+    assert(json.getArray("nobody")   == Json.arr("nobody"))
   }
 
   it should "create JsonObject from Map[String, Map[String, Int]]" in {
@@ -55,10 +55,10 @@ class MapToJsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val json  = Json.toJson(users).as[JsonObject]
 
     assert(json.size == 3)
-    assert(json.names == Seq("root", "lupita", "nobody"))
-    assert(json.getJsonObject("root")   == Json.obj("id" -> 0))
-    assert(json.getJsonObject("lupita") == Json.obj("id" -> 100))
-    assert(json.getJsonObject("nobody") == Json.obj("id" -> 65534))
+    assert(json.keys == Set("root", "lupita", "nobody"))
+    assert(json.getObject("root")   == Json.obj("id" -> 0))
+    assert(json.getObject("lupita") == Json.obj("id" -> 100))
+    assert(json.getObject("nobody") == Json.obj("id" -> 65534))
   }
 
   it should "create JsonObject from Map[String, User]" in {
@@ -79,8 +79,8 @@ class MapToJsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val json  = Json.toJson(users).as[JsonObject]
 
     assert(json.size == 3)
-    assert(json.names == Seq("root", "lupita", "nobody"))
-    assert(json.getJsonObject("root")   == Json.obj("id" -> 0,     "name" -> "root",   "groups" -> Json.arr("root")))
-    assert(json.getJsonObject("lupita") == Json.obj("id" -> 100,   "name" -> "lupita", "groups" -> Json.arr("lupita", "admin")))
-    assert(json.getJsonObject("nobody") == Json.obj("id" -> 65534, "name" -> "nobody", "groups" -> Json.arr("nobody")))
+    assert(json.keys == Set("root", "lupita", "nobody"))
+    assert(json.getObject("root")   == Json.obj("id" -> 0,     "name" -> "root",   "groups" -> Json.arr("root")))
+    assert(json.getObject("lupita") == Json.obj("id" -> 100,   "name" -> "lupita", "groups" -> Json.arr("lupita", "admin")))
+    assert(json.getObject("nobody") == Json.obj("id" -> 65534, "name" -> "nobody", "groups" -> Json.arr("nobody")))
   }

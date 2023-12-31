@@ -89,7 +89,7 @@ object JsonRpcError:
       case _      => new JsonRpcError(code, message, data)
 
   /**
-   * Destructures `JsonRpcError` to its `code`, `message`, and `data`.
+   * Deconstructs `JsonRpcError` to its `code`, `message`, and `data`.
    *
    * @param error JSON-RPC error
    */
@@ -133,7 +133,7 @@ object ParseError:
     new ParseError(data)
 
   /**
-   * Destructures `ParseError` to its `code`, `message`, and `data`.
+   * Deconstructs `ParseError` to its `code`, `message`, and `data`.
    *
    * @param error parse error
    */
@@ -177,7 +177,7 @@ object InvalidRequest:
     new InvalidRequest(data)
 
   /**
-   * Destructures `InvalidRequest` error to its `code`, `message`, and `data`.
+   * Deconstructs `InvalidRequest` error to its `code`, `message`, and `data`.
    *
    * @param error invalid request
    */
@@ -221,7 +221,7 @@ object MethodNotFound:
     new MethodNotFound(data)
 
   /**
-   * Destructures `MethodNotFound` error to its `code`, `message`, and `data`.
+   * Deconstructs `MethodNotFound` error to its `code`, `message`, and `data`.
    *
    * @param error method not found
    */
@@ -265,7 +265,7 @@ object InvalidParams:
     new InvalidParams(data)
 
   /**
-   * Destructures `InvalidParams` error to its `code`, `message`, and `data`.
+   * Deconstructs `InvalidParams` error to its `code`, `message`, and `data`.
    *
    * @param error invalid params
    */
@@ -309,7 +309,7 @@ object InternalError:
     new InternalError(data)
 
   /**
-   * Destructures `InternalError` error to its `code`, `message`, and `data`.
+   * Deconstructs `InternalError` error to its `code`, `message`, and `data`.
    *
    * @param error internal error
    */

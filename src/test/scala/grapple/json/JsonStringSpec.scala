@@ -28,7 +28,7 @@ class JsonStringSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(JsonString("abc") != JsonString("xyz"))
   }
 
-  it should "destructure JsonString" in {
+  it should "deconstruct JsonString" in {
     val s = JsonString("abc")
 
     assert {

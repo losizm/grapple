@@ -28,7 +28,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val req = Json.parse(text).as[JsonRpcRequest]
     assert(req.version == "2.0")
-    assert(req.id.stringValue == "abc")
+    assert(req.id.string == "abc")
     assert(req.method == "compute")
     assert(req.params.isEmpty)
   }
@@ -43,7 +43,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val req = Json.parse(text).as[JsonRpcRequest]
     assert(req.version == "2.0")
-    assert(req.id.numberValue == 123)
+    assert(req.id.number == 123)
     assert(req.method == "compute")
     assert(
       req.params.exists {

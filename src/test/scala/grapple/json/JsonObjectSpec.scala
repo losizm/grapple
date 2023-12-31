@@ -29,19 +29,12 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     )
 
     assert(user.size == 6)
-    assert(!user.isEmpty)
-    assert(user.names == Seq("id", "name", "groups", "enabled", "other", "secret"))
+    assert(user.nonEmpty)
+    assert(user.keys == Set("id", "name", "groups", "enabled", "other", "secret"))
 
-    assertThrows[ClassCastException](user.getJsonObject("id"))
-    assertThrows[ClassCastException](user.getJsonArray("id"))
-    assertThrows[ClassCastException](user.getJsonString("id"))
-    assert(user.getJsonNumber("id") == JsonNumber(100))
-    assertThrows[ClassCastException](user.getJsonBoolean("id"))
-    assertThrows[ClassCastException](user.getJsonNull("id"))
-
+    assertThrows[ClassCastException](user.getObject("id"))
+    assertThrows[ClassCastException](user.getArray("id"))
     assertThrows[ClassCastException](user.getString("id"))
-    assert(user.getByte("id") == 100)
-    assert(user.getShort("id") == 100)
     assert(user.getInt("id") == 100)
     assert(user.getLong("id") == 100)
     assert(user.getFloat("id") == 100)
@@ -51,16 +44,9 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getBoolean("id"))
     assert(!user.isNull("id"))
 
-    assertThrows[ClassCastException](user.getJsonObject("name"))
-    assertThrows[ClassCastException](user.getJsonArray("name"))
-    assert(user.getJsonString("name") == JsonString("lupita"))
-    assertThrows[ClassCastException](user.getJsonNumber("name"))
-    assertThrows[ClassCastException](user.getJsonBoolean("name"))
-    assertThrows[ClassCastException](user.getJsonNull("name"))
-
+    assertThrows[ClassCastException](user.getObject("name"))
+    assertThrows[ClassCastException](user.getArray("name"))
     assert(user.getString("name") == "lupita")
-    assertThrows[ClassCastException](user.getByte("name"))
-    assertThrows[ClassCastException](user.getShort("name"))
     assertThrows[ClassCastException](user.getInt("name"))
     assertThrows[ClassCastException](user.getLong("name"))
     assertThrows[ClassCastException](user.getFloat("name"))
@@ -70,16 +56,9 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getBoolean("name"))
     assert(!user.isNull("name"))
 
-    assertThrows[ClassCastException](user.getJsonObject("groups"))
-    assert(user.getJsonArray("groups") == JsonArray(Seq(JsonString("lupita"), JsonString("admin"), JsonNumber(100))))
-    assertThrows[ClassCastException](user.getJsonString("groups"))
-    assertThrows[ClassCastException](user.getJsonNumber("groups"))
-    assertThrows[ClassCastException](user.getJsonBoolean("groups"))
-    assertThrows[ClassCastException](user.getJsonNull("groups"))
-
+    assertThrows[ClassCastException](user.getObject("groups"))
+    assert(user.getArray("groups") == JsonArray(Seq(JsonString("lupita"), JsonString("admin"), JsonNumber(100))))
     assertThrows[ClassCastException](user.getString("groups"))
-    assertThrows[ClassCastException](user.getByte("groups"))
-    assertThrows[ClassCastException](user.getShort("groups"))
     assertThrows[ClassCastException](user.getInt("groups"))
     assertThrows[ClassCastException](user.getLong("groups"))
     assertThrows[ClassCastException](user.getFloat("groups"))
@@ -89,16 +68,9 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getBoolean("groups"))
     assert(!user.isNull("groups"))
 
-    assertThrows[ClassCastException](user.getJsonObject("enabled"))
-    assertThrows[ClassCastException](user.getJsonArray("enabled"))
-    assertThrows[ClassCastException](user.getJsonString("enabled"))
-    assertThrows[ClassCastException](user.getJsonNumber("enabled"))
-    assert(user.getJsonBoolean("enabled") == JsonBoolean(true))
-    assertThrows[ClassCastException](user.getJsonNull("enabled"))
-
+    assertThrows[ClassCastException](user.getObject("enabled"))
+    assertThrows[ClassCastException](user.getArray("enabled"))
     assertThrows[ClassCastException](user.getString("enabled"))
-    assertThrows[ClassCastException](user.getByte("enabled"))
-    assertThrows[ClassCastException](user.getShort("enabled"))
     assertThrows[ClassCastException](user.getInt("enabled"))
     assertThrows[ClassCastException](user.getLong("enabled"))
     assertThrows[ClassCastException](user.getFloat("enabled"))
@@ -108,16 +80,9 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user.getBoolean("enabled"))
     assert(!user.isNull("enabled"))
 
-    assert(user.getJsonObject("other") == JsonObject(Map("name" -> JsonString("lupita"), "email" -> JsonString("lupita@localhost"), "timeout" -> JsonNumber(10_000_000_000L))))
-    assertThrows[ClassCastException](user.getJsonArray("other"))
-    assertThrows[ClassCastException](user.getJsonString("other"))
-    assertThrows[ClassCastException](user.getJsonNumber("other"))
-    assertThrows[ClassCastException](user.getJsonBoolean("other"))
-    assertThrows[ClassCastException](user.getJsonNull("other"))
-
+    assert(user.getObject("other") == JsonObject(Map("name" -> JsonString("lupita"), "email" -> JsonString("lupita@localhost"), "timeout" -> JsonNumber(10_000_000_000L))))
+    assertThrows[ClassCastException](user.getArray("other"))
     assertThrows[ClassCastException](user.getString("other"))
-    assertThrows[ClassCastException](user.getByte("other"))
-    assertThrows[ClassCastException](user.getShort("other"))
     assertThrows[ClassCastException](user.getInt("other"))
     assertThrows[ClassCastException](user.getLong("other"))
     assertThrows[ClassCastException](user.getFloat("other"))
@@ -127,16 +92,9 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[ClassCastException](user.getBoolean("other"))
     assert(!user.isNull("other"))
 
-    assertThrows[ClassCastException](user.getJsonObject("secret"))
-    assertThrows[ClassCastException](user.getJsonArray("secret"))
-    assertThrows[ClassCastException](user.getJsonString("secret"))
-    assertThrows[ClassCastException](user.getJsonNumber("secret"))
-    assertThrows[ClassCastException](user.getJsonBoolean("secret"))
-    assert(user.getJsonNull("secret") == JsonNull)
-
+    assertThrows[ClassCastException](user.getObject("secret"))
+    assertThrows[ClassCastException](user.getArray("secret"))
     assertThrows[ClassCastException](user.getString("secret"))
-    assertThrows[ClassCastException](user.getByte("secret"))
-    assertThrows[ClassCastException](user.getShort("secret"))
     assertThrows[ClassCastException](user.getInt("secret"))
     assertThrows[ClassCastException](user.getLong("secret"))
     assertThrows[ClassCastException](user.getFloat("secret"))
@@ -171,17 +129,6 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user("secret").as[Option[Boolean]] == None)
     assert(user("secret") == JsonNull)
 
-    assert(user.getOrElse("_id", 0) == 0)
-    assert(user.getOrElse("id", 0) == 100)
-    assert(user.getOrElse("id", 0L) == 100L)
-    assert(user.getOrElse("id", 0.0) == 100.0)
-    assert(user.getOrElse("id", BigDecimal(0)) == BigDecimal(100))
-    assert(user.getOrElse("id", JsonNumber(9999)) == JsonNumber(100))
-    assert(user.getOrElse("_name", "none") == "none")
-    assert(user.getOrElse("name", "none") == "lupita")
-    assert(!user.getOrElse("_enabled", false))
-    assert(user.getOrElse("enabled", false))
-
     assert(user.get("_id").isEmpty)
     assert(user.get("id").contains(JsonNumber(100)))
     assert(user.get("_name").isEmpty)
@@ -191,22 +138,44 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user.get("_secret").isEmpty)
     assert(user.get("secret").contains(JsonNull))
 
-    assert(user.map[Int]("_id").isEmpty)
-    assert(user.map[Int]("id").contains(100))
-    assert(user.map[String]("_name").isEmpty)
-    assert(user.map[String]("name").contains("lupita"))
-    assert(user.map[Boolean]("_enabled").isEmpty)
-    assert(user.map[Boolean]("enabled").contains(true))
-    assert(user.map[String]("secret").isEmpty)
-    assert(user.map[Int]("secret").isEmpty)
-    assert(user.map[Boolean]("secret").isEmpty)
-    assert(user.map[JsonNull.type]("secret").isEmpty)
+    assertThrows[NoSuchElementException](user.read[Int]("_id"))
+    assert(user.read[Int]("id") == 100)
+    assertThrows[NoSuchElementException](user.read[Int]("_name"))
+    assert(user.read[String]("name") == "lupita")
+    assertThrows[NoSuchElementException](user.read[Int]("_enabled"))
+    assert(user.read[Boolean]("enabled"))
+    assertThrows[NullPointerException](user.read[String]("secret"))
+    assertThrows[NullPointerException](user.read[Int]("secret"))
+    assertThrows[NullPointerException](user.read[Boolean]("secret"))
+    assertThrows[NullPointerException](user.read[JsonNull.type]("secret"))
+
+    assert(user.readOption[Int]("_id").isEmpty)
+    assert(user.readOption[Int]("id").contains(100))
+    assert(user.readOption[String]("_name").isEmpty)
+    assert(user.readOption[String]("name").contains("lupita"))
+    assert(user.readOption[Boolean]("_enabled").isEmpty)
+    assert(user.readOption[Boolean]("enabled").contains(true))
+    assert(user.readOption[String]("secret").isEmpty)
+    assert(user.readOption[Int]("secret").isEmpty)
+    assert(user.readOption[Boolean]("secret").isEmpty)
+    assert(user.readOption[JsonNull.type]("secret").isEmpty)
+
+    assert(user.readOrElse("_id", 0) == 0)
+    assert(user.readOrElse("id", 0) == 100)
+    assert(user.readOrElse("id", 0L) == 100L)
+    assert(user.readOrElse("id", 0.0) == 100.0)
+    assert(user.readOrElse("id", BigDecimal(0)) == BigDecimal(100))
+    assert(user.readOrElse("id", JsonNumber(9999)) == JsonNumber(100))
+    assert(user.readOrElse("_name", "none") == "none")
+    assert(user.readOrElse("name", "none") == "lupita")
+    assert(!user.readOrElse("_enabled", false))
+    assert(user.readOrElse("enabled", false))
   }
 
   it should "inspect empty JsonObject" in {
     assert(JsonObject.empty.size == 0)
     assert(JsonObject.empty.isEmpty)
-    assert(JsonObject.empty.names.isEmpty)
+    assert(JsonObject.empty.keys.isEmpty)
   }
 
   it should "merge JsonObjects" in {
@@ -217,20 +186,20 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "add value to JsonObject" in {
-    val user = Json.obj("id" -> 100, "name" -> "guest") + ("group" -> "staff")
+    val user = Json.obj("id" -> 100, "name" -> "guest").updated("group", "staff")
     assert(user("id").as[Int] == 100)
     assert(user("name").as[String] == "guest")
     assert(user("group").as[String] == "staff")
   }
 
   it should "remove value from JsonObject" in {
-    val user = Json.obj("id" -> 100, "name" -> "guest", "group" -> "staff") - "group"
+    val user = Json.obj("id" -> 100, "name" -> "guest", "group" -> "staff").removed("group")
     assert(user("id").as[Int] == 100)
     assert(user("name").as[String] == "guest")
-    assert(user.getOrElse("group", "none") == "none")
+    assert(user.readOrElse("group", "none") == "none")
   }
 
-  it should "destructure JsonObject" in {
+  it should "deconstruct JsonObject" in {
     assert {
       Json.obj("a" -> 1, "b" -> 2) match
         case JsonObject(fields) => fields("a") == JsonNumber(1) && fields("b") == JsonNumber(2)

@@ -22,8 +22,8 @@ class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(!id.isNull)
     assert(id.isString)
     assert(!id.isNumber)
-    assert(id.stringValue == "abc")
-    assertThrows[NoSuchElementException](id.numberValue)
+    assert(id.string == "abc")
+    assertThrows[NoSuchElementException](id.number)
     assert(Json.toJson(id) == JsonString("abc"))
     assert(id == JsonString("abc").as[JsonRpcIdentifier])
   }
@@ -33,8 +33,8 @@ class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(!id.isNull)
     assert(!id.isString)
     assert(id.isNumber)
-    assertThrows[NoSuchElementException](id.stringValue)
-    assert(id.numberValue == 123)
+    assertThrows[NoSuchElementException](id.string)
+    assert(id.number == 123)
     assert(Json.toJson(id) == JsonNumber(123))
     assert(id == JsonNumber(123).as[JsonRpcIdentifier])
   }
@@ -44,8 +44,8 @@ class JsonRpcIdentifierSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(id.isNull)
     assert(!id.isString)
     assert(!id.isNumber)
-    assertThrows[NoSuchElementException](id.stringValue)
-    assertThrows[NoSuchElementException](id.numberValue)
+    assertThrows[NoSuchElementException](id.string)
+    assertThrows[NoSuchElementException](id.number)
     assert(Json.toJson(id) == JsonNull)
     assert(id == JsonNull.as[JsonRpcIdentifier])
   }

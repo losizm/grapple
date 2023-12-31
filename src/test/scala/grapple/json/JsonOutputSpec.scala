@@ -47,7 +47,7 @@ class JsonOutputSpec extends org.scalatest.flatspec.AnyFlatSpec:
       "failure" -> Failure(Exception())
     )
 
-    assert(obj.names == Seq("root", "guest", "other", "users", "some", "none", "right", "left", "success", "failure"))
+    assert(obj.keys == Set("root", "guest", "other", "users", "some", "none", "right", "left", "success", "failure"))
     assert(obj("root")  == Json.obj("id" -> 0,    "name" -> "root",  "groups" -> Set("root", "admin")))
     assert(obj("guest") == Json.obj("id" -> 1000, "name" -> "guest", "groups" -> Set("guest")))
     assert(obj("other") == Json.obj("id" -> 1001, "name" -> "other", "groups" -> Set("other")))

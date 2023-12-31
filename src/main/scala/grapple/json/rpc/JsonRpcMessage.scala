@@ -39,15 +39,15 @@ sealed trait JsonRpcMessage:
    *
    * @throws NoSuchElementException if attribute does not exist
    */
-  def attribute[T](name: String): T =
-    getAttribute(name).get
+  def get[T](name: String): T =
+    getOption(name).get
 
   /**
-   * Gets optional attribute value.
+   * Optionally gets attribute value.
    *
    * @param name attribute name
    */
-  def getAttribute[T](name: String): Option[T] =
+  def getOption[T](name: String): Option[T] =
     attributes.get(name).map(_.asInstanceOf[T])
 
   /**
@@ -56,8 +56,8 @@ sealed trait JsonRpcMessage:
    * @param name attribute name
    * @param default default value
    */
-  def getAttributeOrElse[T](name: String, default: => T): T =
-    getAttribute(name).getOrElse(default)
+  def getOrElse[T](name: String, default: => T): T =
+    getOption(name).getOrElse(default)
 
 /**
  * Defines JSON-RPC request.
@@ -96,7 +96,7 @@ sealed trait JsonRpcRequest extends JsonRpcMessage:
    * @note If attribute already exists with given name, then its value is
    * replaced.
    */
-  def putAttribute(name: String, value: Any): JsonRpcRequest
+  def put(name: String, value: Any): JsonRpcRequest
 
   /**
    * Removes attribute.
@@ -105,7 +105,7 @@ sealed trait JsonRpcRequest extends JsonRpcMessage:
    *
    * @return new request
    */
-  def removeAttribute(name: String): JsonRpcRequest
+  def remove(name: String): JsonRpcRequest
 
 /** Provides JSON-RPC request factory. */
 object JsonRpcRequest:
@@ -155,10 +155,10 @@ private case class JsonRpcRequestImpl(
   def setAttributes(attributes: Map[String, Any]) =
     copy(attributes = attributes)
 
-  def putAttribute(name: String, value: Any) =
+  def put(name: String, value: Any) =
     copy(attributes = attributes + (name -> value))
 
-  def removeAttribute(name: String) =
+  def remove(name: String) =
     copy(attributes = attributes - name)
 
 /**
@@ -205,7 +205,7 @@ sealed trait JsonRpcResponse extends JsonRpcMessage:
    * @note If attribute already exists with given name, then its value is
    * replaced.
    */
-  def putAttribute(name: String, value: Any): JsonRpcResponse
+  def put(name: String, value: Any): JsonRpcResponse
 
   /**
    * Removes attribute.
@@ -214,7 +214,7 @@ sealed trait JsonRpcResponse extends JsonRpcMessage:
    *
    * @return new response
    */
-  def removeAttribute(name: String): JsonRpcResponse
+  def remove(name: String): JsonRpcResponse
 
 /** Provides JSON-RPC response factory. */
 object JsonRpcResponse:
@@ -262,8 +262,8 @@ private case class JsonRpcResponseImpl(
   def setAttributes(attributes: Map[String, Any]) =
     copy(attributes = attributes)
 
-  def putAttribute(name: String, value: Any) =
+  def put(name: String, value: Any) =
     copy(attributes = attributes + (name -> value))
 
-  def removeAttribute(name: String) =
+  def remove(name: String) =
     copy(attributes = attributes - name)

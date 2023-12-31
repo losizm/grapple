@@ -27,7 +27,7 @@ class JsonArrayBuilderSpec extends org.scalatest.flatspec.AnyFlatSpec:
       .add(Json.obj("name" -> "lupita", "email" -> "lupita@localhost", "timeout" -> 10_000_000_000L))
       .toJsonArray()
 
-    assert(!user.isEmpty)
+    assert(user.nonEmpty)
     assert(user.size == 5)
 
     assert(user(0).as[Int] == 1000)

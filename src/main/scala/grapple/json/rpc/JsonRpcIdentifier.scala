@@ -18,28 +18,28 @@ package rpc
 
 /** Defines JSON-RPC identifier. */
 sealed trait JsonRpcIdentifier:
-  /** Tests for null value. */
+  /** Tests for null. */
   def isNull: Boolean
 
-  /** Tests for string value. */
+  /** Tests for string. */
   def isString: Boolean
 
-  /** Tests for number value. */
+  /** Tests for number. */
   def isNumber: Boolean
 
   /**
    * Gets string value.
    *
-   * @throws NoSuchElementException if not string value
+   * @throws NoSuchElementException if identifier is not a string
    */
-  def stringValue: String
+  def string: String
 
   /**
    * Gets number value.
    *
-   * @throws NoSuchElementException if not number value
+   * @throws NoSuchElementException if identifier is not a number
    */
-  def numberValue: Long
+  def number: Long
 
 /** Provides JSON-RPC identifier factory. */
 object JsonRpcIdentifier:
@@ -65,27 +65,27 @@ private object NullIdentifier extends JsonRpcIdentifier:
   val isString = false
   val isNumber = false
 
-  def stringValue = throw new NoSuchElementException("no string value")
-  def numberValue = throw new NoSuchElementException("no number value")
+  def string = throw new NoSuchElementException("no string value")
+  def number = throw new NoSuchElementException("no number value")
 
   override val toString = "null"
 
-private case class StringIdentifier(stringValue: String) extends JsonRpcIdentifier:
-  require(stringValue != null)
+private case class StringIdentifier(string: String) extends JsonRpcIdentifier:
+  require(string != null)
 
   val isNull   = false
   val isString = true
   val isNumber = false
 
-  def numberValue = throw new NoSuchElementException("no number value")
+  def number = throw new NoSuchElementException("no number value")
 
-  override lazy val toString = EncodedString(stringValue)
+  override lazy val toString = EncodedString(string)
 
-private case class NumberIdentifier(numberValue: Long) extends JsonRpcIdentifier:
+private case class NumberIdentifier(number: Long) extends JsonRpcIdentifier:
   val isNull   = false
   val isString = false
   val isNumber = true
 
-  def stringValue = throw new NoSuchElementException("no string value")
+  def string = throw new NoSuchElementException("no string value")
 
-  override val toString = s"$numberValue"
+  override val toString = s"$number"

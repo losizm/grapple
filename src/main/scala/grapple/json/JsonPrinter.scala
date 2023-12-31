@@ -18,8 +18,8 @@ package grapple.json
 import java.io.BufferedWriter
 
 private trait JsonPrinter:
-  def writeStart(name: String, start: Char, depth: Int)(using writer: BufferedWriter): Unit
-  def write(name: String, value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit
+  def writeStart(key: String, start: Char, depth: Int)(using writer: BufferedWriter): Unit
+  def write(key: String, value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit
   def writeStart(start: Char, depth: Int)(using writer: BufferedWriter): Unit
   def write(value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit
   def writeEnd(end: Char, isEmpty: Boolean, depth: Int)(using writer: BufferedWriter): Unit

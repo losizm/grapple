@@ -70,14 +70,14 @@ private object JsonValueToJsonRpcIdentifier extends JsonInput[JsonRpcIdentifier]
   def read(json: JsonValue): JsonRpcIdentifier =
     json match
       case id: JsonString => JsonRpcIdentifier(id.value)
-      case id: JsonNumber => JsonRpcIdentifier(id.longValue)
+      case id: JsonNumber => JsonRpcIdentifier(id.toLong)
       case JsonNull       => JsonRpcIdentifier.nullified
       case _              => throw JsonException("string, number, or null value expected")
 
 private object JsonRpcIdentifierToJsonValue extends JsonOutput[JsonRpcIdentifier]:
   def write(id: JsonRpcIdentifier): JsonValue =
-    if      id.isString then JsonString(id.stringValue)
-    else if id.isNumber then JsonNumber(id.numberValue)
+    if      id.isString then JsonString(id.string)
+    else if id.isNumber then JsonNumber(id.number)
     else                     JsonNull
 
 private object JsonValueToJsonRpcRequest extends JsonInput[JsonRpcRequest]:
@@ -114,7 +114,7 @@ private object JsonValueToJsonRpcRequest extends JsonInput[JsonRpcRequest]:
     builder.toJsonRpcRequest()
 
   private def getLongIdentifier(n: JsonNumber) =
-    try n.longValue
+    try n.toLong
     catch case _: ArithmeticException =>
       throw InvalidRequest("integer value expected for id")
 
@@ -163,7 +163,7 @@ private object JsonValueToJsonRpcResponse extends JsonInput[JsonRpcResponse]:
     builder.toJsonRpcResponse()
 
   private def getLongIdentifier(n: JsonNumber) =
-    try n.longValue
+    try n.toLong
     catch case _: ArithmeticException =>
       throw JsonException("integer value expected for id")
 

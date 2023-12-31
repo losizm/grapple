@@ -15,7 +15,7 @@
  */
 package grapple.json
 
-import java.io.{ File, FileWriter, OutputStream, OutputStreamWriter, Writer }
+import java.io.*
 import java.nio.file.Path
 
 /**

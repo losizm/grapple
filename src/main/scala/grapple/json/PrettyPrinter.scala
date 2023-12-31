@@ -21,15 +21,15 @@ private class PrettyPrinter(indent: String) extends JsonPrinter:
   if !indent.matches("[ \t\r\n]*") then
     throw IllegalArgumentException("Indent restricted to whitespace: [ \\t\\r\\n]*")
 
-  def writeStart(name: String, start: Char, depth: Int)(using writer: BufferedWriter): Unit =
+  def writeStart(key: String, start: Char, depth: Int)(using writer: BufferedWriter): Unit =
     if depth > 0 then writeIndent(depth)
-    writer.write(EncodedString(name))
+    writer.write(EncodedString(key))
     writer.write(": ")
     writer.write(start)
 
-  def write(name: String, value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit =
+  def write(key: String, value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit =
     if depth > 0 then writeIndent(depth)
-    writer.write(EncodedString(name))
+    writer.write(EncodedString(key))
     writer.write(": ")
     writeValue(value, depth)
 
@@ -59,12 +59,12 @@ private class PrettyPrinter(indent: String) extends JsonPrinter:
     writer.write('{')
 
     json.fields.zipWithIndex.foreach {
-      case ((name, value), index) =>
+      case ((key, value), index) =>
         if index > 0 then writer.write(',')
-        write(name, value, depth + 1)
+        write(key, value, depth + 1)
     }
 
-    if !json.isEmpty then writeIndent(depth)
+    if json.nonEmpty then writeIndent(depth)
     writer.write('}')
 
   private def writeArray(json: JsonArray, depth: Int)(using writer: BufferedWriter): Unit =
@@ -76,5 +76,5 @@ private class PrettyPrinter(indent: String) extends JsonPrinter:
         write(value, depth + 1)
     }
 
-    if !json.isEmpty then writeIndent(depth)
+    if json.nonEmpty then writeIndent(depth)
     writer.write(']')

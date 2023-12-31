@@ -33,16 +33,16 @@ import java.nio.file.Path
  *   // Get first event (start root object)
  *   assert { parser.next() == Event.StartObject }
  *
- *   // Get field name and value
- *   assert { parser.next() == Event.FieldName("id") }
+ *   // Get key and value
+ *   assert { parser.next() == Event.Key("id") }
  *   assert { parser.next() == Event.Value(1000) }
  *
- *   // Get field name and value
- *   assert { parser.next() == Event.FieldName("name") }
+ *   // Get key and value
+ *   assert { parser.next() == Event.Key("name") }
  *   assert { parser.next() == Event.Value("lupita") }
  *
- *   // Get field name and value
- *   assert { parser.next() == Event.FieldName("groups") }
+ *   // Get key and value
+ *   assert { parser.next() == Event.Key("groups") }
  *   assert { parser.next() == Event.StartArray } // start nested array
  *   assert { parser.next() == Event.Value("lupita") }
  *   assert { parser.next() == Event.Value("admin") }
@@ -81,8 +81,7 @@ trait JsonParser extends Iterator[JsonParser.Event], AutoCloseable:
    * assert { parser.getObject() == Json.obj("id" -> 1000, "name" -> "lupita") }
    * }}}
    *
-   * @note Parser must be in object context, and previous event must not be
-   * field name.
+   * @note Parser must be in object context.
    */
   def getObject(): JsonObject
 
@@ -112,47 +111,47 @@ trait JsonParser extends Iterator[JsonParser.Event], AutoCloseable:
 object JsonParser:
   /** Defines enumeration of parser events. */
   enum Event:
-    /** Indicates start of object. */
+    /** Signals start of object. */
     case StartObject extends Event
 
-    /** Indicates start of array. */
+    /** Signals start of array. */
     case StartArray extends Event
 
     /**
-     * Indicates field name.
+     * Signals key.
      *
-     * @param get parsed field name
+     * @param get parsed key
      */
-    case FieldName(get: String) extends Event
+    case Key(get: String) extends Event
 
     /**
-     * Indicates value.
+     * Signals value.
      *
      * @param get parsed value
      */
     case Value(get: JsonValue) extends Event
 
-    /** Indicates end of object. */
+    /** Signals end of object. */
     case EndObject extends Event
 
-    /** Indicates end of array. */
+    /** Signals end of array. */
     case EndArray extends Event
 
   /** Creates JSON parser from input. */
   def apply(input: Reader): JsonParser =
     JsonParserImpl(input)
 
-  /** Creates JSON parser from text. */
-  def apply(text: String): JsonParser =
-    JsonParserImpl(StringReader(text))
+  /** Creates JSON parser from input. */
+  def apply(input: String): JsonParser =
+    JsonParserImpl(StringReader(input))
 
-  /** Creates JSON parser from bytes. */
-  def apply(bytes: Array[Byte]): JsonParser =
-    JsonParserImpl(InputStreamReader(ByteArrayInputStream(bytes)))
+  /** Creates JSON parser from input. */
+  def apply(input: Array[Byte]): JsonParser =
+    JsonParserImpl(InputStreamReader(ByteArrayInputStream(input)))
 
-  /** Creates JSON parser from bytes. */
-  def apply(bytes: Array[Byte], offset: Int, length: Int): JsonParser =
-    JsonParserImpl(InputStreamReader(ByteArrayInputStream(bytes, offset, length)))
+  /** Creates JSON parser from input. */
+  def apply(input: Array[Byte], offset: Int, length: Int): JsonParser =
+    JsonParserImpl(InputStreamReader(ByteArrayInputStream(input, offset, length)))
 
   /** Creates JSON parser from input. */
   def apply(input: InputStream): JsonParser =

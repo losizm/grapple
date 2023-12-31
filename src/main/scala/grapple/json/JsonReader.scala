@@ -51,21 +51,21 @@ trait JsonReader extends AutoCloseable:
 
 /** Provides JSON reader factory. */
 object JsonReader:
-  /** Creates JSON reader from text. */
-  def apply(text: String): JsonReader =
-    JsonReaderImpl(StringReader(text))
-
-  /** Creates JSON reader from bytes. */
-  def apply(bytes: Array[Byte]): JsonReader =
-    JsonReaderImpl(InputStreamReader(ByteArrayInputStream(bytes)))
-
-  /** Creates JSON reader from bytes. */
-  def apply(bytes: Array[Byte], offset: Int, length: Int): JsonReader =
-    JsonReaderImpl(InputStreamReader(ByteArrayInputStream(bytes, offset, length)))
-
   /** Creates JSON reader from input. */
   def apply(input: Reader): JsonReader =
     JsonReaderImpl(input)
+
+  /** Creates JSON reader from input. */
+  def apply(input: String): JsonReader =
+    JsonReaderImpl(StringReader(input))
+
+  /** Creates JSON reader from input. */
+  def apply(input: Array[Byte]): JsonReader =
+    JsonReaderImpl(InputStreamReader(ByteArrayInputStream(input)))
+
+  /** Creates JSON reader from input. */
+  def apply(input: Array[Byte], offset: Int, length: Int): JsonReader =
+    JsonReaderImpl(InputStreamReader(ByteArrayInputStream(input, offset, length)))
 
   /** Creates JSON reader from input. */
   def apply(input: InputStream): JsonReader =

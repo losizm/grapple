@@ -42,14 +42,12 @@ class JsonArrayBuilder:
   private val values = ListBuffer[JsonValue]()
 
   /**
-   * Adds value to JSON array.
+   * Adds null value to JSON array.
    *
    * @return this builder
    */
-  def add(value: JsonValue): this.type =
-    if value == null then
-      throw NullPointerException()
-    values += value
+  def addNull(): this.type =
+    values += JsonNull
     this
 
   /**
@@ -68,17 +66,8 @@ class JsonArrayBuilder:
    *
    * @return this builder
    */
-  def add(value: Byte): this.type =
-    values += JsonNumber(value)
-    this
-
-  /**
-   * Adds value to JSON array.
-   *
-   * @return this builder
-   */
-  def add(value: Short): this.type =
-    values += JsonNumber(value)
+  def add(value: Boolean): this.type =
+    values += JsonBoolean(value)
     this
 
   /**
@@ -144,17 +133,10 @@ class JsonArrayBuilder:
    *
    * @return this builder
    */
-  def add(value: Boolean): this.type =
-    values += JsonBoolean(value)
-    this
-
-  /**
-   * Adds null value to JSON array.
-   *
-   * @return this builder
-   */
-  def addNull(): this.type =
-    values += JsonNull
+  def add(value: JsonValue): this.type =
+    if value == null then
+      throw NullPointerException()
+    values += value
     this
 
   /** Builds JSON array. */

@@ -51,7 +51,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
 
     state = State.Reset;
     val success = event.get
-    fieldPending = success.isInstanceOf[Event.FieldName]
+    fieldPending = success.isInstanceOf[Event.Key]
     success
 
   def getObject(): JsonObject =
@@ -63,14 +63,14 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
 
     while !done do
       next() match
-        case Event.EndObject        => done = true
-        case Event.FieldName(name)  =>
+        case Event.EndObject => done = true
+        case Event.Key(key)  =>
           next() match
-            case Event.StartObject  => builder.add(name, getObject())
-            case Event.StartArray   => builder.add(name, getArray())
-            case Event.Value(value) => builder.add(name, value)
-            case _                  => throw JsonException("Unexpected event")
-        case _                      => throw JsonException("Unexpected event")
+            case Event.StartObject  => builder.add(key, getObject())
+            case Event.StartArray   => builder.add(key, getArray())
+            case Event.Value(value) => builder.add(key, value)
+            case event              => throw JsonException(s"Unexpected event: $event")
+        case event                  => throw JsonException(s"Unexpected event: $event")
     builder.toJsonObject()
 
   def getArray(): JsonArray =
@@ -86,7 +86,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
         case Event.StartObject  => builder.add(getObject())
         case Event.StartArray   => builder.add(getArray())
         case Event.Value(value) => builder.add(value)
-        case _                  => throw JsonException("Unexpected event")
+        case event              => throw JsonException(s"Unexpected event: $event")
     builder.toJsonArray()
 
   def close(): Unit =
@@ -140,7 +140,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
             unexpectedChar(',')
 
           tracker.top.isObject match
-            case true  => getFieldNameEvent(reader.getSkipWhitespace())
+            case true  => getKeyEvent(reader.getSkipWhitespace())
             case false => getValueEvent(reader.getSkipWhitespace())
 
         case c =>
@@ -148,12 +148,12 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
             unexpectedChar(c)
 
           tracker.top.isObject match
-            case true  => getFieldNameEvent(c)
+            case true  => getKeyEvent(c)
             case false => getValueEvent(c)
 
-  private def getFieldNameEvent(first: Char): Event =
+  private def getKeyEvent(first: Char): Event =
     first match
-      case '"' => Event.FieldName(finishString())
+      case '"' => Event.Key(finishString())
       case _   => unexpectedChar(first)
 
   private def getValueEvent(first: Char): Event =

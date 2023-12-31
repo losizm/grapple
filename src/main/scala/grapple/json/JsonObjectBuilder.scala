@@ -43,135 +43,113 @@ class JsonObjectBuilder:
   private val values = MutableSeqMap[String, JsonValue]()
 
   /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: JsonValue): this.type =
-    if name == null || value == null then
-      throw NullPointerException()
-    values += name -> value
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: String): this.type =
-    if name == null || value == null then
-      throw NullPointerException()
-    values += name -> JsonString(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: Byte): this.type =
-    if name == null then
-      throw NullPointerException()
-    values += name -> JsonNumber(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: Short): this.type =
-    if name == null then
-      throw NullPointerException()
-    values += name -> JsonNumber(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: Int): this.type =
-    if name == null then
-      throw NullPointerException()
-    values += name -> JsonNumber(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: Long): this.type =
-    if name == null then
-      throw NullPointerException()
-    values += name -> JsonNumber(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: Float): this.type =
-    if name == null then
-      throw NullPointerException()
-    values += name -> JsonNumber(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: Double): this.type =
-    if name == null then
-      throw NullPointerException()
-    values += name -> JsonNumber(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: BigInt): this.type =
-    if name == null || value == null then
-      throw NullPointerException()
-    values += name -> JsonNumber(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: BigDecimal): this.type =
-    if name == null || value == null then
-      throw NullPointerException()
-    values += name -> JsonNumber(value)
-    this
-
-  /**
-   * Adds field to JSON object.
-   *
-   * @return this builder
-   */
-  def add(name: String, value: Boolean): this.type =
-    if name == null then
-      throw NullPointerException()
-    values += name -> JsonBoolean(value)
-    this
-
-  /**
    * Adds field with null value to JSON object.
    *
    * @return this builder
    */
-  def addNull(name: String): this.type =
-    if name == null then
+  def addNull(key: String): this.type =
+    if key == null then
       throw NullPointerException()
-    values += name -> JsonNull
+    values += key -> JsonNull
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: String): this.type =
+    if key == null || value == null then
+      throw NullPointerException()
+    values += key -> JsonString(value)
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: Boolean): this.type =
+    if key == null then
+      throw NullPointerException()
+    values += key -> JsonBoolean(value)
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: Int): this.type =
+    if key == null then
+      throw NullPointerException()
+    values += key -> JsonNumber(value)
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: Long): this.type =
+    if key == null then
+      throw NullPointerException()
+    values += key -> JsonNumber(value)
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: Float): this.type =
+    if key == null then
+      throw NullPointerException()
+    values += key -> JsonNumber(value)
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: Double): this.type =
+    if key == null then
+      throw NullPointerException()
+    values += key -> JsonNumber(value)
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: BigInt): this.type =
+    if key == null || value == null then
+      throw NullPointerException()
+    values += key -> JsonNumber(value)
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: BigDecimal): this.type =
+    if key == null || value == null then
+      throw NullPointerException()
+    values += key -> JsonNumber(value)
+    this
+
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add(key: String, value: JsonValue): this.type =
+    if key == null || value == null then
+      throw NullPointerException()
+    values += key -> value
     this
 
   /** Builds JSON object. */

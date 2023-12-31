@@ -15,7 +15,7 @@
  */
 package grapple.json
 
-import java.io.{ File, InputStream, Reader, StringWriter }
+import java.io.*
 import java.nio.file.Path
 
 /**
@@ -54,30 +54,30 @@ object Json:
     JsonArray(values)
 
   /**
-   * Parses JSON structure from text.
+   * Parses JSON structure from input.
    *
-   * @throws JsonParserError if text cannot be parsed to JSON structure
+   * @throws JsonParserError if input cannot be parsed to JSON structure
    */
-  def parse(text: String): JsonStructure =
-    val reader = JsonReader(text)
+  def parse(input: String): JsonStructure =
+    val reader = JsonReader(input)
     try reader.read() finally reader.close()
 
   /**
-   * Parses JSON structure from bytes.
+   * Parses JSON structure from input.
    *
-   * @throws JsonParserError if bytes cannot be parsed to JSON structure
+   * @throws JsonParserError if input cannot be parsed to JSON structure
    */
-  def parse(bytes: Array[Byte]): JsonStructure =
-    val reader = JsonReader(bytes)
+  def parse(input: Array[Byte]): JsonStructure =
+    val reader = JsonReader(input)
     try reader.read() finally reader.close()
 
   /**
-   * Parses JSON structure from bytes.
+   * Parses JSON structure from input.
    *
-   * @throws JsonParserError if bytes cannot be parsed to JSON structure
+   * @throws JsonParserError if input cannot be parsed to JSON structure
    */
-  def parse(bytes: Array[Byte], offset: Int, length: Int): JsonStructure =
-    val reader = JsonReader(bytes, offset, length)
+  def parse(input: Array[Byte], offset: Int, length: Int): JsonStructure =
+    val reader = JsonReader(input, offset, length)
     try reader.read() finally reader.close()
 
   /**
@@ -157,5 +157,5 @@ object Json:
    * @param value  value
    * @param output converter
    */
-  def toJson[T](value: T)(using converter: JsonOutput[T]): JsonValue =
-    converter.write(value)
+  def toJson[T](value: T)(using output: JsonOutput[T]): JsonValue =
+    output.write(value)

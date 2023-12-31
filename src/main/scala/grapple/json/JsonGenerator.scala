@@ -15,7 +15,7 @@
  */
 package grapple.json
 
-import java.io.{ File, FileWriter, OutputStream, OutputStreamWriter, Writer }
+import java.io.*
 import java.nio.file.Path
 
 /**
@@ -59,107 +59,79 @@ import java.nio.file.Path
  * @see [[JsonWriter]]
  */
 trait JsonGenerator extends AutoCloseable:
+  /** Writes opening brace to start object context. */
+  def writeStartObject(): this.type
+
   /**
    * Writes field declaration and opening brace to start object context.
    *
-   * @param name field name
+   * @param key object key
    */
-  def writeStartObject(name: String): this.type
-
-  /**
-   * Writes field declaration and opening bracket to start array context.
-   *
-   * @param name field name
-   */
-  def writeStartArray(name: String): this.type
-
-  /** Writes opening brace to start object context. */
-  def writeStartObject(): this.type
+  def writeStartObject(key: String): this.type
 
   /** Writes opening bracket to start array context. */
   def writeStartArray(): this.type
 
+  /**
+   * Writes field declaration and opening bracket to start array context.
+   *
+   * @param key object key
+   */
+  def writeStartArray(key: String): this.type
+
   /** Writes closing brace or bracket based on current context. */
   def writeEnd(): this.type
 
-  /**
-   * Writes field to object context.
-   *
-   * @param name  field name
-   * @param value JSON value
-   */
-  def write(name: String, value: JsonValue): this.type
+  /** Writes field with null value to object context. */
+  def writeNull(key: String): this.type =
+    write(key, JsonNull)
 
   /** Writes field to object context. */
-  def write(name: String, value: String): this.type =
-    write(name, JsonString(value))
+  def write(key: String, value: String): this.type =
+    write(key, JsonString(value))
 
   /** Writes field to object context. */
-  def write(name: String, value: Byte): this.type =
-    write(name, JsonNumber(value))
+  def write(key: String, value: Boolean): this.type =
+    write(key, JsonBoolean(value))
 
   /** Writes field to object context. */
-  def write(name: String, value: Short): this.type =
-    write(name, JsonNumber(value))
+  def write(key: String, value: Int): this.type =
+    write(key, JsonNumber(value))
 
   /** Writes field to object context. */
-  def write(name: String, value: Int): this.type =
-    write(name, JsonNumber(value))
+  def write(key: String, value: Long): this.type =
+    write(key, JsonNumber(value))
 
   /** Writes field to object context. */
-  def write(name: String, value: Long): this.type =
-    write(name, JsonNumber(value))
+  def write(key: String, value: Float): this.type =
+    write(key, JsonNumber(value))
 
   /** Writes field to object context. */
-  def write(name: String, value: Float): this.type =
-    write(name, JsonNumber(value))
+  def write(key: String, value: Double): this.type =
+    write(key, JsonNumber(value))
 
   /** Writes field to object context. */
-  def write(name: String, value: Double): this.type =
-    write(name, JsonNumber(value))
+  def write(key: String, value: BigInt): this.type =
+    write(key, JsonNumber(value))
 
   /** Writes field to object context. */
-  def write(name: String, value: BigInt): this.type =
-    write(name, JsonNumber(value))
+  def write(key: String, value: BigDecimal): this.type =
+    write(key, JsonNumber(value))
 
   /** Writes field to object context. */
-  def write(name: String, value: BigDecimal): this.type =
-    write(name, JsonNumber(value))
+  def write(key: String, value: JsonValue): this.type
 
-  /** Writes field to object context. */
-  def write(name: String, value: Boolean): this.type =
-    write(name, JsonBoolean(value))
+  /** Writes null value to array context. */
+  def writeNull(): this.type =
+    write(JsonNull)
 
-  /**
-   * Writes field with null value to object context.
-   *
-   * @param name field name
-   */
-  def writeNull(name: String): this.type =
-    write(name, JsonNull)
-
-  /**
-   * Writes value to array context.
-   *
-   * @param value JSON value
-   */
-  def write(value: JsonValue): this.type
-
-  /**
-   * Writes value to array context.
-   *
-   * @param value JSON value
-   */
+  /** Writes value to array context. */
   def write(value: String): this.type =
     write(JsonString(value))
 
   /** Writes value to array context. */
-  def write(value: Byte): this.type =
-    write(JsonNumber(value))
-
-  /** Writes value to array context. */
-  def write(value: Short): this.type =
-    write(JsonNumber(value))
+  def write(value: Boolean): this.type =
+    write(JsonBoolean(value))
 
   /** Writes value to array context. */
   def write(value: Int): this.type =
@@ -186,12 +158,7 @@ trait JsonGenerator extends AutoCloseable:
     write(JsonNumber(value))
 
   /** Writes value to array context. */
-  def write(value: Boolean): this.type =
-    write(JsonBoolean(value))
-
-  /** Writes null value to array context. */
-  def writeNull(): this.type =
-    write(JsonNull)
+  def write(value: JsonValue): this.type
 
   /** Flushes writer. */
   def flush(): Unit

@@ -27,8 +27,8 @@ class JsonObjectBuilderSpec extends org.scalatest.flatspec.AnyFlatSpec:
       .add("other",   Json.obj("name" -> "lupita", "email" -> "lupita@localhost", "timeout" -> 10_000_000_000L))
       .toJsonObject()
 
-    assert(!user.isEmpty)
-    assert(user.names == Seq("id", "name", "groups", "enabled", "other"))
+    assert(user.nonEmpty)
+    assert(user.keys == Set("id", "name", "groups", "enabled", "other"))
 
     assert(user("id").as[Int] == 1000)
     assert(user("name").as[String] == "lupita")
@@ -40,5 +40,5 @@ class JsonObjectBuilderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "build empty JsonObject" in {
     val obj = JsonObjectBuilder().toJsonObject()
     assert(obj.isEmpty)
-    assert(obj.names.isEmpty)
+    assert(obj.keys.isEmpty)
   }

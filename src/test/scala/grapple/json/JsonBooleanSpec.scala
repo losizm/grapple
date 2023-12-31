@@ -47,7 +47,7 @@ class JsonBooleanSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(JsonBoolean.True != JsonBoolean.False)
   }
 
-  it should "destructure JsonBoolean" in {
+  it should "deconstruct JsonBoolean" in {
     val b1 = JsonBoolean(true)
     assert {
       b1 match

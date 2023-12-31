@@ -18,16 +18,16 @@ package grapple.json
 import java.io.BufferedWriter
 
 private object DefaultPrinter extends JsonPrinter:
-  def write(name: String, value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit =
-    writer.write(EncodedString(name))
+  def write(key: String, value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit =
+    writer.write(EncodedString(key))
     writer.write(':')
     writer.write(value.toString)
 
   def write(value: JsonValue, depth: Int)(using writer: BufferedWriter): Unit =
     writer.write(value.toString)
 
-  def writeStart(name: String, start: Char, depth: Int)(using writer: BufferedWriter): Unit =
-    writer.write(EncodedString(name))
+  def writeStart(key: String, start: Char, depth: Int)(using writer: BufferedWriter): Unit =
+    writer.write(EncodedString(key))
     writer.write(':')
     writer.write(start)
 

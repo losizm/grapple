@@ -27,8 +27,7 @@ package grapple.json
  *
  * // Define how to convert JsonValue to User
  * given userInput: JsonInput[User] =
- *   case json: JsonObject => User(json("id"), json("name"))
- *   case _                => throw IllegalArgumentException("Expected JSON object")
+ *   json => User(json("id"), json("name"))
  *
  * val json = Json.obj("id" -> 0, "name" -> "root")
  * assert { json.as[User] == User(0, "root") }
