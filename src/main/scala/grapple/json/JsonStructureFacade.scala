@@ -51,4 +51,7 @@ class JsonStructureFacade private[json] (json: JsonStructure) extends JsonObject
   @targetName("append")
   def :+(value: JsonValue) = json.asInstanceOf[JsonArray].:+(value)
 
+  /** Unwraps underlying JSON structure. */
+  def unwrap: JsonStructure = json
+
   override lazy val toString = json.toString
