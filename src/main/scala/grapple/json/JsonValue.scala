@@ -583,6 +583,31 @@ trait JsonArray private[json] extends JsonStructure:
       case value    => value.as[T]
 
   /**
+   * Optionally reads value.
+   *
+   * @param index array index
+   *
+   * @note The value is not read if it is null.
+   *
+   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   */
+  def readOption[T](index: Int)(using JsonInput[T]): Option[T] =
+    apply(index) match
+      case JsonNull => None
+      case value    => Some(value.as[T])
+
+  /**
+   * Reads value or returns default value.
+   *
+   * @param index   array index
+   * @param default default value
+   *
+   * @note The value is not read if it is null.
+   */
+  def readOrElse[T](index: Int, default: => T)(using JsonInput[T]): T =
+   readOption(index).getOrElse(default)
+
+  /**
    * Updates value at given index.
    *
    * @param index array index
