@@ -7,7 +7,7 @@ licenses     := List("Apache License, Version 2" -> url("http://www.apache.org/l
 
 versionScheme := Some("early-semver")
 
-scalaVersion := "3.3.1"
+scalaVersion := "3.3.5"
 scalacOptions := Seq("-deprecation", "-feature", "-new-syntax", "-Werror", "-Yno-experimental")
 
 Compile / doc / scalacOptions := Seq(
@@ -16,7 +16,7 @@ Compile / doc / scalacOptions := Seq(
   "-project-logo", "images/logo.svg"
 )
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.17" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % "test"
 
 developers := List(
   Developer(
