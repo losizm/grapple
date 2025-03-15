@@ -27,29 +27,29 @@ import scala.annotation.targetName
 class JsonStructureFacade private[json] (json: JsonStructure) extends JsonObject, JsonArray:
   def size = json.size
 
-  def keys = json.asInstanceOf[JsonObject].keys
-  def fields = json.asInstanceOf[JsonObject].fields
-  def apply(key: String) = json.asInstanceOf[JsonObject].apply(key)
-  def get(key: String) = json.asInstanceOf[JsonObject].get(key)
-  def updated(key: String, value: JsonValue) = json.asInstanceOf[JsonObject].updated(key, value)
-  def removed(key: String) = json.asInstanceOf[JsonObject].removed(key)
+  def keys = expect[JsonObject](json).keys
+  def fields = expect[JsonObject](json).fields
+  def apply(key: String) = expect[JsonObject](json).apply(key)
+  def get(key: String) = expect[JsonObject](json).get(key)
+  def updated(key: String, value: JsonValue) = expect[JsonObject](json).updated(key, value)
+  def removed(key: String) = expect[JsonObject](json).removed(key)
 
   @targetName("concat")
-  def ++(other: JsonObject) = json.asInstanceOf[JsonObject].++(other)
+  def ++(other: JsonObject) = expect[JsonObject](json).++(other)
 
-  def values = json.asInstanceOf[JsonArray].values
-  def apply(index: Int) = json.asInstanceOf[JsonArray].apply(index)
-  def updated(index: Int, value: JsonValue) = json.asInstanceOf[JsonArray].updated(index, value)
-  def removed(index: Int) = json.asInstanceOf[JsonArray].removed(index)
+  def values = expect[JsonArray](json).values
+  def apply(index: Int) = expect[JsonArray](json).apply(index)
+  def updated(index: Int, value: JsonValue) = expect[JsonArray](json).updated(index, value)
+  def removed(index: Int) = expect[JsonArray](json).removed(index)
 
   @targetName("concat")
-  def ++(suffix: JsonArray) = json.asInstanceOf[JsonArray].++(suffix)
+  def ++(suffix: JsonArray) = expect[JsonArray](json).++(suffix)
 
   @targetName("prepend")
-  def +:(value: JsonValue) = json.asInstanceOf[JsonArray].+:(value)
+  def +:(value: JsonValue) = expect[JsonArray](json).+:(value)
 
   @targetName("append")
-  def :+(value: JsonValue) = json.asInstanceOf[JsonArray].:+(value)
+  def :+(value: JsonValue) = expect[JsonArray](json).:+(value)
 
   /** Unwraps underlying JSON structure. */
   def unwrap: JsonStructure = json

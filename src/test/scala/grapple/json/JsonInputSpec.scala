@@ -79,7 +79,7 @@ class JsonInputSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(test(9).as[Either[Option[Int], Int]] == Left(None))
 
     assert(test(0).as[Try[String]].get == "hello")
-    assertThrows[ClassCastException](test(0).as[Try[Int]].get)
+    assertThrows[JsonExpectationError](test(0).as[Try[Int]].get)
   }
 
   it should "read JsonObject as Map" in {

@@ -42,6 +42,15 @@ class JsonException(message: String, cause: Throwable) extends RuntimeException(
   def this(cause: Throwable) = this(null, cause)
 
 /**
+ * Defines JSON expectation error.
+ *
+ * @param expected class
+ * @param actual class
+ */
+case class JsonExpectationError(expected: Class[_], actual: Class[_])
+  extends JsonException(s"Excepted ${expected.getSimpleName} and found ${actual.getSimpleName}")
+
+/**
  * Defines JSON parser error.
  *
  * @param message detail message

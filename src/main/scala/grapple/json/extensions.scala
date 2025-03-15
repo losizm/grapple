@@ -24,22 +24,22 @@ extension (json: JsonValue)
    *
    * @param key object key
    *
-   * @throws ClassCastException if not [[JsonObject]]
+   * @throws JsonExpectationError if not JsonObject
    */
   @targetName("at")
   def \(key: String): JsonValue =
-    json.asInstanceOf[JsonObject](key)
+    expect[JsonObject](json)(key)
 
   /**
    * Gets value in JSON array.
    *
    * @param index array index
    *
-   * @throws ClassCastException if not [[JsonArray]]
+   * @throws JsonExpectationError if not JsonArray
    */
   @targetName("at")
   def \(index: Int): JsonValue =
-    json.asInstanceOf[JsonArray](index)
+    expect[JsonArray](json)(index)
 
   /**
    * Collects values with given object key while traversing nested objects and

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Carlos Conyers
+ * Copyright 2025 Carlos Conyers
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,10 @@
  */
 package grapple.json
 
-class JsonNullSpec extends org.scalatest.flatspec.AnyFlatSpec:
-  it should "inspect JsonNull" in {
-    assert(JsonNull.toString == "null")
-    assertThrows[JsonExpectationError](JsonNull.as[String])
-    assertThrows[JsonExpectationError](JsonNull.as[Int])
-    assertThrows[JsonExpectationError](JsonNull.as[Long])
-    assertThrows[JsonExpectationError](JsonNull.as[Double])
-    assertThrows[JsonExpectationError](JsonNull.as[BigDecimal])
-    assertThrows[JsonExpectationError](JsonNull.as[Boolean])
-  }
+import scala.reflect.ClassTag
+
+private inline def expect[T <: JsonValue](value: JsonValue)(using ctag: ClassTag[T]): T =
+  try
+    value.asInstanceOf[T]
+  catch case _: ClassCastException =>
+    throw JsonExpectationError(ctag.runtimeClass, value.getClass)

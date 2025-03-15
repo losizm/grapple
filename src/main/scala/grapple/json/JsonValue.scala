@@ -227,10 +227,10 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonString
+   * @throws JsonExpectationError if not JsonString
    */
   def getString(key: String): String =
-    apply(key).asInstanceOf[JsonString].value
+    expect[JsonString](apply(key)).value
 
   /**
    * Gets value as `Boolean`.
@@ -238,10 +238,10 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonBoolean
+   * @throws JsonExpectationError if not JsonBoolean
    */
   def getBoolean(key: String): Boolean =
-    apply(key).asInstanceOf[JsonBoolean].value
+    expect[JsonBoolean](apply(key)).value
 
   /**
    * Gets value as `Int`.
@@ -249,11 +249,11 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    * @throws java.lang.ArithmeticException if not represented exactly
    */
   def getInt(key: String): Int =
-    apply(key).asInstanceOf[JsonNumber].toInt
+    expect[JsonNumber](apply(key)).toInt
 
   /**
    * Gets value as `Long`.
@@ -261,11 +261,11 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    * @throws java.lang.ArithmeticException if not represented exactly
    */
   def getLong(key: String): Long =
-    apply(key).asInstanceOf[JsonNumber].toLong
+    expect[JsonNumber](apply(key)).toLong
 
   /**
    * Gets value as `Float`.
@@ -273,10 +273,10 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    */
   def getFloat(key: String): Float =
-    apply(key).asInstanceOf[JsonNumber].toFloat
+    expect[JsonNumber](apply(key)).toFloat
 
   /**
    * Gets value as `Double`.
@@ -284,21 +284,21 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    */
   def getDouble(key: String): Double =
-    apply(key).asInstanceOf[JsonNumber].toDouble
+    expect[JsonNumber](apply(key)).toDouble
 
   /**
    * Gets value as `BigInt`.
    *
    * @param key object key
    *
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    * @throws java.lang.ArithmeticException if not represented exactly
    */
   def getBigInt(key: String): BigInt =
-    apply(key).asInstanceOf[JsonNumber].toBigInt
+    expect[JsonNumber](apply(key)).toBigInt
 
   /**
    * Gets value as `BigDecimal`.
@@ -306,10 +306,10 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    */
   def getBigDecimal(key: String): BigDecimal =
-    apply(key).asInstanceOf[JsonNumber].toBigDecimal
+    expect[JsonNumber](apply(key)).toBigDecimal
 
   /**
    * Gets value as `JsonObject`.
@@ -317,10 +317,10 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonObject
+   * @throws JsonExpectationError if not JsonObject
    */
   def getObject(key: String): JsonObject =
-    apply(key).asInstanceOf[JsonObject]
+    expect { apply(key) }
 
   /**
    * Gets value as `JsonArray`.
@@ -328,10 +328,10 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key object key
    *
    * @throws java.util.NoSuchElementException if key does not exist
-   * @throws java.lang.ClassCastException if not JsonArray
+   * @throws JsonExpectationError if not JsonArray
    */
   def getArray(key: String): JsonArray =
-    apply(key).asInstanceOf[JsonArray]
+    expect { apply(key) }
 
   /**
    * Reads value.
@@ -462,10 +462,10 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonString
+   * @throws JsonExpectationError if not JsonString
    */
   def getString(index: Int): String =
-    apply(index).asInstanceOf[JsonString].value
+    expect[JsonString](apply(index)).value
 
   /**
    * Gets value as `Boolean`.
@@ -473,10 +473,10 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonBoolean
+   * @throws JsonExpectationError if not JsonBoolean
    */
   def getBoolean(index: Int): Boolean =
-    apply(index).asInstanceOf[JsonBoolean].value
+    expect[JsonBoolean](apply(index)).value
 
   /**
    * Gets value as `Int`.
@@ -484,11 +484,11 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    * @throws java.lang.ArithmeticException if not represented exactly
    */
   def getInt(index: Int): Int =
-    apply(index).asInstanceOf[JsonNumber].toInt
+    expect[JsonNumber](apply(index)).toInt
 
   /**
    * Gets value as `Long`.
@@ -496,11 +496,11 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    * @throws java.lang.ArithmeticException if not represented exactly
    */
   def getLong(index: Int): Long =
-    apply(index).asInstanceOf[JsonNumber].toLong
+    expect[JsonNumber](apply(index)).toLong
 
   /**
    * Gets value as `Float`.
@@ -508,10 +508,10 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    */
   def getFloat(index: Int): Float =
-    apply(index).asInstanceOf[JsonNumber].toFloat
+    expect[JsonNumber](apply(index)).toFloat
 
   /**
    * Gets value as `Double`.
@@ -519,10 +519,10 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    */
   def getDouble(index: Int): Double =
-    apply(index).asInstanceOf[JsonNumber].toDouble
+    expect[JsonNumber](apply(index)).toDouble
 
   /**
    * Gets value as `BigInt`.
@@ -530,11 +530,11 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    * @throws java.lang.ArithmeticException if value cannot be represented exactly
    */
   def getBigInt(index: Int): BigInt =
-    apply(index).asInstanceOf[JsonNumber].toBigInt
+    expect[JsonNumber](apply(index)).toBigInt
 
   /**
    * Gets value as `BigDecimal`.
@@ -542,10 +542,10 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonNumber
+   * @throws JsonExpectationError if not JsonNumber
    */
   def getBigDecimal(index: Int): BigDecimal =
-    apply(index).asInstanceOf[JsonNumber].toBigDecimal
+    expect[JsonNumber](apply(index)).toBigDecimal
 
   /**
    * Gets value as `JsonObject`.
@@ -553,10 +553,10 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonObject
+   * @throws JsonExpectationError if not JsonObject
    */
   def getObject(index: Int): JsonObject =
-    apply(index).asInstanceOf[JsonObject]
+    expect { apply(index) }
 
   /**
    * Gets value as `JsonArray`.
@@ -564,10 +564,10 @@ trait JsonArray private[json] extends JsonStructure:
    * @param index array index
    *
    * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.ClassCastException if not JsonArray
+   * @throws JsonExpectationError if not JsonArray
    */
   def getArray(index: Int): JsonArray =
-    apply(index).asInstanceOf[JsonArray]
+    expect { apply(index) }
 
   /**
    * Reads value.

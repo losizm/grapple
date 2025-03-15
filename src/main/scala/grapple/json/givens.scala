@@ -16,6 +16,7 @@
 package grapple.json
 
 import scala.collection.Factory
+import scala.reflect.ClassTag
 import scala.util.{ Failure, Try }
 
 /**
@@ -34,144 +35,148 @@ import scala.util.{ Failure, Try }
  * val list = json("values").as[List[JsonValue]]
  * }}}
  */
-given jsonValueToJsonValue: JsonInput[JsonValue] = identity(_)
+given jsonValueJsonInput: JsonInput[JsonValue] = identity(_)
 
 /** Casts `JsonValue` to `JsonNull`. */
-given jsonValueToJsonNull: JsonInput[JsonNull.type] = _.asInstanceOf[JsonNull.type]
+given jsonNullJsonInput: JsonInput[JsonNull.type] = expect(_)
 
 /** Casts `JsonValue` to `JsonString`. */
-given jsonValueToJsonString: JsonInput[JsonString] = _.asInstanceOf[JsonString]
+given jsonStringJsonInput: JsonInput[JsonString] = expect(_)
 
 /** Casts `JsonValue` to `JsonBoolean`. */
-given jsonValueToJsonBoolean: JsonInput[JsonBoolean] = _.asInstanceOf[JsonBoolean]
+given jsonBooleanJsonInput: JsonInput[JsonBoolean] = expect(_)
 
 /** Casts `JsonValue` to `JsonNumber`. */
-given jsonValueToJsonNumber: JsonInput[JsonNumber] = _.asInstanceOf[JsonNumber]
+given jsonNumberJsonInput: JsonInput[JsonNumber] = expect(_)
 
 /** Casts `JsonValue` to `JsonObject`. */
-given jsonValueToJsonObject: JsonInput[JsonObject] = _.asInstanceOf[JsonObject]
+given jsonObjectJsonInput: JsonInput[JsonObject] = expect(_)
 
 /** Casts `JsonValue` to `JsonArray`. */
-given jsonValueToJsonArray: JsonInput[JsonArray] = _.asInstanceOf[JsonArray]
+given jsonArrayJsonInput: JsonInput[JsonArray] = expect(_)
 
 /** Converts `JsonValue` to `String`. */
-given jsonValueToString: JsonInput[String] = _.asInstanceOf[JsonString].value
+given stringJsonInput: JsonInput[String] = expect[JsonString](_).value
+
+/** Converts `String` to `JsonString`. */
+given stringJsonOutput: JsonOutput[String] = JsonString(_)
 
 /** Converts `JsonValue` to `Boolean`. */
-given jsonValueToBoolean: JsonInput[Boolean] = _.asInstanceOf[JsonBoolean].value
+given booleanJsonInput: JsonInput[Boolean] = expect[JsonBoolean](_).value
+
+/** Converts `Boolean` to `JsonBoolean`. */
+given booleanJsonOutput: JsonOutput[Boolean] = JsonBoolean(_)
 
 /** Converts `JsonValue` to `Int`. */
-given jsonValueToInt: JsonInput[Int] = _.asInstanceOf[JsonNumber].toInt
+given intJsonInput: JsonInput[Int] = expect[JsonNumber](_).toInt
+
+/** Converts `Int` to `JsonNumber`. */
+given intJsonOutput: JsonOutput[Int] = JsonNumber(_)
 
 /** Converts `JsonValue` to `Long`. */
-given jsonValueToLong: JsonInput[Long] = _.asInstanceOf[JsonNumber].toLong
+given longJsonInput: JsonInput[Long] = expect[JsonNumber](_).toLong
+
+/** Converts `Long` to `JsonNumber`. */
+given longJsonOutput: JsonOutput[Long] = JsonNumber(_)
 
 /** Converts `JsonValue` to `Float`. */
-given jsonValueToFloat: JsonInput[Float] = _.asInstanceOf[JsonNumber].toFloat
+given floatJsonInput: JsonInput[Float] = expect[JsonNumber](_).toFloat
+
+/** Converts `Float` to `JsonNumber`. */
+given floatJsonOutput: JsonOutput[Float] = JsonNumber(_)
 
 /** Converts `JsonValue` to `Double`. */
-given jsonValueToDouble: JsonInput[Double] = _.asInstanceOf[JsonNumber].toDouble
+given doubleJsonInput: JsonInput[Double] = expect[JsonNumber](_).toDouble
+
+/** Converts `Double` to `JsonNumber`. */
+given doubleJsonOutput: JsonOutput[Double] = JsonNumber(_)
 
 /** Converts `JsonValue` to `BigInt`. */
-given jsonValueToBigInt: JsonInput[BigInt] = _.asInstanceOf[JsonNumber].toBigInt
+given bigIntJsonInput: JsonInput[BigInt] = expect[JsonNumber](_).toBigInt
+
+/** Converts `BigInt` to `JsonNumber`. */
+given bigIntJsonOutput: JsonOutput[BigInt] = JsonNumber(_)
 
 /** Converts `JsonValue` to `BigDecimal`. */
-given jsonValueToBigDecimal: JsonInput[BigDecimal] = _.asInstanceOf[JsonNumber].toBigDecimal
+given bigDecimalJsonInput: JsonInput[BigDecimal] = expect[JsonNumber](_).toBigDecimal
 
-/** Converts `JsonValue` to `Map`. */
-given jsonValueToMap[T, M[T] <: Map[String, T]](using input: JsonInput[T])(using factory: Factory[(String, T), M[T]]): JsonInput[M[T]] =
-  _.asInstanceOf[JsonObject].fields.foldLeft(factory.newBuilder) {
-    case (builder, (key, value)) => builder += key -> input.read(value)
-  }.result
+/** Converts `BigDecimal` to `JsonNumber`. */
+given bigDecimalJsonOutput: JsonOutput[BigDecimal] = JsonNumber(_)
 
-/** Converts `JsonValue` to collection. */
-given jsonValueToCollection[T, M[T]](using input: JsonInput[T])(using factory: Factory[T, M[T]]): JsonInput[M[T]] =
-  _.asInstanceOf[JsonArray].values.foldLeft(factory.newBuilder) {
-    (builder, value) => builder += input.read(value)
-  }.result
-
-/** Converts `JsonValue` to `Option`. */
-given jsonValueToOption[T](using input: JsonInput[T]): JsonInput[Option[T]] =
+given optionJsonInput[T](using input: JsonInput[T]): JsonInput[Option[T]] =
   case JsonNull => None
   case value    => Some(input.read(value))
 
+/** Converts `Some` to `JsonValue` or returns `JsonNull` if `None`. */
+given optionJsonOutput[T, C[T] <: Option[T]](using output: JsonOutput[T]): JsonOutput[C[T]] =
+  _.fold(JsonNull)(output.write(_))
+
+/** Converts `None` to `JsonNull`. */
+given noneJsonOutput: JsonOutput[None.type] = _ => JsonNull
+
 /** Converts `JsonValue` to `Try`. */
-given jsonValueToTry[T](using input: JsonInput[T]): JsonInput[Try[T]] =
+given tryJsonInput[T](using input: JsonInput[T]): JsonInput[Try[T]] =
   case JsonNull => Failure(NullPointerException())
   case value    => Try(input.read(value))
 
+/** Converts `Success` to `JsonValue` or returns `JsonNull` if `Failure`. */
+given tryJsonOutput[T, C[T] <: Try[T]](using output: JsonOutput[T]): JsonOutput[C[T]] =
+  _.fold(_ => JsonNull, output.write(_))
+
+/** Converts `Failure` to `JsonNull`. */
+given failureJsonOutput: JsonOutput[Failure[?]] = _ => JsonNull
+
 /** Converts `JsonValue` to `Either`. */
-given jsonValueToEither[A, B](using left: JsonInput[A])(using right: JsonInput[B]): JsonInput[Either[A, B]] =
+given eitherJsonInput[A, B](using left: JsonInput[A])(using right: JsonInput[B]): JsonInput[Either[A, B]] =
   value => Try(Right(right.read(value))).getOrElse(Left(left.read(value)))
 
-/** Converts `String` to `JsonString`. */
-given stringToJsonString: JsonOutput[String] = JsonString(_)
+/** Converts `Either` to `JsonValue`. */
+given eitherJsonOutput[A, B, C[A, B] <: Either[A, B]](using left: JsonOutput[A])(using right: JsonOutput[B]): JsonOutput[C[A, B]] =
+  _.fold(left.write(_), right.write(_))
 
-/** Converts `Boolean` to `JsonBoolean`. */
-given booleanToJsonBoolean: JsonOutput[Boolean] = JsonBoolean(_)
+/** Converts `Right` to `JsonValue`. */
+given rightJsonOutput[T](using output: JsonOutput[T]): JsonOutput[Right[?, T]] =
+  _.fold(_ => JsonNull, output.write(_))
 
-/** Converts `Int` to `JsonNumber`. */
-given intToJsonNumber: JsonOutput[Int] = JsonNumber(_)
+/** Converts `Left` to `JsonValue`. */
+given leftJsonOutput[T](using output: JsonOutput[T]): JsonOutput[Left[T, ?]] =
+  _.fold(output.write(_), _ => JsonNull)
 
-/** Converts `Long` to `JsonNumber`. */
-given longToJsonNumber: JsonOutput[Long] = JsonNumber(_)
+/** Converts `JsonValue` to `Array`. */
+given arrayJsonInput[T](using input: JsonInput[T])(using ctag: ClassTag[T]): JsonInput[Array[T]] =
+  expect[JsonArray](_).values.map(input.read).toArray
 
-/** Converts `Float` to `JsonNumber`. */
-given floatToJsonNumber: JsonOutput[Float] = JsonNumber(_)
+/** Converts `Array` to `JsonArray`. */
+given arrayJsonOutput[T](using output: JsonOutput[T]): JsonOutput[Array[T]] =
+  _.foldLeft(JsonArrayBuilder()) {
+    (builder, value) => builder.add(output.write(value))
+  }.toJsonArray()
 
-/** Converts `Double` to `JsonNumber`. */
-given doubleToJsonNumber: JsonOutput[Double] = JsonNumber(_)
+/** Converts `JsonValue` to `Iterable`. */
+given iterableJsonInput[T, C[T] <: Iterable[T]](using input: JsonInput[T])(using factory: Factory[T, C[T]]): JsonInput[C[T]] =
+  expect[JsonArray](_).values.foldLeft(factory.newBuilder) {
+    (builder, value) => builder += input.read(value)
+  }.result
 
-/** Converts `BigInt` to `JsonNumber`. */
-given bigIntToJsonNumber: JsonOutput[BigInt] = JsonNumber(_)
+/** Converts `Iterable` to `JsonArray`. */
+given iterableJsonOutput[T, C[T] <: Iterable[T]](using output: JsonOutput[T]): JsonOutput[C[T]] =
+  _.foldLeft(JsonArrayBuilder()) {
+    (builder, value) => builder.add(output.write(value))
+  }.toJsonArray()
 
-/** Converts `BigDecimal` to `JsonNumber`. */
-given bigDecimalToJsonNumber: JsonOutput[BigDecimal] = JsonNumber(_)
+/** Converts `JsonValue` to `Map`. */
+given mapJsonInput[T, C[T] <: Map[String, T]](using input: JsonInput[T])(using factory: Factory[(String, T), C[T]]): JsonInput[C[T]] =
+  expect[JsonObject](_).fields.foldLeft(factory.newBuilder) {
+    case (builder, (key, value)) => builder += key -> input.read(value)
+  }.result
 
 /** Converts `Map` to `JsonObject`. */
-given mapToJsonObject[T, M[T] <: Map[String, T]](using output: JsonOutput[T]): JsonOutput[M[T]] =
+given mapJsonOutput[T, C[T] <: Map[String, T]](using output: JsonOutput[T]): JsonOutput[C[T]] =
   _.foldLeft(JsonObjectBuilder()) {
     case (builder, (key, value)) => builder.add(key, output.write(value))
   }.toJsonObject()
 
-/** Converts `Array` to `JsonArray`. */
-given arrayToJsonArray[T](using output: JsonOutput[T]): JsonOutput[Array[T]] =
-  _.foldLeft(JsonArrayBuilder()) {
-    (builder, value) => builder.add(output.write(value))
-  }.toJsonArray()
-
-/** Converts `Iterable` to `JsonArray`. */
-given iterableToJsonArray[T, M[T] <: Iterable[T]](using output: JsonOutput[T]): JsonOutput[M[T]] =
-  _.foldLeft(JsonArrayBuilder()) {
-    (builder, value) => builder.add(output.write(value))
-  }.toJsonArray()
-
-/** Converts `Some` to `JsonValue` or returns `JsonNull` if `None`. */
-given optionToJsonValue[T, M[T] <: Option[T]](using output: JsonOutput[T]): JsonOutput[M[T]] =
-  _.fold(JsonNull)(output.write(_))
-
-/** Converts `None` to `JsonNull`. */
-given noneToJsonNull: JsonOutput[None.type] = _ => JsonNull
-
-/** Converts `Success` to `JsonValue` or returns `JsonNull` if `Failure`. */
-given tryToJsonValue[T, M[T] <: Try[T]](using output: JsonOutput[T]): JsonOutput[M[T]] =
-  _.fold(_ => JsonNull, output.write(_))
-
-/** Converts `Failure` to `JsonNull`. */
-given failureToJsonNull: JsonOutput[Failure[?]] = _ => JsonNull
-
-/** Converts `Either` to `JsonValue`. */
-given eitherToJsonValue[A, B, M[A, B] <: Either[A, B]](using left: JsonOutput[A])(using right: JsonOutput[B]): JsonOutput[M[A, B]] =
-  _.fold(left.write(_), right.write(_))
-
-/** Converts `Right` to `JsonValue`. */
-given rightToJsonValue[T](using output: JsonOutput[T]): JsonOutput[Right[?, T]] =
-  _.fold(_ => JsonNull, output.write(_))
-
-/** Converts `Left` to `JsonValue`. */
-given leftToJsonValue[T](using output: JsonOutput[T]): JsonOutput[Left[T, ?]] =
-  _.fold(output.write(_), _ => JsonNull)
-
+/** Converts `JsonValue` to `Option`. */
 /** Applies conversion using `JsonInput`. */
 given jsonInputConversion[T](using input: JsonInput[T]): Conversion[JsonValue, T] =
   input.read(_)
@@ -182,12 +187,8 @@ given jsonOutputConversion[T](using output: JsonOutput[T]): Conversion[T, JsonVa
 
 /** Converts `(String, T)` to `(String, JsonValue)`. */
 given jsonFieldConversion[T](using output: JsonOutput[T]): Conversion[(String, T), (String, JsonValue)] =
-  case (key, value) => key -> output.write(value)
+  _ -> output.write(_)
 
-/**
- * Converts `JsonValue` to `JsonStructureFacade`.
- *
- * @throws java.lang.ClassCastException if not JSON structure
- */
+/** Converts `JsonValue` to `JsonStructureFacade`. */
 given jsonStructureFacadeConversion: Conversion[JsonValue, JsonStructureFacade] =
-  json => JsonStructureFacade(json.asInstanceOf[JsonStructure])
+  json => JsonStructureFacade(expect(json))
