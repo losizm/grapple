@@ -1,6 +1,6 @@
 organization := "com.github.losizm"
 name         := "grapple"
-version      := "16.0.0-SNAPSHOT"
+version      := "16.0.0"
 description  := "The JSON library for Scala"
 homepage     := Some(url("https://github.com/losizm/grapple"))
 licenses     := List("Apache License, Version 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))

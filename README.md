@@ -8,7 +8,7 @@ The JSON library for Scala.
 To get started, add **Grapple** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "grapple" % "15.1.0"
+libraryDependencies += "com.github.losizm" %% "grapple" % "16.0.0"
 ```
 
 ## Let's Grapple!
@@ -23,7 +23,7 @@ deal with these classes directly.
 
 ### Reading and Writing
 Reading and writing are powered by `JsonInput` and `JsonOutput`. They convert
-values to and from JSON, and library-provided implementations are provided for
+values to and from JSON, and library-provided implementations are included for
 working with standard types like `String`, `Int`, etc. You must provide custom
 implementations for converting to and from instances of your classes.
 
