@@ -48,7 +48,23 @@ class JsonException(message: String, cause: Throwable) extends RuntimeException(
  * @param actual class
  */
 case class JsonExpectationError(expected: Class[_], actual: Class[_])
-  extends JsonException(s"Excepted ${expected.getSimpleName} and found ${actual.getSimpleName}")
+  extends JsonException(s"Expected ${expected.getSimpleName} instead of ${actual.getSimpleName}")
+
+/**
+ * Defines JSON object error.
+ *
+ * @param key object key
+ * @param cause underlying cause
+ */
+case class JsonObjectError(key: String, cause: Exception) extends JsonException(s"Error accessing key: ${EncodedString(key)}", cause)
+
+/**
+ * Defines JSON array error.
+ *
+ * @param index array index
+ * @param cause underlying cause
+ */
+case class JsonArrayError(index: Int, cause: Exception) extends JsonException(s"Error accessing index: $index", cause)
 
 /**
  * Defines JSON parser error.

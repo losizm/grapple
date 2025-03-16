@@ -16,6 +16,7 @@
 package grapple.json
 
 import scala.annotation.targetName
+import scala.reflect.ClassTag
 
 /** Represents JSON value. */
 sealed trait JsonValue:
@@ -188,7 +189,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws JsonObjectError if error occurs
    */
   def apply(key: String): JsonValue
 
@@ -197,7 +198,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws JsonObjectError if error occurs
    */
   def get(key: String): Option[JsonValue]
 
@@ -215,8 +216,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   *
-   * @throws java.util.NoSuchElementException if key does not exist
+   * @throws JsonObjectError if error occurs
    */
   def isNull(key: String): Boolean =
     apply(key) == JsonNull
@@ -226,141 +226,140 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonString
+   * @throws JsonObjectError if error occurs
    */
   def getString(key: String): String =
-    expect[JsonString](apply(key)).value
+    getExpected[JsonString](key).value
 
   /**
    * Gets value as `Boolean`.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonBoolean
+   * @throws JsonObjectError if error occurs
    */
   def getBoolean(key: String): Boolean =
-    expect[JsonBoolean](apply(key)).value
+   getExpected[JsonBoolean](key).value
 
   /**
    * Gets value as `Int`.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonNumber
-   * @throws java.lang.ArithmeticException if not represented exactly
+   * @throws JsonObjectError if error occurs
    */
   def getInt(key: String): Int =
-    expect[JsonNumber](apply(key)).toInt
+    getExpected[JsonNumber](key).toInt
 
   /**
    * Gets value as `Long`.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonNumber
-   * @throws java.lang.ArithmeticException if not represented exactly
+   * @throws JsonObjectError if error occurs
    */
   def getLong(key: String): Long =
-    expect[JsonNumber](apply(key)).toLong
+    getExpected[JsonNumber](key).toLong
 
   /**
    * Gets value as `Float`.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonNumber
+   * @throws JsonObjectError if error occurs
    */
   def getFloat(key: String): Float =
-    expect[JsonNumber](apply(key)).toFloat
+    getExpected[JsonNumber](key).toFloat
 
   /**
    * Gets value as `Double`.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonNumber
+   * @throws JsonObjectError if error occurs
    */
   def getDouble(key: String): Double =
-    expect[JsonNumber](apply(key)).toDouble
+    getExpected[JsonNumber](key).toDouble
 
   /**
    * Gets value as `BigInt`.
    *
    * @param key object key
    *
-   * @throws JsonExpectationError if not JsonNumber
-   * @throws java.lang.ArithmeticException if not represented exactly
+   * @throws JsonObjectError if error occurs
    */
   def getBigInt(key: String): BigInt =
-    expect[JsonNumber](apply(key)).toBigInt
+    getExpected[JsonNumber](key).toBigInt
 
   /**
    * Gets value as `BigDecimal`.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonNumber
+   * @throws JsonObjectError if error occurs
    */
   def getBigDecimal(key: String): BigDecimal =
-    expect[JsonNumber](apply(key)).toBigDecimal
+    getExpected[JsonNumber](key).toBigDecimal
 
   /**
    * Gets value as `JsonObject`.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonObject
+   * @throws JsonObjectError if error occurs
    */
   def getObject(key: String): JsonObject =
-    expect { apply(key) }
+    getExpected(key)
 
   /**
    * Gets value as `JsonArray`.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exist
-   * @throws JsonExpectationError if not JsonArray
+   * @throws JsonObjectError if error occurs
    */
   def getArray(key: String): JsonArray =
-    expect { apply(key) }
+    getExpected(key)
 
   /**
    * Reads value.
    *
    * @param key object key
    *
-   * @throws java.util.NoSuchElementException if key does not exists
-   * @throws java.lang.NullPointerException if value is null
+   * @throws JsonObjectError if error occurs
    */
   def read[T](key: String)(using JsonInput[T]): T =
-    apply(key) match
-      case JsonNull => throw NullPointerException()
-      case value    => value.as[T]
+    try
+      apply(key) match
+        case JsonNull => throw NullPointerException()
+        case value    => value.as[T]
+    catch
+      case cause: JsonObjectError => throw cause
+      case cause: Exception       => throw JsonObjectError(key, cause)
 
   /**
    * Optionally reads value.
    *
    * @param key object key
    *
+   * @throws JsonObjectError if error occurs
+   *
    * @note The value is not read if it is null.
    */
   def readOption[T](key: String)(using JsonInput[T]): Option[T] =
-    get(key).filter(JsonNull.!=).map(_.as[T])
+    try
+      get(key).filter(JsonNull.!=).map(_.as[T])
+    catch
+      case cause: JsonObjectError => throw cause
+      case cause: Exception       => throw JsonObjectError(key, cause)
 
   /**
    * Reads value or returns default value.
    *
    * @param key     object key
    * @param default default value
+   *
+   * @throws JsonObjectError if error occurs
    *
    * @note The value is not read if it is null.
    */
@@ -393,6 +392,16 @@ trait JsonObject private[json] extends JsonStructure:
    */
   @targetName("concat")
   def ++(other: JsonObject): JsonObject
+
+  private inline def getExpected[T <: JsonValue](key: String)(using ctag: ClassTag[T]): T =
+    if key == null then
+      throw NullPointerException()
+
+    try
+      expect[T](apply(key))
+    catch
+      case cause: JsonObjectError => throw cause
+      case cause: Exception       => throw JsonObjectError(key, cause)
 
 /** Provides JSON object factory. */
 object JsonObject:
@@ -442,7 +451,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws JsonArrayError if error occurs
    */
   def apply(index: Int): JsonValue
 
@@ -451,7 +460,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws JsonArrayError if error occurs
    */
   def isNull(index: Int): Boolean =
     apply(index) == JsonNull
@@ -461,126 +470,116 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonString
+   * @throws JsonArrayError if error occurs
    */
   def getString(index: Int): String =
-    expect[JsonString](apply(index)).value
+    getExpected[JsonString](index).value
 
   /**
    * Gets value as `Boolean`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonBoolean
+   * @throws JsonArrayError if error occurs
    */
   def getBoolean(index: Int): Boolean =
-    expect[JsonBoolean](apply(index)).value
+    getExpected[JsonBoolean](index).value
 
   /**
    * Gets value as `Int`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonNumber
-   * @throws java.lang.ArithmeticException if not represented exactly
+   * @throws JsonArrayError if error occurs
    */
   def getInt(index: Int): Int =
-    expect[JsonNumber](apply(index)).toInt
+    getExpected[JsonNumber](index).toInt
 
   /**
    * Gets value as `Long`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonNumber
-   * @throws java.lang.ArithmeticException if not represented exactly
+   * @throws JsonArrayError if error occurs
    */
   def getLong(index: Int): Long =
-    expect[JsonNumber](apply(index)).toLong
+    getExpected[JsonNumber](index).toLong
 
   /**
    * Gets value as `Float`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonNumber
+   * @throws JsonArrayError if error occurs
    */
   def getFloat(index: Int): Float =
-    expect[JsonNumber](apply(index)).toFloat
+    getExpected[JsonNumber](index).toFloat
 
   /**
    * Gets value as `Double`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonNumber
+   * @throws JsonArrayError if error occurs
    */
   def getDouble(index: Int): Double =
-    expect[JsonNumber](apply(index)).toDouble
+    getExpected[JsonNumber](index).toDouble
 
   /**
    * Gets value as `BigInt`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonNumber
-   * @throws java.lang.ArithmeticException if value cannot be represented exactly
+   * @throws JsonArrayError if error occurs
    */
   def getBigInt(index: Int): BigInt =
-    expect[JsonNumber](apply(index)).toBigInt
+    getExpected[JsonNumber](index).toBigInt
 
   /**
    * Gets value as `BigDecimal`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonNumber
+   * @throws JsonArrayError if error occurs
    */
   def getBigDecimal(index: Int): BigDecimal =
-    expect[JsonNumber](apply(index)).toBigDecimal
+    getExpected[JsonNumber](index).toBigDecimal
 
   /**
    * Gets value as `JsonObject`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonObject
+   * @throws JsonArrayError if error occurs
    */
   def getObject(index: Int): JsonObject =
-    expect { apply(index) }
+    getExpected(index)
 
   /**
    * Gets value as `JsonArray`.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws JsonExpectationError if not JsonArray
+   * @throws JsonArrayError if error occurs
    */
   def getArray(index: Int): JsonArray =
-    expect { apply(index) }
+    getExpected(index)
 
   /**
    * Reads value.
    *
    * @param index array index
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   * @throws java.lang.NullPointerException if value is null
+   * @throws JsonArrayError if error occurs
    */
   def read[T](index: Int)(using JsonInput[T]): T =
-    apply(index) match
-      case JsonNull => throw NullPointerException()
-      case value    => value.as[T]
+    try
+      apply(index) match
+        case JsonNull => throw NullPointerException()
+        case value    => value.as[T]
+    catch
+      case cause: JsonArrayError => throw cause
+      case cause: Exception      => throw JsonArrayError(index, cause)
 
   /**
    * Optionally reads value.
@@ -589,12 +588,16 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @note The value is not read if it is null.
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws JsonArrayError if error occurs
    */
   def readOption[T](index: Int)(using JsonInput[T]): Option[T] =
-    apply(index) match
-      case JsonNull => None
-      case value    => Some(value.as[T])
+    try
+      apply(index) match
+        case JsonNull => None
+        case value    => Some(value.as[T])
+    catch
+      case cause: JsonArrayError => throw cause
+      case cause: Exception      => throw JsonArrayError(index, cause)
 
   /**
    * Reads value or returns default value.
@@ -603,6 +606,8 @@ trait JsonArray private[json] extends JsonStructure:
    * @param default default value
    *
    * @note The value is not read if it is null.
+   *
+   * @throws JsonArrayError if error occurs
    */
   def readOrElse[T](index: Int, default: => T)(using JsonInput[T]): T =
    readOption(index).getOrElse(default)
@@ -615,7 +620,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @return new JSON array
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
+   * @throws JsonArrayError if error occurs
    */
   def updated(index: Int, value: JsonValue): JsonArray
 
@@ -626,9 +631,9 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @return new JSON array
    *
-   * @throws java.lang.IndexOutOfBoundsException if index is out of bounds
-   *
    * @note Subsequent values to index are shifted left.
+   *
+   * @throws JsonArrayError if error occurs
    */
   def removed(index: Int): JsonArray
 
@@ -655,6 +660,13 @@ trait JsonArray private[json] extends JsonStructure:
    */
   @targetName("append")
   def :+(value: JsonValue): JsonArray
+
+  private inline def getExpected[T <: JsonValue](index: Int)(using ctag: ClassTag[T]): T =
+    try
+      expect[T](apply(index))
+    catch
+      case cause: JsonArrayError => throw cause
+      case cause: Exception      => throw JsonArrayError(index, cause)
 
 /** Provides JSON array factory. */
 object JsonArray:

@@ -25,16 +25,20 @@ private case class JsonArrayImpl(values: Seq[JsonValue]) extends JsonArray:
   lazy val head = values.head
 
   def apply(index: Int) =
+    if index < 0 || index >= size then
+      throw JsonArrayError(index, IndexOutOfBoundsException(index))
     values(index)
 
   def updated(index: Int, value: JsonValue): JsonArray =
+    if index < 0 || index >= size then
+      throw JsonArrayError(index, IndexOutOfBoundsException(index))
     if value == null then
       throw NullPointerException()
     JsonArrayImpl(values.updated(index, value))
 
   def removed(index: Int): JsonArray =
     if index < 0 || index >= size then
-      throw IndexOutOfBoundsException()
+      throw JsonArrayError(index, IndexOutOfBoundsException(index))
     JsonArrayImpl(values.take(index) ++ values.drop(index + 1))
 
   @targetName("concat")

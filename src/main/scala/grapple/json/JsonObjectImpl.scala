@@ -25,16 +25,17 @@ private case class JsonObjectImpl(fields: Map[String, JsonValue]) extends JsonOb
   lazy val size = fields.size
 
   def apply(key: String) =
-    fields(key)
+    get(key).getOrElse(throw JsonObjectError(key, new NoSuchElementException(key)))
 
   def get(key: String) =
+    if key == null then
+      throw NullPointerException()
     fields.get(key)
 
   def updated(key: String, value: JsonValue): JsonObject =
-    (key, value) match
-      case (null, _    ) => throw NullPointerException()
-      case (key,  null ) => JsonObjectImpl(fields.updated(key, JsonNull))
-      case (key,  value) => JsonObjectImpl(fields.updated(key, value))
+    if key == null || value == null then
+      throw NullPointerException()
+    JsonObjectImpl(fields.updated(key, value))
 
   def removed(key: String): JsonObject =
     if key == null then
