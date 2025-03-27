@@ -17,46 +17,46 @@ package grapple.json
 
 import java.io.{ EOFException, Reader }
 
-private class JsonReaderImpl(input: Reader) extends JsonReader:
-  import JsonParser.Event
+import JsonParser.Event
 
-  private val reader = JsonParser(input)
+private class JsonReaderImpl(input: Reader) extends JsonReader:
+  private val parser = JsonParserImpl(input)
 
   def read(): JsonStructure =
     try
-      reader.next() match
+      parser.next(true) match
         case Event.StartObject => readObject()
         case Event.StartArray  => readArray()
         case event             => throw JsonException(s"Unexpected event: $event")
     catch
         case e: EOFException   => throw JsonException("Unexpected end of input", e)
 
-  def close(): Unit = reader.close()
+  def close(): Unit = parser.close()
 
   private def readObject(): JsonObject =
     val builder = JsonObjectBuilder()
 
-    var event = reader.next()
+    var event = parser.next()
     while event != Event.EndObject do
       val key = getKey(event)
-      reader.next() match
+      parser.next() match
         case Event.StartObject => builder.add(key, readObject())
         case Event.StartArray  => builder.add(key, readArray())
         case event             => builder.add(key, getValue(event))
-      event = reader.next()
+      event = parser.next()
 
     builder.toJsonObject()
 
   private def readArray(): JsonArray =
     val builder = JsonArrayBuilder()
 
-    var event = reader.next()
+    var event = parser.next()
     while event != Event.EndArray do
       event match
         case Event.StartObject => builder.add(readObject())
         case Event.StartArray  => builder.add(readArray())
         case _                 => builder.add(getValue(event))
-      event = reader.next()
+      event = parser.next()
 
     builder.toJsonArray()
 

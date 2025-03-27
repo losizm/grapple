@@ -148,5 +148,42 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(err4.offset == 9)
   }
 
+  it should "read objects and arrays" in {
+    val reader = JsonReader("""
+      { "id": 0, "name": "root" }
+      {
+        "id": 1000,
+        "name": "lupita"
+      }
+      [{ "id": 0, "name": "root" }, { "id": 1000, "name": "lupita" }]
+      [
+        { "id": 0, "name": "root" },
+        { "id": 1000, "name": "lupita" }
+      ]
+    """)
+
+    val obj1 = reader.read()
+    assert(obj1 \ "id" == JsonNumber(0))
+    assert(obj1 \ "name" == JsonString("root"))
+
+    val obj2 = reader.read()
+    assert(obj2 \ "id" == JsonNumber(1000))
+    assert(obj2 \ "name" == JsonString("lupita"))
+
+    val arr1 = reader.read()
+    assert(arr1 \ 0 \ "id" == JsonNumber(0))
+    assert(arr1 \ 0 \ "name" == JsonString("root"))
+    assert(arr1 \ 1 \ "id" == JsonNumber(1000))
+    assert(arr1 \ 1 \ "name" == JsonString("lupita"))
+
+    val arr2 = reader.read()
+    assert(arr2 \ 0 \ "id" == JsonNumber(0))
+    assert(arr2 \ 0 \ "name" == JsonString("root"))
+    assert(arr2 \ 1 \ "id" == JsonNumber(1000))
+    assert(arr2 \ 1 \ "name" == JsonString("lupita"))
+
+    assertThrows[JsonException] { reader.read() }
+  }
+
   private def withResource[R <: AutoCloseable, T](res: R)(op: R => T): T =
     try op(res) finally res.close()

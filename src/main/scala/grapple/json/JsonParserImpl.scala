@@ -45,6 +45,14 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
       case State.Next  => true
       case State.Done  => false
 
+  def next(init: Boolean): JsonParser.Event =
+    if init then
+      state = State.Init
+      event = null
+      tracker.clear()
+      fieldPending = false
+    next()
+
   def next(): JsonParser.Event =
     if !hasNext then
       throw new NoSuchElementException()
