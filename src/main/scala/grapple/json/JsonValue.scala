@@ -189,7 +189,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist
    */
   def apply(key: String): JsonValue
 
@@ -197,8 +197,6 @@ trait JsonObject private[json] extends JsonStructure:
    * Optionally gets value.
    *
    * @param key object key
-   *
-   * @throws JsonObjectError if error occurs
    */
   def get(key: String): Option[JsonValue]
 
@@ -216,7 +214,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist
    */
   def isNull(key: String): Boolean =
     apply(key) == JsonNull
@@ -226,7 +224,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read as
+   * `String`
    */
   def getString(key: String): String =
     getExpected[JsonString](key).value
@@ -236,7 +235,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read as
+   * `Boolean`
    */
   def getBoolean(key: String): Boolean =
    getExpected[JsonBoolean](key).value
@@ -246,7 +246,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read as
+   * `Int`
    */
   def getInt(key: String): Int =
     getExpected[JsonNumber](key).toInt
@@ -256,7 +257,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read as
+   * `Long`
    */
   def getLong(key: String): Long =
     getExpected[JsonNumber](key).toLong
@@ -266,7 +268,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read as
+   * `Float`
    */
   def getFloat(key: String): Float =
     getExpected[JsonNumber](key).toFloat
@@ -276,7 +279,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read as
+   * `Double`
    */
   def getDouble(key: String): Double =
     getExpected[JsonNumber](key).toDouble
@@ -286,7 +290,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read as
+   * `BigInt`
    */
   def getBigInt(key: String): BigInt =
     getExpected[JsonNumber](key).toBigInt
@@ -296,7 +301,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read as
+   * `BigDecimal`
    */
   def getBigDecimal(key: String): BigDecimal =
     getExpected[JsonNumber](key).toBigDecimal
@@ -306,7 +312,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value is not an object
    */
   def getObject(key: String): JsonObject =
     getExpected(key)
@@ -316,7 +322,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value is not an array
    */
   def getArray(key: String): JsonArray =
     getExpected(key)
@@ -326,7 +332,8 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if key does not exist or if value cannot be read
+   * as type `T`.
    */
   def read[T](key: String)(using JsonInput[T]): T =
     try
@@ -342,7 +349,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @param key object key
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if value cannot be read as type `T`.
    *
    * @note The value is not read if it is null.
    */
@@ -359,7 +366,7 @@ trait JsonObject private[json] extends JsonStructure:
    * @param key     object key
    * @param default default value
    *
-   * @throws JsonObjectError if error occurs
+   * @throws JsonObjectError if value cannot be read as type `T`.
    *
    * @note The value is not read if it is null.
    */
@@ -451,7 +458,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds
    */
   def apply(index: Int): JsonValue
 
@@ -460,7 +467,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds
    */
   def isNull(index: Int): Boolean =
     apply(index) == JsonNull
@@ -470,7 +477,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as `String`
    */
   def getString(index: Int): String =
     getExpected[JsonString](index).value
@@ -480,7 +488,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as `Boolean`
    */
   def getBoolean(index: Int): Boolean =
     getExpected[JsonBoolean](index).value
@@ -490,7 +499,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as `Int`
    */
   def getInt(index: Int): Int =
     getExpected[JsonNumber](index).toInt
@@ -500,7 +510,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as `Long`
    */
   def getLong(index: Int): Long =
     getExpected[JsonNumber](index).toLong
@@ -510,7 +521,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as `Float`
    */
   def getFloat(index: Int): Float =
     getExpected[JsonNumber](index).toFloat
@@ -520,7 +532,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as `Double`
    */
   def getDouble(index: Int): Double =
     getExpected[JsonNumber](index).toDouble
@@ -530,7 +543,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as `BigInt`
    */
   def getBigInt(index: Int): BigInt =
     getExpected[JsonNumber](index).toBigInt
@@ -540,7 +554,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as `BigDecimal`
    */
   def getBigDecimal(index: Int): BigDecimal =
     getExpected[JsonNumber](index).toBigDecimal
@@ -550,7 +565,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value is not an object
    */
   def getObject(index: Int): JsonObject =
     getExpected(index)
@@ -560,7 +575,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value is not an array
    */
   def getArray(index: Int): JsonArray =
     getExpected(index)
@@ -570,7 +585,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @param index array index
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as type `T`
    */
   def read[T](index: Int)(using JsonInput[T]): T =
     try
@@ -588,7 +604,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @note The value is not read if it is null.
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as type `T`
    */
   def readOption[T](index: Int)(using JsonInput[T]): Option[T] =
     try
@@ -607,7 +624,8 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @note The value is not read if it is null.
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds or if value cannot be read
+   * as type `T`
    */
   def readOrElse[T](index: Int, default: => T)(using JsonInput[T]): T =
    readOption(index).getOrElse(default)
@@ -620,7 +638,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @return new JSON array
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds
    */
   def updated(index: Int, value: JsonValue): JsonArray
 
@@ -633,7 +651,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @note Subsequent values to index are shifted left.
    *
-   * @throws JsonArrayError if error occurs
+   * @throws JsonArrayError if index is out of bounds
    */
   def removed(index: Int): JsonArray
 

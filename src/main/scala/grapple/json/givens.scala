@@ -31,7 +31,7 @@ import scala.util.{ Failure, Try }
  *
  * val json = Json.obj("values" -> Json.arr("abc", 123, true))
  *
- * // Requires jsonValueToJsonValue
+ * // Requires jsonValueJsonInput
  * val list = json("values").as[List[JsonValue]]
  * }}}
  */
