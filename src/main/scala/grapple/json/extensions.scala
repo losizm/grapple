@@ -25,6 +25,7 @@ extension (json: JsonValue)
    * @param key object key
    *
    * @throws JsonExpectationError if not JsonObject
+   * @throws JsonObjectError if object key does not exist
    */
   @targetName("at")
   def \(key: String): JsonValue =
@@ -36,6 +37,7 @@ extension (json: JsonValue)
    * @param index array index
    *
    * @throws JsonExpectationError if not JsonArray
+   * @throws JsonArrayError if array index is out of bounds
    */
   @targetName("at")
   def \(index: Int): JsonValue =
@@ -68,11 +70,6 @@ extension (json: JsonValue)
   @targetName("collect")
   def \\(key: String): Seq[JsonValue] =
     json match
-      case json: JsonObject =>
-        Try(json(key))
-          .toOption
-          .toSeq ++
-        json.fields.values.flatMap(_ \\ key).toSeq
-
-      case json: JsonArray => json.values.flatMap(_ \\ key).toSeq
-      case _               => Nil
+      case json: JsonObject => json.get(key).toSeq ++ json.fields.values.flatMap(_ \\ key).toSeq
+      case json: JsonArray  => json.values.flatMap(_ \\ key).toSeq
+      case _                => Nil
