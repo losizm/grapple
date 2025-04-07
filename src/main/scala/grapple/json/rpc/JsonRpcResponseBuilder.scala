@@ -56,6 +56,8 @@ final class JsonRpcResponseBuilder:
    *
    * @note If `value` throws exception that does not match `onFailure`, then
    * the exception is raised.
+   *
+   * @see [[toJsonRpcError]]
    */
   def tryResult(value: => JsonValue)(using onFailure: PartialFunction[Throwable, JsonRpcError]): this.type =
     Try(value)

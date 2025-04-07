@@ -17,35 +17,39 @@ package grapple.json
 package rpc
 
 /** Converts `JsonValue` to `JsonRpcError`. */
-given jsonValueToJsonRpcError: JsonInput[JsonRpcError] = JsonValueToJsonRpcError
+given jsonRpcErrorJsonInput: JsonInput[JsonRpcError] = JsonRpcErrorJsonInput
 
 /** Converts `JsonRpcError` to `JsonValue`. */
-given jsonRpcErrorToJsonValue: JsonOutput[JsonRpcError] = JsonRpcErrorToJsonValue
+given jsonRpcErrorJsonOutput: JsonOutput[JsonRpcError] = JsonRpcErrorJsonOutput
 
 /** Converts `JsonValue` to `JsonRpcIdentifier`. */
-given jsonValueToJsonRpcIdentifier: JsonInput[JsonRpcIdentifier] = JsonValueToJsonRpcIdentifier
+given jsonRpcIdentifierJsonInput: JsonInput[JsonRpcIdentifier] = JsonRpcIdentifierJsonInput
 
 /** Converts `JsonRpcIdentifier` to `JsonValue`. */
-given jsonRpcIdentifierToJsonValue: JsonOutput[JsonRpcIdentifier] = JsonRpcIdentifierToJsonValue
+given jsonRpcIdentifierJsonOutput: JsonOutput[JsonRpcIdentifier] = JsonRpcIdentifierJsonOutput
 
 /** Converts `JsonValue` to `JsonRpcRequest`. */
-given jsonValueToJsonRpcRequest: JsonInput[JsonRpcRequest] = JsonValueToJsonRpcRequest
+given jsonRpcRequestJsonInput: JsonInput[JsonRpcRequest] = JsonRpcRequestJsonInput
 
 /** Converts `JsonRpcRequest` to `JsonValue`. */
-given jsonRpcRequestToJsonValue: JsonOutput[JsonRpcRequest] = JsonRpcRequestToJsonValue
+given jsonRpcRequestJsonOutput: JsonOutput[JsonRpcRequest] = JsonRpcRequestJsonOutput
 
 /** Converts `JsonValue` to `JsonRpcResponse`. */
-given jsonValueToJsonRpcResponse: JsonInput[JsonRpcResponse] = JsonValueToJsonRpcResponse
+given jsonRpcResponseJsonInput: JsonInput[JsonRpcResponse] = JsonRpcResponseJsonInput
 
 /** Converts `JsonRpcResponse` to `JsonValue`. */
-given jsonRpcResponseToJsonValue: JsonOutput[JsonRpcResponse] = JsonRpcResponseToJsonValue
+given jsonRpcResponseJsonOutput: JsonOutput[JsonRpcResponse] = JsonRpcResponseJsonOutput
 
-/** Provides passthrough for `JsonRpcError` or returns `InternalError`. */
-given defaultOnFailure: PartialFunction[Throwable, JsonRpcError] =
+/**
+ * Provides passthrough for `JsonRpcError` or returns `InternalError`.
+ *
+ * @see [[JsonRpcResponseBuilder.tryResult]]
+ */
+given toJsonRpcError: PartialFunction[Throwable, JsonRpcError] =
   case err: JsonRpcError => err
   case _                 => InternalError()
 
-private object JsonValueToJsonRpcError extends JsonInput[JsonRpcError]:
+private object JsonRpcErrorJsonInput extends JsonInput[JsonRpcError]:
   def read(json: JsonValue): JsonRpcError =
     json match
       case json: JsonObject =>
@@ -58,7 +62,7 @@ private object JsonValueToJsonRpcError extends JsonInput[JsonRpcError]:
       case _ =>
         throw JsonException("object value expected")
 
-private object JsonRpcErrorToJsonValue extends JsonOutput[JsonRpcError]:
+private object JsonRpcErrorJsonOutput extends JsonOutput[JsonRpcError]:
   def write(error: JsonRpcError): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("code", error.code)
@@ -66,7 +70,7 @@ private object JsonRpcErrorToJsonValue extends JsonOutput[JsonRpcError]:
     error.data.foreach(builder.add("data", _))
     builder.toJsonObject()
 
-private object JsonValueToJsonRpcIdentifier extends JsonInput[JsonRpcIdentifier]:
+private object JsonRpcIdentifierJsonInput extends JsonInput[JsonRpcIdentifier]:
   def read(json: JsonValue): JsonRpcIdentifier =
     json match
       case id: JsonString => JsonRpcIdentifier(id.value)
@@ -74,13 +78,13 @@ private object JsonValueToJsonRpcIdentifier extends JsonInput[JsonRpcIdentifier]
       case JsonNull       => JsonRpcIdentifier.nullified
       case _              => throw JsonException("string, number, or null value expected")
 
-private object JsonRpcIdentifierToJsonValue extends JsonOutput[JsonRpcIdentifier]:
+private object JsonRpcIdentifierJsonOutput extends JsonOutput[JsonRpcIdentifier]:
   def write(id: JsonRpcIdentifier): JsonValue =
     if      id.isString then JsonString(id.string)
     else if id.isNumber then JsonNumber(id.number)
     else                     JsonNull
 
-private object JsonValueToJsonRpcRequest extends JsonInput[JsonRpcRequest]:
+private object JsonRpcRequestJsonInput extends JsonInput[JsonRpcRequest]:
   def read(json: JsonValue): JsonRpcRequest =
     json match
       case json: JsonObject => toRequest(json)
@@ -118,7 +122,7 @@ private object JsonValueToJsonRpcRequest extends JsonInput[JsonRpcRequest]:
     catch case _: ArithmeticException =>
       throw InvalidRequest("integer value expected for id")
 
-private object JsonRpcRequestToJsonValue extends JsonOutput[JsonRpcRequest]:
+private object JsonRpcRequestJsonOutput extends JsonOutput[JsonRpcRequest]:
   def write(request: JsonRpcRequest): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("version", request.version)
@@ -131,7 +135,7 @@ private object JsonRpcRequestToJsonValue extends JsonOutput[JsonRpcRequest]:
 
     builder.toJsonObject()
 
-private object JsonValueToJsonRpcResponse extends JsonInput[JsonRpcResponse]:
+private object JsonRpcResponseJsonInput extends JsonInput[JsonRpcResponse]:
   def read(json: JsonValue): JsonRpcResponse =
     json match
       case json: JsonObject => toResponse(json)
@@ -167,7 +171,7 @@ private object JsonValueToJsonRpcResponse extends JsonInput[JsonRpcResponse]:
     catch case _: ArithmeticException =>
       throw JsonException("integer value expected for id")
 
-private object JsonRpcResponseToJsonValue extends JsonOutput[JsonRpcResponse]:
+private object JsonRpcResponseJsonOutput extends JsonOutput[JsonRpcResponse]:
   def write(response: JsonRpcResponse): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("version", response.version)
