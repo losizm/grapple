@@ -236,14 +236,14 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
     getExpectedChar('r')
     getExpectedChar('u')
     getExpectedChar('e')
-    JsonBoolean.True
+    JsonTrue
 
   private def finishFalse(): JsonBoolean =
     getExpectedChar('a')
     getExpectedChar('l')
     getExpectedChar('s')
     getExpectedChar('e')
-    JsonBoolean.False
+    JsonFalse
 
   private def finishNull(): JsonNull.type =
     getExpectedChar('u')

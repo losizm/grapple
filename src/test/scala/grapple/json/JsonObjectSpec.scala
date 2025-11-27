@@ -134,7 +134,7 @@ class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(user.get("_name").isEmpty)
     assert(user.get("name").contains(JsonString("lupita")))
     assert(user.get("_enabled").isEmpty)
-    assert(user.get("enabled").contains(JsonBoolean.True))
+    assert(user.get("enabled").contains(JsonTrue))
     assert(user.get("_secret").isEmpty)
     assert(user.get("secret").contains(JsonNull))
 

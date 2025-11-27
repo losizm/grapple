@@ -59,33 +59,33 @@ sealed trait JsonBoolean extends JsonValue:
   /** Gets value. */
   def value: Boolean
 
+/** Represents JSON true. */
+case object JsonTrue extends JsonBoolean:
+  val value = true
+
+  /**
+   * Gets string representation.
+   *
+   * @return `"true"`
+   */
+  override val toString = "true"
+
+/** Represents JSON false. */
+case object JsonFalse extends JsonBoolean:
+  val value = false
+
+  /**
+   * Gets string representation.
+   *
+   * @return `"false"`
+   */
+  override val toString = "false"
+
 /** Provides JSON boolean factory. */
 object JsonBoolean:
-  /** Represents JSON true. */
-  case object True extends JsonBoolean:
-    val value = true
-
-    /**
-     * Gets string representation.
-     *
-     * @return `"true"`
-     */
-    override val toString = "true"
-
-  /** Represents JSON false. */
-  case object False extends JsonBoolean:
-    val value = false
-
-    /**
-     * Gets string representation.
-     *
-     * @return `"false"`
-     */
-    override val toString = "false"
-
   /** Creates JSON boolean. */
   def apply(value: Boolean): JsonBoolean =
-    if value then True else False
+    if value then JsonTrue else JsonFalse
 
   /** Deconstructs JSON boolean. */
   def unapply(json: JsonBoolean): Option[Boolean] =

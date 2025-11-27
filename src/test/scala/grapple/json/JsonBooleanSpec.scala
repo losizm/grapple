@@ -26,7 +26,7 @@ class JsonBooleanSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[JsonExpectationError](b1.as[Double])
     assertThrows[JsonExpectationError](b1.as[BigDecimal])
     assert(b1.as[Boolean])
-    assert(b1 == JsonBoolean.True)
+    assert(b1 == JsonTrue)
 
     val b2 = JsonBoolean(false)
     assert(!b2.value)
@@ -37,14 +37,14 @@ class JsonBooleanSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assertThrows[JsonExpectationError](b2.as[Double])
     assertThrows[JsonExpectationError](b2.as[BigDecimal])
     assert(!b2.as[Boolean])
-    assert(b2 == JsonBoolean.False)
+    assert(b2 == JsonFalse)
   }
 
   it should "compare JsonBooleans" in {
     assert(JsonBoolean(true) == JsonBoolean(true))
     assert(JsonBoolean(true) != JsonBoolean(false))
     assert(JsonBoolean(false) == JsonBoolean(false))
-    assert(JsonBoolean.True != JsonBoolean.False)
+    assert(JsonTrue != JsonFalse)
   }
 
   it should "deconstruct JsonBoolean" in {
