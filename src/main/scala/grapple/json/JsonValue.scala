@@ -50,9 +50,7 @@ object JsonString:
 
   /** Deconstructs JSON string. */
   def unapply(json: JsonString): Option[String] =
-    json != null match
-      case true  => Some(json.value)
-      case false => None
+    Some(json.value)
 
 /** Represents JSON boolean. */
 sealed trait JsonBoolean extends JsonValue:
@@ -89,9 +87,7 @@ object JsonBoolean:
 
   /** Deconstructs JSON boolean. */
   def unapply(json: JsonBoolean): Option[Boolean] =
-    json != null match
-      case true  => Some(json.value)
-      case false => None
+    Some(json.value)
 
 /** Represents JSON number. */
 sealed trait JsonNumber extends JsonValue:
@@ -157,9 +153,7 @@ object JsonNumber:
 
   /** Deconstructs JSON number. */
   def unapply(json: JsonNumber): Option[BigDecimal] =
-    json != null match
-      case true  => Some(json.toBigDecimal)
-      case false => None
+    Some(json.toBigDecimal)
 
 /** Represents JSON structure. */
 sealed trait JsonStructure extends JsonValue:
@@ -440,9 +434,7 @@ object JsonObject:
 
   /** Deconstructs JSON object. */
   def unapply(json: JsonObject): Option[Map[String, JsonValue]] =
-    json != null match
-      case true  => Some(json.fields)
-      case false => None
+    Some(json.fields)
 
 /**
  * Represents JSON array.
@@ -704,9 +696,7 @@ object JsonArray:
 
   /** Deconstructs JSON array. */
   def unapply(json: JsonArray): Option[Seq[JsonValue]] =
-    json != null match
-      case true  => Some(json.values)
-      case false => None
+    Some(json.values)
 
 private case class JsonStringImpl(value: String) extends JsonString:
   if value == null then

@@ -94,9 +94,7 @@ object JsonRpcError:
    * @param error JSON-RPC error
    */
   def unapply(error: JsonRpcError): Option[(Int, String, Option[JsonValue])] =
-    error match
-      case null => None
-      case _    => Some(error.code, error.message, error.data)
+    Some(error.code, error.message, error.data)
 
 /** Defines JSON-RPC ParseError (-32700). */
 final class ParseError private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32700, message, data):
@@ -138,9 +136,7 @@ object ParseError:
    * @param error parse error
    */
   def unapply(error: ParseError): Option[(Int, String, Option[JsonValue])] =
-    error match
-      case null => None
-      case _    => Some(error.code, error.message, error.data)
+    Some(error.code, error.message, error.data)
 
 /** Defines JSON-RPC InvalidRequest (-32600). */
 final class InvalidRequest private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32600, message, data):
@@ -182,9 +178,7 @@ object InvalidRequest:
    * @param error invalid request
    */
   def unapply(error: InvalidRequest): Option[(Int, String, Option[JsonValue])] =
-    error match
-      case null => None
-      case _    => Some(error.code, error.message, error.data)
+    Some(error.code, error.message, error.data)
 
 /** Defines JSON-RPC MethodNotFound (-32601). */
 final class MethodNotFound private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32601, message, data):
@@ -226,9 +220,7 @@ object MethodNotFound:
    * @param error method not found
    */
   def unapply(error: MethodNotFound): Option[(Int, String, Option[JsonValue])] =
-    error match
-      case null => None
-      case _    => Some(error.code, error.message, error.data)
+    Some(error.code, error.message, error.data)
 
 /** Defines JSON-RPC InvalidParams (-32602). */
 final class InvalidParams private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32602, message, data):
@@ -270,9 +262,7 @@ object InvalidParams:
    * @param error invalid params
    */
   def unapply(error: InvalidParams): Option[(Int, String, Option[JsonValue])] =
-    error match
-      case null => None
-      case _    => Some(error.code, error.message, error.data)
+    Some(error.code, error.message, error.data)
 
 /** Defines JSON-RPC InternalError (-32603). */
 final class InternalError private[rpc] (message: String, data: Option[JsonValue]) extends JsonRpcError(-32603, message, data):
@@ -314,6 +304,4 @@ object InternalError:
    * @param error internal error
    */
   def unapply(error: InternalError): Option[(Int, String, Option[JsonValue])] =
-    error match
-      case null => None
-      case _    => Some(error.code, error.message, error.data)
+    Some(error.code, error.message, error.data)
