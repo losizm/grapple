@@ -103,6 +103,7 @@ given bigDecimalJsonInput: JsonInput[BigDecimal] = expect[JsonNumber](_).toBigDe
 /** Converts `BigDecimal` to `JsonNumber`. */
 given bigDecimalJsonOutput: JsonOutput[BigDecimal] = JsonNumber(_)
 
+/** Converts `JsonValue` to `Option`. */
 given optionJsonInput[T](using input: JsonInput[T]): JsonInput[Option[T]] =
   case JsonNull => None
   case value    => Some(input.read(value))
@@ -176,7 +177,6 @@ given mapJsonOutput[T, C[T] <: Map[String, T]](using output: JsonOutput[T]): Jso
     case (builder, (key, value)) => builder.add(key, output.write(value))
   }.toJsonObject()
 
-/** Converts `JsonValue` to `Option`. */
 /** Applies conversion using `JsonInput`. */
 given jsonInputConversion[T](using input: JsonInput[T]): Conversion[JsonValue, T] =
   input.read(_)

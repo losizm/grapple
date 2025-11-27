@@ -23,7 +23,7 @@ private inline def expect[T <: JsonValue](value: JsonValue)(using ctag: ClassTag
   catch case _: ClassCastException =>
     throw JsonExpectationError(ctag.runtimeClass, jsonValueType(value))
 
-private def jsonValueType[T <: JsonValue](value: JsonValue): Class[_] =
+private def jsonValueType[T <: JsonValue](value: JsonValue): Class[?] =
   value match
     case JsonNull               => classOf[JsonNull.type]
     case _: JsonString          => classOf[JsonString]
