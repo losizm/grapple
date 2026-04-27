@@ -18,126 +18,126 @@ package rpc
 
 import scala.language.implicitConversions
 
-class JsonRpcParseResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
+class JsonRpcResponseLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class Answer(value: Int)
 
   given JsonInput[Answer] =
     case json: JsonObject => Answer(json("answer"))
     case _                => throw IllegalArgumentException("Expected JSON object")
 
-  it should "parse response with object result" in {
+  it should "load response with object result" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": "abc",
       "result": { "answer": 3 }
     }"""
 
-    val res = Json.parse(text).as[JsonRpcResponse]
+    val res = JsonRpcResponse.load(text)
     assert(res.version == "2.0")
     assert(res.id.string == "abc")
     assert(res.result.as[Answer] == Answer(3))
   }
 
-  it should "parse response with array result" in {
+  it should "load response with array result" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": "abc",
       "result": [0, 1, 2]
     }"""
 
-    val res = Json.parse(text).as[JsonRpcResponse]
+    val res = JsonRpcResponse.load(text)
     assert(res.version == "2.0")
     assert(res.id.string == "abc")
     assert(res.result.as[Seq[Int]] == Seq(0, 1, 2))
   }
 
-  it should "parse response with number result" in {
+  it should "load response with number result" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": "abc",
       "result": 3
     }"""
 
-    val res = Json.parse(text).as[JsonRpcResponse]
+    val res = JsonRpcResponse.load(text)
     assert(res.version == "2.0")
     assert(res.id.string == "abc")
     assert(res.result.as[Int] == 3)
   }
 
-  it should "parse response with string result" in {
+  it should "load response with string result" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123,
       "result": "success"
     }"""
 
-    val res = Json.parse(text).as[JsonRpcResponse]
+    val res = JsonRpcResponse.load(text)
     assert(res.version == "2.0")
     assert(res.id.number == 123)
     assert(res.result.as[String] == "success")
   }
 
-  it should "parse response with boolean result" in {
+  it should "load response with boolean result" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123,
       "result": true
     }"""
 
-    val res = Json.parse(text).as[JsonRpcResponse]
+    val res = JsonRpcResponse.load(text)
     assert(res.version == "2.0")
     assert(res.id.number == 123)
     assert(res.result.as[Boolean])
   }
 
-  it should "parse response with error" in {
+  it should "load response with error" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123,
       "error": { "code": -32603, "message": "Internal Error" }
     }"""
 
-    val res = Json.parse(text).as[JsonRpcResponse]
+    val res = JsonRpcResponse.load(text)
     assert(res.version == "2.0")
     assert(res.id.number == 123)
     assert(res.error.isInternalError)
     assert(res.error.message == "Internal Error")
   }
 
-  it should "not parse response as array" in {
-    assertThrows[JsonException](Json.parse("[0, 1, 2]").as[JsonRpcResponse])
+  it should "not load response as array" in {
+    assertThrows[JsonException](JsonRpcResponse.load("[0, 1, 2]"))
   }
 
-  it should "not parse response with invalid JSON" in {
+  it should "not load response with invalid JSON" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123
       "result": [0, 1, 2]
     }"""
-    assertThrows[JsonException](Json.parse(text).as[JsonRpcResponse])
+    assertThrows[JsonException](JsonRpcResponse.load(text))
   }
 
-  it should "not parse response without jsonrpc" in {
+  it should "not load response without jsonrpc" in {
     val text = """{
       "id": 123,
       "result": [0, 1, 2]
     }"""
-    assertThrows[JsonException](Json.parse(text).as[JsonRpcResponse])
+    assertThrows[JsonException](JsonRpcResponse.load(text))
   }
 
-  it should "not parse response with number value for jsonrpc" in {
+  it should "not load response with number value for jsonrpc" in {
     val text = """{
       "jsonrpc": 2.0,
       "id": 123,
       "result": [0, 1, 2]
     }"""
-    assertThrows[JsonException](Json.parse(text).as[JsonRpcResponse])
+    assertThrows[JsonException](JsonRpcResponse.load(text))
   }
 
-  it should "not parse response without result" in {
+  it should "not load response without result" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123
     }"""
-    assertThrows[JsonException](Json.parse(text).as[JsonRpcResponse])
+    assertThrows[JsonException](JsonRpcResponse.load(text))
   }

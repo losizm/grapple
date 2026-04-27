@@ -16,6 +16,9 @@
 package grapple.json
 package rpc
 
+import java.io.{ File, InputStream, OutputStream, Reader, Writer }
+import java.nio.file.Path
+
 /** Defines JSON-RPC message. */
 sealed trait JsonRpcMessage:
   /** Gets JSON-RPC version. */
@@ -58,6 +61,61 @@ sealed trait JsonRpcMessage:
    */
   def getOrElse[T](name: String, default: => T): T =
     getOption(name).getOrElse(default)
+
+  /** Dumps JSON-RPC message. */
+  def dump(): String =
+    Json.toPrettyPrint(toJsonObject)
+
+  /**
+   * Dumps JSON-RPC message.
+   *
+   * @param out target
+   *
+   * @return JSON-RPC message
+   */
+  def dump(out: File): Unit =
+    val writer = JsonWriter(out, "  ")
+    writer.write(toJsonObject)
+
+  /**
+   * Dumps JSON-RPC message.
+   *
+   * @param out target
+   *
+   * @return JSON-RPC message
+   */
+  def dump(out: Path): Unit =
+    val writer = JsonWriter(out, "  ")
+    writer.write(toJsonObject)
+
+  /**
+   * Dumps JSON-RPC message.
+   *
+   * @param out target
+   *
+   * @return JSON-RPC message
+   */
+  def dump(out: Writer): Unit =
+    val writer = JsonWriter(out, "  ")
+    writer.write(toJsonObject)
+
+  /**
+   * Dumps JSON-RPC message.
+   *
+   * @param out target
+   *
+   * @return JSON-RPC message
+   */
+  def dump(out: OutputStream): Unit =
+    val writer = JsonWriter(out, "  ")
+    writer.write(toJsonObject)
+
+  /**
+   * Gets JSON-RPC message as JSON object.
+   *
+   * @return JSON object
+   */
+  def toJsonObject: JsonObject
 
 /**
  * Defines JSON-RPC request.
@@ -107,6 +165,13 @@ sealed trait JsonRpcRequest extends JsonRpcMessage:
    */
   def remove(name: String): JsonRpcRequest
 
+  /**
+   * Gets JSON-RPC request as JSON object.
+   *
+   * @return JSON object
+   */
+  lazy val toJsonObject = Json.toJson(this).as[JsonObject]
+
 /** Provides JSON-RPC request factory. */
 object JsonRpcRequest:
   /**
@@ -140,6 +205,66 @@ object JsonRpcRequest:
       .params(params)
       .toJsonRpcRequest()
 
+  /**
+   * Creates JSON-RPC request from supplied JSON value.
+   *
+   * @param value JSON value
+   *
+   * @return JSON-RPC request
+   */
+  def from(value: JsonValue): JsonRpcRequest =
+    value.as[JsonRpcRequest]
+
+  /**
+   * Loads JSON-RPC request.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC request
+   */
+  def load(in: String): JsonRpcRequest =
+    Json.parse(in).as[JsonRpcRequest]
+
+  /**
+   * Loads JSON-RPC request.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC request
+   */
+  def load(in: File): JsonRpcRequest =
+    Json.parse(in).as[JsonRpcRequest]
+
+  /**
+   * Loads JSON-RPC request.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC request
+   */
+  def load(in: Path): JsonRpcRequest =
+    Json.parse(in).as[JsonRpcRequest]
+
+  /**
+   * Loads JSON-RPC request.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC request
+   */
+  def load(in: Reader): JsonRpcRequest =
+    Json.parse(in).as[JsonRpcRequest]
+
+  /**
+   * Loads JSON-RPC request.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC request
+   */
+  def load(in: InputStream): JsonRpcRequest =
+    Json.parse(in).as[JsonRpcRequest]
+
 private case class JsonRpcRequestImpl(
   version:    String,
   idOption:   Option[JsonRpcIdentifier],
@@ -147,7 +272,6 @@ private case class JsonRpcRequestImpl(
   params:     Option[JsonValue],
   attributes: Map[String, Any] = Map.empty
 ) extends JsonRpcRequest:
-
   val isNotification = idOption.isEmpty
 
   def id = idOption.getOrElse(throw new NoSuchElementException("id"))
@@ -216,6 +340,13 @@ sealed trait JsonRpcResponse extends JsonRpcMessage:
    */
   def remove(name: String): JsonRpcResponse
 
+  /**
+   * Gets JSON-RPC response as JSON object.
+   *
+   * @return JSON object
+   */
+  lazy val toJsonObject = Json.toJson(this).as[JsonObject]
+
 /** Provides JSON-RPC response factory. */
 object JsonRpcResponse:
   /**
@@ -246,13 +377,72 @@ object JsonRpcResponse:
       .error(error)
       .toJsonRpcResponse()
 
+  /**
+   * Creates JSON-RPC response from supplied JSON value.
+   *
+   * @param value JSON value
+   *
+   * @return JSON-RPC response
+   */
+  def from(value: JsonValue): JsonRpcResponse =
+    value.as[JsonRpcResponse]
+
+  /**
+   * Loads JSON-RPC response.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC response
+   */
+  def load(in: String): JsonRpcResponse =
+    Json.parse(in).as[JsonRpcResponse]
+
+  /**
+   * Loads JSON-RPC response.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC response
+   */
+  def load(in: File): JsonRpcResponse =
+    Json.parse(in).as[JsonRpcResponse]
+
+  /**
+   * Loads JSON-RPC response.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC response
+   */
+  def load(in: Path): JsonRpcResponse =
+    Json.parse(in).as[JsonRpcResponse]
+
+  /**
+   * Loads JSON-RPC response.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC response
+   */
+  def load(in: Reader): JsonRpcResponse =
+    Json.parse(in).as[JsonRpcResponse]
+
+  /**
+   * Loads JSON-RPC response.
+   *
+   * @param in source
+   *
+   * @return JSON-RPC response
+   */
+  def load(in: InputStream): JsonRpcResponse =
+    Json.parse(in).as[JsonRpcResponse]
+
 private case class JsonRpcResponseImpl(
   version:    String,
   id:         JsonRpcIdentifier,
   content:    Either[JsonRpcError, JsonValue],
   attributes: Map[String, Any] = Map.empty
 ) extends JsonRpcResponse:
-
   def isResult = content.isRight
   def isError  = content.isLeft
 

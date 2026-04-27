@@ -18,22 +18,22 @@ package rpc
 
 import scala.language.implicitConversions
 
-class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
-  it should "parse request without params" in {
+class JsonRpcRequestLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
+  it should "load request without params" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": "abc",
       "method": "compute"
     }"""
 
-    val req = Json.parse(text).as[JsonRpcRequest]
+    val req = JsonRpcRequest.load(text)
     assert(req.version == "2.0")
     assert(req.id.string == "abc")
     assert(req.method == "compute")
     assert(req.params.isEmpty)
   }
 
-  it should "parse request with params" in {
+  it should "load request with params" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123,
@@ -41,7 +41,7 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
       "params": { "a": 1, "b": 2 }
     }"""
 
-    val req = Json.parse(text).as[JsonRpcRequest]
+    val req = JsonRpcRequest.load(text)
     assert(req.version == "2.0")
     assert(req.id.number == 123)
     assert(req.method == "compute")
@@ -53,64 +53,64 @@ class JsonRpcParseRequestSpec extends org.scalatest.flatspec.AnyFlatSpec:
     )
   }
 
-  it should "not parse request as array" in {
-    assertThrows[InvalidRequest](Json.parse("[0, 1, 2]").as[JsonRpcRequest])
+  it should "not load request as array" in {
+    assertThrows[InvalidRequest](JsonRpcRequest.load("[0, 1, 2]"))
   }
 
-  it should "not parse request with JSON exception" in {
+  it should "not load request with JSON exception" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[JsonException](Json.parse(text).as[JsonRpcRequest])
+    assertThrows[JsonException](JsonRpcRequest.load(text))
   }
 
-  it should "not parse request without jsonrpc" in {
+  it should "not load request without jsonrpc" in {
     val text = """{
       "id": 123,
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
+    assertThrows[InvalidRequest](JsonRpcRequest.load(text))
   }
 
-  it should "not parse request with number value for jsonrpc" in {
+  it should "not load request with number value for jsonrpc" in {
     val text = """{
       "jsonrpc": 2.0,
       "id": 123,
       "method": "compute",
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
+    assertThrows[InvalidRequest](JsonRpcRequest.load(text))
   }
 
-  it should "not parse request without method" in {
+  it should "not load request without method" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123,
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
+    assertThrows[InvalidRequest](JsonRpcRequest.load(text))
   }
 
-  it should "not parse request with array value for method" in {
+  it should "not load request with array value for method" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123,
       "method": [],
       "params": { "a": 1, "b": 2 }
     }"""
-    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
+    assertThrows[InvalidRequest](JsonRpcRequest.load(text))
   }
 
-  it should "not parse request with string value for params" in {
+  it should "not load request with string value for params" in {
     val text = """{
       "jsonrpc": "2.0",
       "id": 123,
       "method": "compute",
       "params": "a"
     }"""
-    assertThrows[InvalidRequest](Json.parse(text).as[JsonRpcRequest])
+    assertThrows[InvalidRequest](JsonRpcRequest.load(text))
   }
