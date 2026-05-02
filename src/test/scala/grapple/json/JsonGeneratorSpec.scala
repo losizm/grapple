@@ -17,8 +17,6 @@ package grapple.json
 
 import java.io.StringWriter
 
-import scala.language.implicitConversions
-
 class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
   case class User(id: Int, name: String)
 
@@ -29,10 +27,10 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val json = Json.obj(
       "id"     -> 1000,
       "name"   -> "lupita",
-      "groups" -> Seq("lupita", "admin", "sudoer"),
+      "groups" -> Json.arr("lupita", "admin", "sudoer"),
       "info"   -> Json.obj("home" -> "/home/lupita", "storage" -> 8L * 1024 * 1024 * 1024),
-      "root"   -> User(0, "root"),
-      "nobody" -> User(65534, "nobody"),
+      "root"   -> Json.toJson(User(0, "root")),
+      "nobody" -> Json.toJson(User(65534, "nobody")),
       "photo"  -> JsonNull
     )
 
@@ -68,10 +66,10 @@ class JsonGeneratorSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val json = Json.arr(
       1000,
       "lupita",
-      Seq("lupita", "admin", "sudoer"),
+      Json.arr("lupita", "admin", "sudoer"),
       Json.obj("home" -> "/home/lupita", "storage" -> 8L * 1024 * 1024 * 1024),
-      User(0, "root"),
-      User(65534, "nobody"),
+      Json.toJson(User(0, "root")),
+      Json.toJson(User(65534, "nobody")),
       JsonNull
     )
 

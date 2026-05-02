@@ -18,7 +18,6 @@ package grapple.json
 import java.time.LocalDate
 
 import scala.collection.immutable.{ ListMap, TreeMap }
-import scala.language.implicitConversions
 import scala.util.Try
 
 class JsonInputSpec extends org.scalatest.flatspec.AnyFlatSpec:

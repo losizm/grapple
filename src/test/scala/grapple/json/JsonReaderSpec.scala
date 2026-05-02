@@ -18,20 +18,18 @@ package grapple.json
 import java.io.{ File, FileInputStream, FileReader }
 import java.nio.file.Paths
 
-import scala.language.implicitConversions
-
 class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   private val textObject = """{ "id": 1000, "name": "lupita", "groups": ["lupita", "admin", "sudoer"] }"""
   private val textArray  = """[1000, "lupita", ["lupita", "admin", "sudoer"]]"""
 
   it should "parse JSON text" in {
-    val obj = Json.parse(textObject)
+    val obj = Json.parse(textObject).as[JsonObject]
     assert(obj.keys == Set("id", "name", "groups"))
     assert((obj \ "id")     == JsonNumber(1000))
     assert((obj \ "name")   == JsonString("lupita"))
     assert((obj \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val arr = Json.parse(textArray)
+    val arr = Json.parse(textArray).as[JsonArray]
     assert(arr.size == 3)
     assert((arr \ 0) == JsonNumber(1000))
     assert((arr \ 1) == JsonString("lupita"))
@@ -42,13 +40,13 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "parse JSON bytes" in {
-    val obj = Json.parse(textObject.getBytes())
+    val obj = Json.parse(textObject.getBytes()).as[JsonObject]
     assert(obj.keys == Set("id", "name", "groups"))
     assert((obj \ "id")     == JsonNumber(1000))
     assert((obj \ "name")   == JsonString("lupita"))
     assert((obj \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val arr = Json.parse(textArray.getBytes())
+    val arr = Json.parse(textArray.getBytes()).as[JsonArray]
     assert(arr.size == 3)
     assert((arr \ 0) == JsonNumber(1000))
     assert((arr \ 1) == JsonString("lupita"))
@@ -59,7 +57,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "parse JSON file" in {
-    val json1 = Json.parse(File("./src/test/resources/users.json"))
+    val json1 = Json.parse(File("./src/test/resources/users.json")).as[JsonObject]
     assert(json1.keys == Set("root", "guest", "lupita"))
 
     assert((json1 \ "root" \ "id")     == JsonNumber(0))
@@ -74,7 +72,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert((json1 \ "lupita" \ "name")   == JsonString("lupita"))
     assert((json1 \ "lupita" \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val json2 = Json.parse(Paths.get("./src/test/resources/users.json"))
+    val json2 = Json.parse(Paths.get("./src/test/resources/users.json")).as[JsonObject]
     assert(json2.keys == Set("root", "guest", "lupita"))
 
     assert((json2 \ "root" \ "id")     == JsonNumber(0))
@@ -91,7 +89,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
   }
 
   it should "parse JSON input stream" in {
-    val json1 = withResource(FileInputStream("./src/test/resources/users.json")) { Json.parse(_) }
+    val json1 = withResource(FileInputStream("./src/test/resources/users.json")) { Json.parse(_).as[JsonObject] }
     assert(json1.keys == Set("root", "guest", "lupita"))
 
     assert((json1 \ "root" \ "id")     == JsonNumber(0))
@@ -106,7 +104,7 @@ class JsonReaderSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert((json1 \ "lupita" \ "name")   == JsonString("lupita"))
     assert((json1 \ "lupita" \ "groups") == JsonArray(Seq("lupita", "admin", "sudoer")))
 
-    val json2 = withResource(FileReader("./src/test/resources/users.json")) { Json.parse(_) }
+    val json2 = withResource(FileReader("./src/test/resources/users.json")) { Json.parse(_).as[JsonObject] }
     assert(json2.keys == Set("root", "guest", "lupita"))
 
     assert((json2 \ "root" \ "id")     == JsonNumber(0))

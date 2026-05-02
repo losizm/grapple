@@ -44,11 +44,9 @@ class JsonException(message: String, cause: Throwable) extends RuntimeException(
 /**
  * Defines JSON expectation error.
  *
- * @param expected class
- * @param actual class
+ * @param message describes expectation
  */
-case class JsonExpectationError(expected: Class[?], actual: Class[?])
-  extends JsonException(s"Expected ${expected.getSimpleName} instead of ${actual.getSimpleName}")
+case class JsonExpectationError(message: String) extends JsonException(message)
 
 /**
  * Defines JSON object error.

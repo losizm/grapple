@@ -37,6 +37,7 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
   private var event        = null : Try[Event]
   private var tracker      = Stack[JsonContext]()
   private var fieldPending = false
+  private var parseAny     = false
 
   def hasNext: Boolean =
     state match
@@ -45,12 +46,13 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
       case State.Next  => true
       case State.Done  => false
 
-  def next(init: Boolean): JsonParser.Event =
+  def next(init: Boolean, any: Boolean): JsonParser.Event =
     if init then
       state = State.Init
       event = null
       tracker.clear()
       fieldPending = false
+      parseAny     = any
     next()
 
   def next(): JsonParser.Event =
@@ -122,7 +124,10 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
         tracker.push(ArrayContext(0))
         Event.StartArray
 
-      case c   => unexpectedChar(c)
+      case c =>
+        parseAny match
+          case true  => getNoContextValueEvent(c)
+          case false => unexpectedChar(c)
 
   private def nextEvent(): Event =
     if fieldPending then
@@ -207,6 +212,15 @@ private class JsonParserImpl(input: Reader) extends JsonParser:
         Event.Value(value)
 
       case _ => unexpectedChar(first)
+
+  private def getNoContextValueEvent(first: Char): Event =
+    first match
+      case '"' => Event.Value(JsonString(finishString()))
+      case 't' => Event.Value(finishTrue())
+      case 'f' => Event.Value(finishFalse())
+      case 'n' => Event.Value(finishNull())
+      case '-' => Event.Value(finishNumber('-'))
+      case c   => if isDigit(c) then Event.Value(finishNumber(c)) else unexpectedChar(first)
 
   private def finishString(): String =
     val word = StringBuilder()

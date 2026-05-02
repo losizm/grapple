@@ -22,11 +22,9 @@ import scala.util.{ Failure, Try }
 /**
  * Returns `JsonValue` as is.
  *
- * This is required to perform actions such as the following:
+ * Required to perform actions such as the following:
  *
  * {{{
- * import scala.language.implicitConversions
- *
  * import grapple.json.{ Json, JsonValue, given }
  *
  * val json = Json.obj("values" -> Json.arr("abc", 123, true))
@@ -36,6 +34,22 @@ import scala.util.{ Failure, Try }
  * }}}
  */
 given jsonValueJsonInput: JsonInput[JsonValue] = identity(_)
+
+/**
+ * Returns `JsonValue` as is.
+ *
+ * Required to perform actions such as the following:
+ *
+ * {{{
+ * import grapple.json.{ *, given }
+ *
+ * val list = Seq(JsonString("x"), JsonNumber(1), JsonTrue)
+ *
+ * // Requires jsonValueJsonOutput
+ * val json = Json.toJson(list) 
+ * }}}
+ */
+given jsonValueJsonOutput: JsonOutput[JsonValue] = identity(_)
 
 /** Casts JSON value to `JsonNull`. */
 given jsonNullJsonInput: JsonInput[JsonNull.type] = expect(_)
@@ -193,18 +207,10 @@ given mapJsonOutput[T, C[T] <: Map[String, T]](using output: JsonOutput[T]): Jso
     case (builder, (key, value)) => builder.add(key, output.write(value))
   }.toJsonObject()
 
-/** Applies JSON input conversion. */
+/** Applies conversions using JSON input. */
 given jsonInputConversion[T](using input: JsonInput[T]): Conversion[JsonValue, T] =
   input.read(_)
 
-/** Applies JSON output conversion. */
+/** Applies conversions using JSON output. */
 given jsonOutputConversion[T](using output: JsonOutput[T]): Conversion[T, JsonValue] =
   output.write(_)
-
-/** Applies JSON output conversion to field. */
-given fieldsJsonOutputConversion[T](using output: JsonOutput[T]): Conversion[(String, T), (String, JsonValue)] =
-  _ -> output.write(_)
-
-/** Converts JSON value to `JsonStructureFacade`. */
-given jsonStructureFacadeConversion: Conversion[JsonValue, JsonStructureFacade] =
-  json => JsonStructureFacade(expect(json))

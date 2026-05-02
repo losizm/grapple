@@ -139,6 +139,17 @@ class JsonArrayBuilder:
     values += value
     this
 
+  /**
+   * Adds value to JSON array.
+   *
+   * @return this builder
+   */
+  def add[T](value: T)(using convert: JsonOutput[T]): this.type =
+    if value == null then
+      throw NullPointerException()
+    values += Json.toJson(value)
+    this
+
   /** Builds JSON array. */
   def toJsonArray(): JsonArray =
     val arr = JsonArrayImpl(values.toSeq)

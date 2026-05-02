@@ -66,12 +66,6 @@ final class JsonRpcResponseBuilder:
       .get
     this
 
-  /** Sets either result or error. */
-  def resultOrError(value: JsonValue | JsonRpcError): this.type =
-    value match
-      case json: JsonValue   => result(json)
-      case err: JsonRpcError => error(err)
-
   /** Sets result. */
   def result(value: JsonValue): this.type =
     if value == null then

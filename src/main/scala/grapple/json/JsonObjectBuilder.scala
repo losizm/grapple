@@ -152,6 +152,17 @@ class JsonObjectBuilder:
     values += key -> value
     this
 
+  /**
+   * Adds field to JSON object.
+   *
+   * @return this builder
+   */
+  def add[T](key: String, value: T)(using convert: JsonOutput[T]): this.type =
+    if key == null || value == null then
+      throw NullPointerException()
+    values += key -> Json.toJson(value)
+    this
+
   /** Builds JSON object. */
   def toJsonObject(): JsonObject =
     val obj = JsonObjectImpl(values.to(ImmutableSeqMap))

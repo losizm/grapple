@@ -131,7 +131,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val value = 6
     val res1 = JsonRpcResponseBuilder()
       .id(123)
-      .resultOrError(if value < 10 then value else InvalidParams())
+      .tryResult(if value < 10 then value else throw InvalidParams())
       .toJsonRpcResponse()
     assert(res1.id.number == 123)
     assert(res1.isResult)
@@ -141,7 +141,7 @@ class JsonRpcResponseSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
     val res2 = JsonRpcResponseBuilder()
       .id(123)
-      .resultOrError(if value < 10 then InvalidParams() else value)
+      .tryResult(if value < 10 then throw InvalidParams() else value)
       .toJsonRpcResponse()
     assert(res2.id.number == 123)
     assert(!res2.isResult)

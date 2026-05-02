@@ -15,8 +15,6 @@
  */
 package grapple.json
 
-import scala.language.implicitConversions
-
 class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonArray" in {
     val user = Json.arr(
@@ -154,7 +152,7 @@ class JsonArraySpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert((user \ 2 \ 1).as[String] == "admin")
     assert((user \ 2 \ 2).as[Int] == 100)
 
-    assert(user(3))
+    assert(user(3).as[Boolean])
 
     assert(user(4) == Json.obj("name" -> "lupita", "email" -> "lupita@localhost", "timeout" -> 10_000_000_000L))
     assert((user \ 4 \ "name").as[String] == "lupita")

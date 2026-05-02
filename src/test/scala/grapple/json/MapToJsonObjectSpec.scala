@@ -15,8 +15,6 @@
  */
 package grapple.json
 
-import scala.language.implicitConversions
-
 class MapToJsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonObject from Map[String, Int]" in {
     val users = Map("root" -> 0, "lupita" -> 100, "nobody" -> 65534)
@@ -68,7 +66,7 @@ class MapToJsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
       user => Json.obj(
         "id"     -> user.id,
         "name"   -> user.name,
-        "groups" -> user.groups
+        "groups" -> Json.arr(user.groups*)
       )
 
     val users = Map(

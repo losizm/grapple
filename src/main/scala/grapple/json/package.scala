@@ -17,18 +17,30 @@ package grapple.json
 
 import scala.reflect.ClassTag
 
+/** Defines type alias for JSON value parameter. */
+type JsonValueParam = JsonValue | String | Boolean | Int | Long | Float | Double | BigInt | BigDecimal
+
+private def ToJsonValue: PartialFunction[JsonValueParam, JsonValue] =
+  case value: JsonValue  => value
+  case value: String     => JsonString(value)
+  case value: Boolean    => JsonBoolean(value)
+  case value: Int        => JsonNumber(value)
+  case value: Long       => JsonNumber(value)
+  case value: Float      => JsonNumber(value)
+  case value: Double     => JsonNumber(value)
+  case value: BigInt     => JsonNumber(value)
+  case value: BigDecimal => JsonNumber(value)
+
 private inline def expect[T <: JsonValue](value: JsonValue)(using ctag: ClassTag[T]): T =
   try
     value.asInstanceOf[T]
   catch case _: ClassCastException =>
-    throw JsonExpectationError(ctag.runtimeClass, jsonValueType(value))
+    throw JsonExpectationError(s"Expected ${ctag.runtimeClass.getSimpleName} instead of ${JsonValueName(value)}")
 
-private def jsonValueType[T <: JsonValue](value: JsonValue): Class[?] =
-  value match
-    case JsonNull               => classOf[JsonNull.type]
-    case _: JsonString          => classOf[JsonString]
-    case _: JsonNumber          => classOf[JsonNumber]
-    case _: JsonBoolean         => classOf[JsonBoolean]
-    case f: JsonStructureFacade => jsonValueType(f.unwrap)
-    case _: JsonObject          => classOf[JsonObject]
-    case _: JsonArray           => classOf[JsonArray]
+private def JsonValueName[T <: JsonValue]: PartialFunction[T, String] =
+  case JsonNull               => "JsonNull"
+  case _: JsonString          => "JsonString"
+  case _: JsonNumber          => "JsonNumber"
+  case _: JsonBoolean         => "JsonBoolean"
+  case _: JsonObject          => "JsonObject"
+  case _: JsonArray           => "JsonArray"

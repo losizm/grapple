@@ -24,10 +24,19 @@ private class JsonReaderImpl(input: Reader) extends JsonReader:
 
   def read(): JsonStructure =
     try
-      parser.next(true) match
+      parser.next(true, false) match
         case Event.StartObject => readObject()
         case Event.StartArray  => readArray()
         case event             => throw JsonException(s"Unexpected event: $event")
+    catch
+        case e: EOFException   => throw JsonException("Unexpected end of input", e)
+
+  def readAny(): JsonValue =
+    try
+      parser.next(true, true) match
+        case Event.StartObject => readObject()
+        case Event.StartArray  => readArray()
+        case event             => getValue(event)
     catch
         case e: EOFException   => throw JsonException("Unexpected end of input", e)
 

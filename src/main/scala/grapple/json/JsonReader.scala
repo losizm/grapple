@@ -46,6 +46,13 @@ trait JsonReader extends AutoCloseable:
    */
   def read(): JsonStructure
 
+  /**
+   * Reads JSON value.
+   *
+   * @throws JsonException if it cannot read JSON value
+   */
+  def readAny(): JsonValue
+
   /** Closes reader. */
   def close(): Unit
 

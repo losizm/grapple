@@ -32,10 +32,10 @@ private case class JsonObjectImpl(fields: Map[String, JsonValue]) extends JsonOb
       throw NullPointerException()
     fields.get(key)
 
-  def updated(key: String, value: JsonValue): JsonObject =
+  def updated(key: String, value: JsonValueParam): JsonObject =
     if key == null || value == null then
       throw NullPointerException()
-    JsonObjectImpl(fields.updated(key, value))
+    JsonObjectImpl(fields.updated(key, ToJsonValue(value)))
 
   def removed(key: String): JsonObject =
     if key == null then

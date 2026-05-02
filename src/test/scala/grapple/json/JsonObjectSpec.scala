@@ -15,8 +15,6 @@
  */
 package grapple.json
 
-import scala.language.implicitConversions
-
 class JsonObjectSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "create JsonObject" in {
     val user = Json.obj(

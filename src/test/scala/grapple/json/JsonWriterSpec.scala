@@ -17,14 +17,12 @@ package grapple.json
 
 import java.io.StringWriter
 
-import scala.language.implicitConversions
-
 class JsonWriterSpec extends org.scalatest.flatspec.AnyFlatSpec:
   it should "write JSON object" in {
     val json = Json.obj(
       "id"     -> 1000,
       "name"   -> "lupita",
-      "groups" -> Seq("lupita", "admin", "sudoer")
+      "groups" -> Json.arr("lupita", "admin", "sudoer")
     )
 
     val buf = StringWriter()
@@ -43,7 +41,7 @@ class JsonWriterSpec extends org.scalatest.flatspec.AnyFlatSpec:
     val json = Json.arr(
       1000,
       "lupita",
-      Seq("lupita", "admin", "sudoer")
+      Json.arr("lupita", "admin", "sudoer")
     )
 
     val buf = StringWriter()

@@ -29,12 +29,12 @@ private case class JsonArrayImpl(values: Seq[JsonValue]) extends JsonArray:
       throw JsonArrayError(index, IndexOutOfBoundsException(index))
     values(index)
 
-  def updated(index: Int, value: JsonValue): JsonArray =
+  def updated(index: Int, value: JsonValueParam): JsonArray =
     if index < 0 || index >= size then
       throw JsonArrayError(index, IndexOutOfBoundsException(index))
     if value == null then
       throw NullPointerException()
-    JsonArrayImpl(values.updated(index, value))
+    JsonArrayImpl(values.updated(index, ToJsonValue(value)))
 
   def removed(index: Int): JsonArray =
     if index < 0 || index >= size then
@@ -48,15 +48,15 @@ private case class JsonArrayImpl(values: Seq[JsonValue]) extends JsonArray:
     JsonArrayImpl(values ++ suffix.values)
 
   @targetName("prepend")
-  def +:(value: JsonValue): JsonArray =
+  def +:(value: JsonValueParam): JsonArray =
     if value == null then
       throw NullPointerException()
-    JsonArrayImpl(value +: values)
+    JsonArrayImpl(ToJsonValue(value) +: values)
 
   @targetName("append")
-  def :+(value: JsonValue): JsonArray =
+  def :+(value: JsonValueParam): JsonArray =
     if value == null then
       throw NullPointerException()
-    JsonArrayImpl(values :+ value)
+    JsonArrayImpl(values :+ ToJsonValue(value))
 
   override lazy val toString = values.mkString("[", ",", "]")

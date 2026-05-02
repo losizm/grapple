@@ -375,7 +375,7 @@ trait JsonObject private[json] extends JsonStructure:
    *
    * @return new JSON object
    */
-  def updated(key: String, value: JsonValue): JsonObject
+  def updated(key: String, value: JsonValueParam): JsonObject
 
   /**
    * Removes field.
@@ -415,21 +415,21 @@ object JsonObject:
   def apply(): JsonObject = emptyObject
 
   /** Creates JSON object with supplied fields. */
-  def apply(fields: Map[String, JsonValue]): JsonObject =
+  def apply(fields: Map[String, JsonValueParam]): JsonObject =
     fields.isEmpty match
       case true  => emptyObject
       case false =>
         fields.foldLeft(JsonObjectBuilder()) { (builder, field) =>
-          builder.add(field._1, field._2)
+          builder.add(field._1, ToJsonValue(field._2))
         }.toJsonObject()
 
   /** Creates JSON object with supplied fields. */
-  def apply(fields: Seq[(String, JsonValue)]): JsonObject =
+  def apply(fields: Seq[(String, JsonValueParam)]): JsonObject =
     fields.isEmpty match
       case true  => emptyObject
       case false =>
         fields.foldLeft(JsonObjectBuilder()) { (builder, field) =>
-          builder.add(field._1, field._2)
+          builder.add(field._1, ToJsonValue(field._2))
         }.toJsonObject()
 
   /** Deconstructs JSON object. */
@@ -632,7 +632,7 @@ trait JsonArray private[json] extends JsonStructure:
    *
    * @throws JsonArrayError if index is out of bounds
    */
-  def updated(index: Int, value: JsonValue): JsonArray
+  def updated(index: Int, value: JsonValueParam): JsonArray
 
   /**
    * Removes value at given index.
@@ -661,7 +661,7 @@ trait JsonArray private[json] extends JsonStructure:
    * @return new JSON array
    */
   @targetName("prepend")
-  def +:(value: JsonValue): JsonArray
+  def +:(value: JsonValueParam): JsonArray
 
   /**
    * Appends value.
@@ -669,7 +669,7 @@ trait JsonArray private[json] extends JsonStructure:
    * @return new JSON array
    */
   @targetName("append")
-  def :+(value: JsonValue): JsonArray
+  def :+(value: JsonValueParam): JsonArray
 
   private inline def getExpected[T <: JsonValue](index: Int)(using ctag: ClassTag[T]): T =
     try
@@ -689,10 +689,10 @@ object JsonArray:
   def apply(): JsonArray = emptyArray
 
   /** Creates JSON array with supplied values. */
-  def apply(values: Seq[JsonValue]): JsonArray =
+  def apply(values: Seq[JsonValueParam]): JsonArray =
     values.isEmpty match
       case true  => emptyArray
-      case false => values.foldLeft(JsonArrayBuilder())(_ add _).toJsonArray()
+      case false => values.foldLeft(JsonArrayBuilder())(_ add ToJsonValue(_)).toJsonArray()
 
   /** Deconstructs JSON array. */
   def unapply(json: JsonArray): Option[Seq[JsonValue]] =

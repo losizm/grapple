@@ -16,7 +16,10 @@
 package grapple.json
 
 import java.io.*
+import java.net.URI
 import java.nio.file.Path
+
+import scala.io.Source
 
 /**
  * Provides JSON utilities.
@@ -46,11 +49,11 @@ import java.nio.file.Path
  */
 object Json:
   /** Creates JSON object with supplied fields. */
-  def obj(fields: (String, JsonValue)*): JsonObject =
+  def obj(fields: (String, JsonValueParam)*): JsonObject =
     JsonObject(fields)
 
   /** Creates JSON array with supplied values. */
-  def arr(values: JsonValue*): JsonArray =
+  def arr(values: JsonValueParam*): JsonArray =
     JsonArray(values)
 
   /**
@@ -119,6 +122,93 @@ object Json:
   def parse(input: Path): JsonStructure =
     val reader = JsonReader(input)
     try reader.read() finally reader.close()
+
+  /**
+   * Parses JSON structure from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON structure
+   */
+  def parse(input: URI): JsonStructure =
+    val source = Source.fromURL(input.toURL)
+    try Json.parse(source.mkString)
+    finally source.close()
+
+  /**
+   * Parses JSON value from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON value
+   */
+  def parseAny(input: String): JsonValue =
+    val reader = JsonReader(input)
+    try reader.readAny() finally reader.close()
+
+  /**
+   * Parses JSON value from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON value
+   */
+  def parseAny(input: Array[Byte]): JsonValue =
+    val reader = JsonReader(input)
+    try reader.readAny() finally reader.close()
+
+  /**
+   * Parses JSON value from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON value
+   */
+  def parseAny(input: Array[Byte], offset: Int, length: Int): JsonValue =
+    val reader = JsonReader(input, offset, length)
+    try reader.readAny() finally reader.close()
+
+  /**
+   * Parses JSON value from input.
+   *
+   * @note Closes input on return.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON value
+   */
+  def parseAny(input: Reader): JsonValue =
+    val reader = JsonReader(input)
+    try reader.readAny() finally reader.close()
+
+  /**
+   * Parses JSON value from input.
+   *
+   * @note Closes input on return.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON value
+   */
+  def parseAny(input: InputStream): JsonValue =
+    val reader = JsonReader(input)
+    try reader.readAny() finally reader.close()
+
+  /**
+   * Parses JSON value from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON value
+   */
+  def parseAny(input: File): JsonValue =
+    val reader = JsonReader(input)
+    try reader.readAny() finally reader.close()
+
+  /**
+   * Parses JSON value from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON value
+   */
+  def parseAny(input: Path): JsonValue =
+    val reader = JsonReader(input)
+    try reader.readAny() finally reader.close()
+
+  /**
+   * Parses JSON value from input.
+   *
+   * @throws JsonParserError if input cannot be parsed to JSON value
+   */
+  def parseAny(input: URI): JsonValue =
+    val source = Source.fromURL(input.toURL)
+    try Json.parseAny(source.mkString)
+    finally source.close()
 
   /**
    * Creates "pretty" print of JSON using 2-space indent.

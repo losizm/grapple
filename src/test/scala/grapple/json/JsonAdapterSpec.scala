@@ -15,7 +15,6 @@
  */
 package grapple.json
 
-import scala.language.implicitConversions
 import scala.util.Try
 
 class JsonAdapterSpec extends org.scalatest.flatspec.AnyFlatSpec:
@@ -23,7 +22,7 @@ class JsonAdapterSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   private given JsonAdapter[User] with
     def read(value: JsonValue) =
-      User(value \ "id", value \ "name")
+      User((value \ "id").as[Int], (value \ "name").as[String])
 
     def write(value: User) =
       Json.obj("id" -> value.id, "name" -> value.name)
@@ -38,7 +37,7 @@ class JsonAdapterSpec extends org.scalatest.flatspec.AnyFlatSpec:
 
   it should "write JSON using adapter" in {
     val user = User(65534, "nobody")
-    val json = Json.toJson(user)
+    val json = Json.toJson(user).as[JsonObject]
 
     assert(json.getInt("id") == 65534)
     assert(json.getString("name") == "nobody")
