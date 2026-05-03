@@ -8,7 +8,7 @@ The JSON library for Scala.
 To get started, add **Grapple** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "grapple" % "17.0.0"
+libraryDependencies += "com.github.losizm" %% "grapple" % "18.0.0"
 ```
 
 ## Let's Grapple!
@@ -276,6 +276,51 @@ assert { response.version == "2.0" }
 assert { response.id.string == "590d24ae-500a-486c-8d73-8035e78529bd" }
 assert { response.result.as[Int] == 6 }
 ```
+
+## JSON Schema
+
+The library provides an API for [JSON Schema](https://json-schema.org/),
+which is used to describe the shape of JSON content.
+
+Here is an example demonstrating how to create a schema for a simple user object:
+
+```scala
+import java.io.File
+import grapple.json.schema.{ JsonSchema, JsonSchemaBuilder }
+
+// Create schema with builder
+val schema = JsonSchemaBuilder()
+  .setKind("object")
+  .setId("https://www.examples.com/user/schema")
+  .addProperties("id" -> JsonSchema(kind = "integer"))
+  .addProperties("name" -> JsonSchema(kind = "string"))
+  .setRequired("id", "name")
+  .toJsonSchema()
+
+// Dump schema to a file
+schema.dump(File("user-schema.json"))
+```
+If we take a look at `user-schema.json`, we'd see:
+```json
+{
+  "$id": "https://www.examples.com/user/schema",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "name": { "type": "string" }
+  },
+  "required": ["id", "name"]
+}
+```
+
+And we can load the schema from the file:
+```scala
+val userSchema = JsonSchema.load(File("user-schema.json"))
+```
+
+There is full support for all [JSON Schema keywords](https://json-schema.org/understanding-json-schema/keywords)
+defined in [Draft 2020-12](https://json-schema.org/draft/2020-12/), so you can
+certainly create schemas describing more complex structures than shown here.
 
 ## API Documentation
 See [scaladoc](https://losizm.github.io/grapple/latest/api/index.html)
