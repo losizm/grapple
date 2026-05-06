@@ -31,6 +31,8 @@ class JsonRpcRequestLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(req.id.string == "abc")
     assert(req.method == "compute")
     assert(req.params.isEmpty)
+
+    assert { Json.toJson(req).as[JsonRpcRequest] == req }
   }
 
   it should "load request with params" in {
@@ -51,6 +53,8 @@ class JsonRpcRequestLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
         case _                  => throw IllegalArgumentException("Expected JSON object")
       }
     )
+
+    assert { Json.toJson(req).as[JsonRpcRequest] == req }
   }
 
   it should "not load request as array" in {

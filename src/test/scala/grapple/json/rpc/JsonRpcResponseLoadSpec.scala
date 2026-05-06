@@ -36,6 +36,8 @@ class JsonRpcResponseLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res.version == "2.0")
     assert(res.id.string == "abc")
     assert(res.result.as[Answer] == Answer(3))
+
+    assert { Json.toJson(res).as[JsonRpcResponse] == res }
   }
 
   it should "load response with array result" in {
@@ -49,6 +51,8 @@ class JsonRpcResponseLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res.version == "2.0")
     assert(res.id.string == "abc")
     assert(res.result.as[Seq[Int]] == Seq(0, 1, 2))
+
+    assert { Json.toJson(res).as[JsonRpcResponse] == res }
   }
 
   it should "load response with number result" in {
@@ -62,6 +66,8 @@ class JsonRpcResponseLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res.version == "2.0")
     assert(res.id.string == "abc")
     assert(res.result.as[Int] == 3)
+
+    assert { Json.toJson(res).as[JsonRpcResponse] == res }
   }
 
   it should "load response with string result" in {
@@ -75,6 +81,8 @@ class JsonRpcResponseLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res.version == "2.0")
     assert(res.id.number == 123)
     assert(res.result.as[String] == "success")
+
+    assert { Json.toJson(res).as[JsonRpcResponse] == res }
   }
 
   it should "load response with boolean result" in {
@@ -88,6 +96,8 @@ class JsonRpcResponseLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res.version == "2.0")
     assert(res.id.number == 123)
     assert(res.result.as[Boolean])
+
+    assert { Json.toJson(res).as[JsonRpcResponse] == res }
   }
 
   it should "load response with error" in {
@@ -102,6 +112,12 @@ class JsonRpcResponseLoadSpec extends org.scalatest.flatspec.AnyFlatSpec:
     assert(res.id.number == 123)
     assert(res.error.isInternalError)
     assert(res.error.message == "Internal Error")
+
+    val resCopy = Json.toJson(res).as[JsonRpcResponse]
+    assert(resCopy.version == "2.0")
+    assert(resCopy.id.number == 123)
+    assert(resCopy.error.isInternalError)
+    assert(resCopy.error.message == "Internal Error")
   }
 
   it should "not load response as array" in {

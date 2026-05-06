@@ -113,7 +113,7 @@ private object JsonRpcRequestJsonInput extends JsonInput[JsonRpcRequest]:
 private object JsonRpcRequestJsonOutput extends JsonOutput[JsonRpcRequest]:
   def write(request: JsonRpcRequest): JsonValue =
     val builder = JsonObjectBuilder()
-    builder.add("version", request.version)
+    builder.add("jsonrpc", request.version)
 
     if !request.isNotification then
       builder.add("id", Json.toJson(request.id))
@@ -162,7 +162,7 @@ private object JsonRpcResponseJsonInput extends JsonInput[JsonRpcResponse]:
 private object JsonRpcResponseJsonOutput extends JsonOutput[JsonRpcResponse]:
   def write(response: JsonRpcResponse): JsonValue =
     val builder = JsonObjectBuilder()
-    builder.add("version", response.version)
+    builder.add("jsonrpc", response.version)
     builder.add("id", Json.toJson(response.id))
 
     response.isResult match
