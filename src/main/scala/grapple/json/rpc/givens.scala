@@ -28,6 +28,18 @@ given jsonRpcResponseJsonInput: JsonInput[JsonRpcResponse] = JsonRpcResponseJson
 /** Provides JSON output for `JsonRpcResponse`. */
 given jsonRpcResponseJsonOutput: JsonOutput[JsonRpcResponse] = JsonRpcResponseJsonOutput
 
+/** Provides JSON input for `JsonRpcIdentifier`. */
+given jsonRpcIdentifierJsonInput: JsonInput[JsonRpcIdentifier] = JsonRpcIdentifierJsonInput
+
+/** Provides JSON output for `JsonRpcIdentifier`. */
+given jsonRpcIdentifierJsonOutput: JsonOutput[JsonRpcIdentifier] = JsonRpcIdentifierJsonOutput
+
+/** Provides JSON input for `JsonRpcError`. */
+given jsonRpcErrorJsonInput: JsonInput[JsonRpcError] = JsonRpcErrorJsonInput
+
+/** Provides JSON output for `JsonRpcError`. */
+given jsonRpcErrorJsonOutput: JsonOutput[JsonRpcError] = JsonRpcErrorJsonOutput
+
 /**
  * Provides passthrough for `JsonRpcError` or returns `InternalError`.
  *
@@ -37,7 +49,7 @@ given toJsonRpcError: PartialFunction[Throwable, JsonRpcError] =
   case err: JsonRpcError => err
   case _                 => InternalError()
 
-private given JsonInput[JsonRpcError] with
+private object JsonRpcErrorJsonInput extends JsonInput[JsonRpcError]:
   def read(json: JsonValue): JsonRpcError =
     json match
       case json: JsonObject =>
@@ -50,7 +62,7 @@ private given JsonInput[JsonRpcError] with
       case _ =>
         throw JsonException("object value expected")
 
-private given JsonOutput[JsonRpcError] with
+private object JsonRpcErrorJsonOutput extends JsonOutput[JsonRpcError]:
   def write(error: JsonRpcError): JsonValue =
     val builder = JsonObjectBuilder()
     builder.add("code", error.code)
@@ -58,7 +70,7 @@ private given JsonOutput[JsonRpcError] with
     error.data.foreach(builder.add("data", _))
     builder.toJsonObject()
 
-private given JsonInput[JsonRpcIdentifier] with
+private object JsonRpcIdentifierJsonInput extends JsonInput[JsonRpcIdentifier]:
   def read(json: JsonValue): JsonRpcIdentifier =
     json match
       case id: JsonString => JsonRpcIdentifier(id.value)
@@ -66,7 +78,7 @@ private given JsonInput[JsonRpcIdentifier] with
       case JsonNull       => JsonRpcIdentifier.nullified
       case _              => throw JsonException("string, number, or null value expected")
 
-private given JsonOutput[JsonRpcIdentifier] with
+private object JsonRpcIdentifierJsonOutput extends JsonOutput[JsonRpcIdentifier]:
   def write(id: JsonRpcIdentifier): JsonValue =
     if      id.isString then JsonString(id.string)
     else if id.isNumber then JsonNumber(id.number)
