@@ -1,0 +1,24 @@
+{
+  "title": "Between",
+  "description": "Defines between constraint",
+  "properties": {
+    "start": {
+      "type": ["string", "boolean", "number"],
+      "description": "Minimum accepted value"
+    },
+    "end": {
+      "type": ["string", "boolean", "number"],
+      "description": "Maximum accepted value"
+    },
+    "startInclusive": {
+      "type": "boolean",
+      "description": "Indicates whether start is inclusive",
+      "default": true
+    },
+    "endInclusive": {
+      "type": "boolean",
+      "description": "Indicates whether end is inclusive",
+      "default": true
+    }
+  }
+}

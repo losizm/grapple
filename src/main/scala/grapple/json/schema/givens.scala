@@ -113,8 +113,8 @@ given jsonSchemaJsonOutput: JsonOutput[JsonSchema] =
     schema.title.foreach           { value => obj.add("title", value) }
     schema.description.foreach     { value => obj.add("description", value) }
 
-    if      schema.kind.size == 1 then obj.add("type", schema.kind(0))
-    else if schema.kind.size == 2 then obj.add("type", schema.kind)
+    if schema.kind.size == 1 then obj.add("type", schema.kind(0))
+    else obj.add("type", schema.kind)
 
     schema.defaultValue.foreach { value => obj.add("default", value) }
     schema.constValue.foreach   { value => obj.add("const", value) }

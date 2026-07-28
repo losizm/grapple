@@ -18,6 +18,8 @@ package schema
 
 import scala.io.Source
 
+import DataType.*
+
 class JsonSchemaLoaderSpec extends org.scalatest.flatspec.AnyFlatSpec with ProductSchemaAssertions:
   it should "load JSON schema" in {
     val schema =
@@ -35,3 +37,32 @@ class JsonSchemaLoaderSpec extends org.scalatest.flatspec.AnyFlatSpec with Produ
     assert { !schema.isFalse }
     verify(schema.toJsonValue.as[JsonObject])
   }
+
+  it should "load, dump, and reload JSON schema" in {
+    val schema =
+      val in = Source.fromResource("schema/BetweenSchema.json")
+      try JsonSchema.load(in.mkString)
+      finally in.close()
+
+    info("verifying JSON schema")
+    verifyBetweenSchema(schema)
+
+    val reloaded = JsonSchema.load(schema.dump())
+    info("verifying JSON schema")
+    verifyBetweenSchema(reloaded)
+  }
+
+  private def verifyBetweenSchema(schema: JsonSchema): Unit =
+    assert { schema.title.contains("Between") }
+    assert { schema.description.contains("Defines between constraint") }
+    assert { schema.properties.size == 4 }
+    assert { schema.properties("start").kind == Seq(StringType, BooleanType, NumberType) }
+    assert { schema.properties("start").description.contains("Minimum accepted value") }
+    assert { schema.properties("startInclusive").kind == Seq(BooleanType) }
+    assert { schema.properties("startInclusive").description.contains("Indicates whether start is inclusive") }
+    assert { schema.properties("startInclusive").defaultValue.contains(JsonTrue) }
+    assert { schema.properties("end").kind == Seq(StringType, BooleanType, NumberType) }
+    assert { schema.properties("end").description.contains("Maximum accepted value") }
+    assert { schema.properties("endInclusive").kind == Seq(BooleanType) }
+    assert { schema.properties("endInclusive").description.contains("Indicates whether end is inclusive") }
+    assert { schema.properties("endInclusive").defaultValue.contains(JsonTrue) }
