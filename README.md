@@ -8,7 +8,7 @@ The JSON library for Scala.
 To get started, add **Grapple** to your project:
 
 ```scala
-libraryDependencies += "com.github.losizm" %% "grapple" % "18.1.0"
+libraryDependencies += "com.github.losizm" %% "grapple" % "18.1.1"
 ```
 
 ## Let's Grapple!
